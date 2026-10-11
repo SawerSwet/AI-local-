@@ -150,7 +150,6 @@
     border-radius: 8px; border: 1px solid rgba(248,81,73,0.4);
     max-width: 95%; text-align: center; }
 
-  /* Кнопки под сообщением */
   .msg-actions {
     display: flex; gap: 4px; margin-top: 6px;
     flex-wrap: wrap; opacity: 0.6;
@@ -166,7 +165,6 @@
   }
   .msg-actions button:active { background: var(--border); color: var(--text); }
 
-  /* OCR-карточка */
   .ocr-card {
     align-self: stretch; max-width: 100%;
     background: var(--bg2); border: 1px solid var(--border);
@@ -386,10 +384,6 @@
   .chat-item:active { background: var(--border); }
   .chat-item .title { flex: 1; overflow: hidden;
     text-overflow: ellipsis; white-space: nowrap; }
-  .chat-item .tag {
-    font-size: 9px; padding: 1px 5px; border-radius: 4px;
-    background: var(--accent); color: white; flex-shrink: 0;
-  }
   .chat-item .del { color: var(--error); font-size: 16px; padding: 4px 8px; }
 
   .btn-primary {
@@ -425,12 +419,6 @@
     padding: 4px 8px; border-radius: 6px;
     border: 1px solid var(--border);
     background: var(--bg3); color: var(--text); font-size: 12px;
-  }
-  .settings-row input[type="text"] {
-    padding: 4px 8px; border-radius: 6px;
-    border: 1px solid var(--border);
-    background: var(--bg3); color: var(--text); font-size: 12px;
-    flex: 1;
   }
 
   .diag-line {
@@ -469,19 +457,6 @@
 
   .drop-active { outline: 3px dashed var(--accent); outline-offset: -10px; }
 
-  .preprocess-preview {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 6px; margin: 10px 0;
-  }
-  .preprocess-opt {
-    padding: 6px; border-radius: 8px;
-    border: 2px solid var(--border);
-    background: var(--bg); cursor: pointer;
-    text-align: center; font-size: 10px; color: var(--text2);
-  }
-  .preprocess-opt.selected { border-color: var(--accent); color: var(--text); }
-  .preprocess-opt .icon { font-size: 18px; display: block; margin-bottom: 2px; }
-
   .ocr-progress {
     height: 3px; background: var(--bg);
     border-radius: 2px; overflow: hidden; margin: 6px 0;
@@ -505,7 +480,6 @@
   .preset-btn .icon { font-size: 18px; margin-right: 6px; }
   .preset-btn .sub { font-size: 10px; color: var(--text2); margin-top: 2px; }
 
-  /* Skeleton */
   .skeleton {
     display: inline-block; width: 8px; height: 14px;
     background: var(--accent); border-radius: 2px;
@@ -539,7 +513,7 @@
 </header>
 
 <div id="toolbar">
-  <button class="tb-btn auto on" id="btn-auto" title="Авто-выбор модели">🎯 Авто ✓</button>
+  <button class="tb-btn auto on" id="btn-auto">🎯 Авто ✓</button>
   <button class="tb-btn" id="btn-models">🧠</button>
   <button class="tb-btn" id="btn-chats">💬</button>
   <button class="tb-btn" id="btn-new">➕</button>
@@ -562,17 +536,17 @@
   <button class="quick-btn" data-p="Реши пошагово: ">🎯 Пошагово</button>
   <button class="quick-btn" data-p="Докажи тождество: ">📐 Доказать</button>
   <button class="quick-btn" data-p="Напиши код на Python: ">💻 Код</button>
-  <button class="quick-btn" data-p="/teacher Проверь меня, не давай ответ сразу">👨‍🏫 Учитель</button>
-  <button class="quick-btn" data-p="/check Проверь моё решение и найди ошибки">🔎 Проверка</button>
+  <button class="quick-btn" data-p="/teacher Проверь меня, не давай ответ">👨‍🏫 Учитель</button>
+  <button class="quick-btn" data-p="/check Проверь моё решение">🔎 Проверка</button>
   <button class="quick-btn" data-p="/explain Объясни максимально подробно">🔬 Подробно</button>
   <button class="quick-btn" data-p="/short Ответь кратко, только суть">⚡ Кратко</button>
 </div>
 
 <div id="chat">
   <div class="msg sys">
-    <b>🧠 Умный учебный ИИ · офлайн после первой загрузки</b><br>
-    🎯 Авто-выбор модели · 📚 30+ моделей · 📷 OCR текста и формул<br>
-    🎤 Голос · 🔊 Озвучка · 📄 Экспорт · 🍅 Pomodoro · ⚡ Офлайн
+    <b>🧠 Умный учебный ИИ</b><br>
+    🎯 Авто-выбор модели · 📷 OCR · 🎤 Голос · 🔊 Озвучка<br>
+    📚 30+ моделей · ⚡ Офлайн после первой загрузки
   </div>
 </div>
 
@@ -587,51 +561,49 @@
 </div>
 
 <div id="input-area">
-  <button class="icon-btn" id="btn-camera" title="Камера">📷</button>
-  <button class="icon-btn file" id="btn-file" title="Файл">📎</button>
+  <button class="icon-btn" id="btn-camera">📷</button>
+  <button class="icon-btn file" id="btn-file">📎</button>
   <input type="file" id="file-input" multiple
     accept="image/*,.pdf,.txt,.md,.docx,application/pdf,text/plain"
     style="display:none">
-  <button class="icon-btn mic" id="btn-mic" title="Голос">🎤</button>
+  <button class="icon-btn mic" id="btn-mic">🎤</button>
   <textarea id="input" rows="1" placeholder="Спроси..." disabled></textarea>
   <button id="stop">■</button>
   <button id="send" disabled>➤</button>
 </div>
 
-<!-- Модалка: модели -->
+<!-- Модалки -->
 <div class="modal" id="modal-models">
   <div class="modal-content">
     <h2>🧠 Все модели</h2>
     <div id="storage-info" class="storage-info">
       <span class="spinner"></span>Проверка хранилища...
     </div>
-    <p>💾 — уже в кэше (загрузка мгновенная).</p>
+    <p>💾 — уже в кэше.</p>
     <div id="model-list"></div>
     <button class="btn-secondary" onclick="autoSelectBest()">🎯 Подобрать по RAM</button>
-    <button class="btn-secondary" onclick="clearModelCache()">🗑 Очистить кэш моделей</button>
+    <button class="btn-secondary" onclick="clearModelCache()">🗑 Очистить кэш</button>
     <button class="btn-secondary" onclick="closeModal('modal-models')">Закрыть</button>
   </div>
 </div>
 
-<!-- Модалка: чаты -->
 <div class="modal" id="modal-chats">
   <div class="modal-content">
     <h2>💬 Сохранённые чаты</h2>
-    <input type="text" id="chat-search" placeholder="🔍 Поиск по названию и содержимому..."
+    <input type="text" id="chat-search" placeholder="🔍 Поиск..."
       style="width:100%;padding:8px 12px;border-radius:8px;
       border:1px solid var(--border);background:var(--bg);
       color:var(--text);font-size:13px;margin-bottom:10px;">
     <div id="chat-list"></div>
-    <button class="btn-primary" onclick="newChat()">➕ Новый чат</button>
-    <button class="btn-secondary" onclick="exportChats()">📤 Экспорт в JSON</button>
-    <button class="btn-secondary" onclick="exportChatsMarkdown()">📄 Экспорт в Markdown</button>
-    <button class="btn-secondary" onclick="importChats()">📥 Импорт из JSON</button>
-    <button class="btn-secondary" onclick="printChat()">🖨 Печать / PDF</button>
+    <button class="btn-primary" onclick="newChat()">➕ Новый</button>
+    <button class="btn-secondary" onclick="exportChats()">📤 JSON</button>
+    <button class="btn-secondary" onclick="exportChatsMarkdown()">📄 Markdown</button>
+    <button class="btn-secondary" onclick="importChats()">📥 Импорт</button>
+    <button class="btn-secondary" onclick="printChat()">🖨 Печать</button>
     <button class="btn-secondary" onclick="closeModal('modal-chats')">Закрыть</button>
   </div>
 </div>
 
-<!-- Модалка: статистика -->
 <div class="modal" id="modal-stats">
   <div class="modal-content">
     <h2>📊 Статистика</h2>
@@ -641,11 +613,9 @@
   </div>
 </div>
 
-<!-- Модалка: бенчмарк -->
 <div class="modal" id="modal-bench">
   <div class="modal-content">
     <h2>⚡ Бенчмарк</h2>
-    <p>Прогон моделей по очереди. Качает ~5 GB.</p>
     <div id="bench-content">
       <p style="color:var(--text2);">Нажми «Запустить».</p>
     </div>
@@ -655,7 +625,6 @@
   </div>
 </div>
 
-<!-- Модалка: диагностика -->
 <div class="modal" id="modal-diag">
   <div class="modal-content">
     <h2>🔍 Диагностика</h2>
@@ -664,32 +633,26 @@
   </div>
 </div>
 
-<!-- Модалка: предметы -->
 <div class="modal" id="modal-presets">
   <div class="modal-content">
-    <h2>📚 Пресеты по предметам</h2>
-    <p>Выбери предмет — установится оптимальный системный промпт.</p>
+    <h2>📚 Пресеты предметов</h2>
     <div class="preset-grid" id="preset-grid"></div>
     <button class="btn-secondary" onclick="closeModal('modal-presets')">Закрыть</button>
   </div>
 </div>
 
-<!-- Модалка: LoRA -->
 <div class="modal" id="modal-lora">
   <div class="modal-content">
     <h2>✨ Дообучение LoRA</h2>
-    <p><b>LoRA</b> — патч (~20–50 MB) поверх базовой модели. Обучается в Google Colab.
-    Работает на телефоне после слияния.</p>
+    <p>LoRA — патч (~20–50 MB) поверх базовой модели. Обучается в Google Colab.</p>
     <p style="color:var(--warn);font-size:11px;">
-    ⚠️ Обучать можно только на ПК/Colab. На телефоне — только запускать готовую.</p>
-    <h3 style="font-size:13px;margin-top:14px;">Шаги</h3>
+    ⚠️ Обучать можно только на ПК/Colab.</p>
     <ol style="font-size:11px;color:var(--text2);padding-left:20px;">
-      <li>Собери датасет: 100–1000 пар «вопрос → ответ»</li>
+      <li>Собери датасет: 100–1000 пар</li>
       <li>Скачай train.ipynb</li>
       <li>Открой colab.research.google.com</li>
       <li>Запусти ячейки (~30–40 мин)</li>
       <li>Скачай qwen-tuned-Q4_K_M.gguf</li>
-      <li>Используй в MLC Chat APK или PocketPal</li>
     </ol>
     <button class="btn-primary" onclick="downloadNotebook()">📥 train.ipynb</button>
     <button class="btn-secondary" onclick="downloadDatasetTemplate()">📥 Шаблон датасета</button>
@@ -697,7 +660,6 @@
   </div>
 </div>
 
-<!-- Модалка: настройки -->
 <div class="modal" id="modal-settings">
   <div class="modal-content">
     <h2>⚙️ Настройки</h2>
@@ -747,14 +709,14 @@
       </select>
     </div>
     <div class="settings-row">
-      <label>Авто-выбор модели</label>
+      <label>Авто-выбор</label>
       <select id="s-auto">
         <option value="1" selected>Включён</option>
         <option value="0">Выключен</option>
       </select>
     </div>
     <div class="settings-row">
-      <label>Озвучка ответов</label>
+      <label>Озвучка</label>
       <select id="s-tts">
         <option value="0">Выключена</option>
         <option value="1">Автоматически</option>
@@ -767,30 +729,21 @@
         <option value="light">Светлая</option>
       </select>
     </div>
-    <p style="font-size:11px;margin-top:12px;color:var(--text2);">
-      Контекст применится после смены модели.
-      Для математики — температура 0.2–0.4.
-    </p>
     <button class="btn-primary" onclick="applySettings()">Применить</button>
     <button class="btn-secondary" onclick="closeModal('modal-settings')">Закрыть</button>
   </div>
 </div>
 
-<!-- Модалка: камера -->
 <div class="modal" id="modal-camera">
   <div class="modal-content">
     <h2>📷 Снимок</h2>
     <video id="camera-preview" autoplay playsinline></video>
     <canvas id="camera-canvas" style="display:none"></canvas>
-    <button class="btn-primary" id="btn-snap">📸 Снять и распознать</button>
+    <button class="btn-primary" id="btn-snap">📸 Снять</button>
     <button class="btn-secondary" id="btn-close-camera">Отмена</button>
-    <p style="font-size:11px; margin-top:8px;">
-      Держи ровно, освещение хорошее. Для формул — крупно.
-    </p>
   </div>
 </div>
 
-<!-- PWA Manifest inline -->
 <script type="application/manifest+json" id="pwa-manifest">
 {
   "name": "Умный учебный ИИ",
@@ -812,7 +765,7 @@
 import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
 // ============================================================
-// ЗАГРУЗКА ВНЕШНИХ БИБЛИОТЕК (один раз, потом из кэша)
+// === ВНЕШНИЕ БИБЛИОТЕКИ ===
 // ============================================================
 let Tesseract = null;
 let pdfjsLib = null;
@@ -820,15 +773,83 @@ let mammoth = null;
 let katex = null;
 let marked = null;
 
+// ---------- TESSERACT OCR (ИСПРАВЛЕНО) ----------
 async function loadTesseract() {
   if (Tesseract) return Tesseract;
-  addMessage('sys', 'Загрузка OCR (~10 MB)...');
-  const mod = await import('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.esm.min.js');
-  Tesseract = mod;
+  addMessage('sys', 'Загрузка OCR-движка (~10 MB)...');
+
+  // Список источников и версий
+  const sources = [
+    // v5 ESM
+    'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.esm.min.js',
+    'https://unpkg.com/tesseract.js@5.1.0/dist/tesseract.esm.min.js',
+    // v4 ESM
+    'https://cdn.jsdelivr.net/npm/tesseract.js@4.1.4/dist/tesseract.esm.min.js',
+    'https://unpkg.com/tesseract.js@4.1.4/dist/tesseract.esm.min.js',
+  ];
+
+  let api = null;
+  let lastError = null;
+
+  for (const url of sources) {
+    try {
+      const mod = await import(url);
+      // Извлекаем API из .default или из модуля
+      const candidate = mod.default || mod;
+      if (candidate && typeof candidate.createWorker === 'function') {
+        api = candidate;
+        console.log('[Tesseract] loaded from:', url);
+        break;
+      } else if (mod && typeof mod.createWorker === 'function') {
+        api = mod;
+        console.log('[Tesseract] loaded (module.createWorker) from:', url);
+        break;
+      }
+    } catch (e) {
+      console.warn('[Tesseract] failed from', url, e.message);
+      lastError = e;
+    }
+  }
+
+  if (!api) {
+    addMessage('error',
+      'Не удалось загрузить Tesseract. Проверь интернет и обнови страницу. ' +
+      (lastError ? '(' + lastError.message + ')' : ''));
+    throw new Error('Tesseract not loaded');
+  }
+
+  Tesseract = api;
   addMessage('stat', '✅ OCR готов');
   return Tesseract;
 }
 
+async function runOCR(imageData, lang, onProgress) {
+  const T = await loadTesseract();
+
+  if (!T || typeof T.createWorker !== 'function') {
+    throw new Error('Tesseract.createWorker недоступна');
+  }
+
+  const worker = await T.createWorker(lang, 1, {
+    logger: m => {
+      if (m.status === 'recognizing text' && onProgress) {
+        onProgress(m.progress || 0);
+      }
+    }
+  });
+
+  try {
+    const result = await worker.recognize(imageData);
+    return {
+      text: (result.data && result.data.text ? result.data.text : '').trim(),
+      confidence: (result.data && result.data.confidence) || 0,
+    };
+  } finally {
+    try { await worker.terminate(); } catch (e) {}
+  }
+}
+
+// ---------- PDF.js ----------
 async function loadPdfJs() {
   if (pdfjsLib) return pdfjsLib;
   addMessage('sys', 'Загрузка PDF.js...');
@@ -840,18 +861,19 @@ async function loadPdfJs() {
   return pdfjsLib;
 }
 
+// ---------- Mammoth (DOCX) ----------
 async function loadMammoth() {
   if (mammoth) return mammoth;
   addMessage('sys', 'Загрузка DOCX...');
   const mod = await import('https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js');
-  mammoth = mod;
+  mammoth = mod.default || mod;
   addMessage('stat', '✅ DOCX готов');
   return mammoth;
 }
 
+// ---------- KaTeX ----------
 async function loadKatex() {
   if (katex) return katex;
-  // KaTeX через CDN
   if (!document.getElementById('katex-css')) {
     const link = document.createElement('link');
     link.id = 'katex-css';
@@ -865,25 +887,21 @@ async function loadKatex() {
   return katex;
 }
 
+// ---------- Marked (Markdown) ----------
 async function loadMarked() {
   if (marked) return marked;
   const mod = await import('https://cdn.jsdelivr.net/npm/marked@12.0.0/lib/marked.esm.js');
   marked = mod.marked || mod;
-  // Настраиваем
   if (marked.setOptions) {
-    marked.setOptions({
-      breaks: true,
-      gfm: true,
-    });
+    marked.setOptions({ breaks: true, gfm: true });
   }
   return marked;
 }
 
 // ============================================================
-// РЕЕСТР МОДЕЛЕЙ (30+)
+// === РЕЕСТР МОДЕЛЕЙ ===
 // ============================================================
 const MODELS = {
-  // 🚀 БЫСТРЫЕ
   "smol360": {
     id: "SmolLM2-360M-Instruct-q4f16_1-MLC",
     name: "SmolLM2 360M", size: "250 MB", ram: "~600 MB", speed: "25–40",
@@ -899,11 +917,10 @@ const MODELS = {
     name: "Qwen3 0.6B", size: "400 MB", ram: "~900 MB", speed: "15–25",
     category: "🚀 Быстрые", desc: "Новая Qwen", tags: ["быстрые"],
   },
-  // ⚖️ ОПТИМУМ
   "llama1b": {
     id: "Llama-3.2-1B-Instruct-q4f16_1-MLC",
     name: "Llama 3.2 1B", size: "700 MB", ram: "~1.5 GB", speed: "12–18",
-    category: "⚖️ Оптимум", desc: "Быстрая, хороший англ", tags: ["текст"],
+    category: "⚖️ Оптимум", desc: "Быстрая", tags: ["текст"],
   },
   "tinyllama": {
     id: "TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC",
@@ -924,7 +941,7 @@ const MODELS = {
   "smol17": {
     id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC",
     name: "SmolLM2 1.7B", size: "1 GB", ram: "~2 GB", speed: "7–12",
-    category: "⚖️ Оптимум", desc: "Хорошо пишет код", tags: ["код"],
+    category: "⚖️ Оптимум", desc: "Код", tags: ["код"],
   },
   "stable16": {
     id: "StableLM-2-1.6B-q4f16_1-MLC",
@@ -934,13 +951,12 @@ const MODELS = {
   "phi2": {
     id: "Phi-2-q4f16_1-MLC",
     name: "Phi-2 (2.7B)", size: "1.5 GB", ram: "~3 GB", speed: "4–7",
-    category: "⚖️ Оптимум", desc: "Логика, математика", tags: ["математика"],
+    category: "⚖️ Оптимум", desc: "Логика", tags: ["математика"],
   },
-  // 🧮 МАТЕМАТИКА
   "qwen_math15": {
     id: "Qwen2.5-Math-1.5B-Instruct-q4f16_1-MLC",
     name: "Qwen2.5 Math 1.5B 🧮", size: "1 GB", ram: "~2 GB", speed: "8–12",
-    category: "🧮 Математика", desc: "Уравнения, задачи",
+    category: "🧮 Математика", desc: "Уравнения",
     tags: ["математика", "физика"],
   },
   "deepseek_r1": {
@@ -952,10 +968,9 @@ const MODELS = {
   "deepseek_r1_7b": {
     id: "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC",
     name: "DeepSeek R1 7B", size: "4.5 GB", ram: "~7 GB", speed: "0.5–1.5",
-    category: "🧮 Математика", desc: "Мощная, много RAM",
+    category: "🧮 Математика", desc: "Много RAM",
     tags: ["математика", "heavy"],
   },
-  // 💻 КОД
   "qwen_coder15": {
     id: "Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC",
     name: "Qwen2.5 Coder 1.5B 💻", size: "1 GB", ram: "~2 GB", speed: "8–12",
@@ -966,7 +981,6 @@ const MODELS = {
     name: "Qwen2.5 Coder 7B", size: "4.5 GB", ram: "~7 GB", speed: "0.5–1.5",
     category: "💻 Код", desc: "Серьёзный код", tags: ["код", "heavy"],
   },
-  // 🧠 УМНЫЕ
   "gemma2b": {
     id: "gemma-2-2b-it-q4f16_1-MLC",
     name: "Gemma 2 2B", size: "1.5 GB", ram: "~3 GB", speed: "4–7",
@@ -990,7 +1004,7 @@ const MODELS = {
   "phi35": {
     id: "Phi-3.5-mini-instruct-q4f16_1-MLC",
     name: "Phi-3.5 Mini (3.8B)", size: "2.2 GB", ram: "~4 GB", speed: "2–4",
-    category: "🧠 Умные", desc: "Логика, математика",
+    category: "🧠 Умные", desc: "Логика",
     tags: ["математика", "reasoning"],
   },
   "mistral7b": {
@@ -1003,100 +1017,58 @@ const MODELS = {
     name: "Llama 3.1 8B", size: "4.9 GB", ram: "~7.5 GB", speed: "0.5–1.2",
     category: "🧠 Умные", desc: "Топ качество", tags: ["текст", "heavy"],
   },
-  // 🔬 REASONING
   "qwen_qwq": {
     id: "QwQ-32B-Preview-q4f16_1-MLC",
-    name: "QwQ 32B (сверхтяжёлая)", size: "18 GB", ram: "~24 GB", speed: "<0.3",
-    category: "🔬 Reasoning", desc: "Не для телефона",
+    name: "QwQ 32B", size: "18 GB", ram: "~24 GB", speed: "<0.3",
+    category: "🔬 Reasoning", desc: "Только ПК",
     tags: ["reasoning", "huge"],
   },
-  // 👁️ VISION
   "phi35v": {
     id: "Phi-3.5-vision-instruct-q4f16_1-MLC",
     name: "Phi-3.5 Vision 👁️", size: "3.5 GB", ram: "~5.5 GB", speed: "0.3–1",
-    category: "👁️ Vision", desc: "Распознаёт картинки",
+    category: "👁️ Vision", desc: "Картинки",
     tags: ["vision", "heavy"],
   },
 };
 
 // ============================================================
-// ПРЕСЕТЫ ПРЕДМЕТОВ
+// === ПРЕСЕТЫ ПРЕДМЕТОВ ===
 // ============================================================
 const PRESETS = {
-  math: {
-    icon: '🧮',
-    name: 'Математика',
-    sub: 'Уравнения, алгебра, геометрия',
-    system: 'Ты учитель математики. Решай пошагово, объясняй каждый шаг. Используй LaTeX для формул. Проверяй ответ. Отвечай на русском, татарском, английском.',
-    quick: 'Реши пошагово: ',
-  },
-  physics: {
-    icon: '⚛️',
-    name: 'Физика',
-    sub: 'Задачи, формулы, законы',
-    system: 'Ты учитель физики. Решай задачи пошагово, указывай единицы измерения, проверяй размерность. Используй LaTeX.',
-    quick: 'Реши задачу по физике: ',
-  },
-  chemistry: {
-    icon: '🧪',
-    name: 'Химия',
-    sub: 'Реакции, формулы, задачи',
-    system: 'Ты учитель химии. Объясняй реакции, балансируй уравнения, объясняй механизмы. Проверяй валентности.',
-    quick: 'Объясни реакцию: ',
-  },
-  biology: {
-    icon: '🧬',
-    name: 'Биология',
-    sub: 'Клетки, гены, системы',
-    system: 'Ты учитель биологии. Объясняй ясно, используй примеры. Термины — с переводом.',
-    quick: 'Объясни тему: ',
-  },
-  history: {
-    icon: '📜',
-    name: 'История',
-    sub: 'Даты, события, персоналии',
-    system: 'Ты учитель истории. Отвечай структурировано: причины, события, последствия. Указывай даты и персоналии.',
-    quick: 'Расскажи о событии: ',
-  },
-  lang: {
-    icon: '🌐',
-    name: 'Языки',
-    sub: 'Перевод, грамматика',
-    system: 'Ты преподаватель языков. Переводи точно. Объясняй грамматику. Приводи примеры. Учи русский, татарский, английский, немецкий, французский.',
-    quick: 'Переведи: ',
-  },
-  code: {
-    icon: '💻',
-    name: 'Программирование',
-    sub: 'Python, JS, алгоритмы',
-    system: 'Ты программист. Пиши чистый код с комментариями. Объясняй алгоритм. Указывай сложность O(). Поддерживай Python, JavaScript, C++, SQL.',
-    quick: 'Напиши код: ',
-  },
-  teacher: {
-    icon: '👨‍🏫',
-    name: 'Учитель',
-    sub: 'Проверяет, не даёт ответ',
-    system: 'Ты учитель-наставник. НЕ давай готовый ответ сразу. Задавай наводящие вопросы. Веди ученика к решению. Если ученик ошибся — укажи где, но не давай правильный ответ.',
-    quick: 'Помоги решить: ',
-  },
-  examiner: {
-    icon: '📝',
-    name: 'Экзамен',
-    sub: 'Тесты и вопросы',
-    system: 'Ты экзаменатор. Задавай вопросы по теме, оценивай ответы, объясняй ошибки. Дай итоговую оценку по 5-балльной шкале.',
-    quick: 'Проверь мои знания по теме: ',
-  },
-  summary: {
-    icon: '📄',
-    name: 'Конспект',
-    sub: 'Сжатие текста',
-    system: 'Ты конспектируешь. Из любого текста делай структурированный конспект: заголовки, ключевые тезисы, формулы, определения. Максимально сжато.',
-    quick: 'Сделай конспект: ',
-  },
+  math: { icon: '🧮', name: 'Математика', sub: 'Уравнения, алгебра',
+    system: 'Ты учитель математики. Решай пошагово, используй LaTeX. Проверяй ответ.',
+    model: 'qwen_math15' },
+  physics: { icon: '⚛️', name: 'Физика', sub: 'Задачи, формулы',
+    system: 'Ты учитель физики. Указывай единицы, проверяй размерность. LaTeX.',
+    model: 'qwen_math15' },
+  chemistry: { icon: '🧪', name: 'Химия', sub: 'Реакции',
+    system: 'Ты учитель химии. Балансируй уравнения, объясняй механизмы.',
+    model: 'qwen15' },
+  biology: { icon: '🧬', name: 'Биология', sub: 'Клетки, гены',
+    system: 'Ты учитель биологии. Объясняй ясно, с примерами.',
+    model: 'qwen15' },
+  history: { icon: '📜', name: 'История', sub: 'Даты, события',
+    system: 'Ты учитель истории. Причины, события, последствия. Даты и персоналии.',
+    model: 'qwen15' },
+  lang: { icon: '🌐', name: 'Языки', sub: 'Перевод, грамматика',
+    system: 'Ты преподаватель языков. Переводи точно, объясняй грамматику.',
+    model: 'qwen15' },
+  code: { icon: '💻', name: 'Программирование', sub: 'Python, JS',
+    system: 'Ты программист. Чистый код с комментариями. Указывай сложность.',
+    model: 'qwen_coder15' },
+  teacher: { icon: '👨‍🏫', name: 'Учитель', sub: 'Наводящие вопросы',
+    system: 'Ты учитель-наставник. НЕ давай готовый ответ. Задавай наводящие вопросы.',
+    model: 'qwen15' },
+  examiner: { icon: '📝', name: 'Экзамен', sub: 'Тесты, вопросы',
+    system: 'Ты экзаменатор. Задавай вопросы, оценивай, объясняй ошибки.',
+    model: 'qwen15' },
+  summary: { icon: '📄', name: 'Конспект', sub: 'Сжатие',
+    system: 'Ты конспектируешь. Структура: заголовки, тезисы, формулы.',
+    model: 'qwen15' },
 };
 
 // ============================================================
-// СОСТОЯНИЕ
+// === СОСТОЯНИЕ ===
 // ============================================================
 let engine = null;
 let currentModelKey = localStorage.getItem('ai-model') || 'qwen15';
@@ -1143,7 +1115,7 @@ const progressBar = $('progress-bar');
 const statsEl = $('stats');
 
 // ============================================================
-// НАСТРОЙКИ
+// === НАСТРОЙКИ ===
 // ============================================================
 const DEFAULT_SETTINGS = {
   temperature: 0.6,
@@ -1163,14 +1135,14 @@ let SETTINGS = loadSettings();
 
 function loadSettings() {
   try {
-    const raw = localStorage.getItem('ai-settings-v5');
+    const raw = localStorage.getItem('ai-settings-v6');
     if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
   } catch (e) {}
   return { ...DEFAULT_SETTINGS };
 }
 
 function saveSettings() {
-  try { localStorage.setItem('ai-settings-v5', JSON.stringify(SETTINGS)); } catch (e) {}
+  try { localStorage.setItem('ai-settings-v6', JSON.stringify(SETTINGS)); } catch (e) {}
 }
 
 function applySettings() {
@@ -1198,7 +1170,7 @@ function applyTheme(theme) {
 }
 
 // ============================================================
-// УТИЛИТЫ
+// === УТИЛИТЫ ===
 // ============================================================
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({
@@ -1225,13 +1197,8 @@ function addMessage(cls, text, opts) {
   opts = opts || {};
   const div = document.createElement('div');
   div.className = 'msg ' + cls;
-
-  if (opts.html) {
-    div.innerHTML = text;
-  } else {
-    div.textContent = text;
-  }
-
+  if (opts.html) div.innerHTML = text;
+  else div.textContent = text;
   chatEl.appendChild(div);
   chatEl.scrollTop = chatEl.scrollHeight;
   return div;
@@ -1297,14 +1264,13 @@ function updateAutoBtn() {
 }
 
 // ============================================================
-// MARKDOWN + KATEX РЕНДЕР
+// === MARKDOWN + KATEX ===
 // ============================================================
 async function renderMarkdown(text) {
   try {
     const md = await loadMarked();
     const kx = await loadKatex();
 
-    // Сначала заменяем $$...$$ на placeholder для формул
     const formulas = [];
     let processed = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, formula) => {
       formulas.push({ type: 'block', formula });
@@ -1315,16 +1281,13 @@ async function renderMarkdown(text) {
       return `FORMULA_INLINE_${formulas.length - 1}`;
     });
 
-    // Markdown
     let html = md.parse(processed);
 
-    // Заменяем формулы на отрендеренный KaTeX
     html = html.replace(/FORMULA_BLOCK_(\d+)/g, (_, i) => {
       const f = formulas[parseInt(i)];
       try {
         return kx.renderToString(f.formula, {
-          displayMode: true,
-          throwOnError: false,
+          displayMode: true, throwOnError: false,
         });
       } catch (e) {
         return '<code>' + escapeHtml(f.formula) + '</code>';
@@ -1334,8 +1297,7 @@ async function renderMarkdown(text) {
       const f = formulas[parseInt(i)];
       try {
         return kx.renderToString(f.formula, {
-          displayMode: false,
-          throwOnError: false,
+          displayMode: false, throwOnError: false,
         });
       } catch (e) {
         return '<code>' + escapeHtml(f.formula) + '</code>';
@@ -1350,11 +1312,10 @@ async function renderMarkdown(text) {
 }
 
 // ============================================================
-// АВТО-ОПРЕДЕЛЕНИЕ МОДЕЛИ ПО ТЕКСТУ
+// === АВТО-ОПРЕДЕЛЕНИЕ МОДЕЛИ ===
 // ============================================================
 const AUTO_RULES = [
-  {
-    priority: 100,
+  { priority: 100,
     patterns: [
       /\b\d+\s*[+\-*/×÷]\s*\d+/,
       /\b[xyza]\s*[\^²³]/,
@@ -1365,55 +1326,36 @@ const AUTO_RULES = [
       /[²³¹⁰]/,
       /\b(solve|equation|derivative|integral)/i,
     ],
-    model: "qwen_math15",
-    reason: "математика",
-  },
-  {
-    priority: 95,
+    model: "qwen_math15", reason: "математика" },
+  { priority: 95,
     patterns: [
       /\b(докажи|доказать|доказательство)/i,
       /\b(теорема|парадокс)/i,
     ],
-    model: "deepseek_r1",
-    reason: "логика/доказательство",
-  },
-  {
-    priority: 90,
+    model: "deepseek_r1", reason: "логика" },
+  { priority: 90,
     patterns: [
       /\b(код|программ|функци|класс|python|javascript|java|c\+\+|алгоритм|скрипт)/i,
       /\b(function|class|def |import |const |let |var )/,
       /\b(sql|html|css|api|json|regex)\b/i,
     ],
-    model: "qwen_coder15",
-    reason: "программирование",
-  },
-  {
-    priority: 70,
+    model: "qwen_coder15", reason: "программирование" },
+  { priority: 70,
     patterns: [
       /\b(переведи|перевод|translate|как сказать|как будет по)/i,
-      /\b(по-английски|по-русски|по-татарски)/i,
     ],
-    model: "qwen15",
-    reason: "перевод",
-  },
-  {
-    priority: 60,
+    model: "qwen15", reason: "перевод" },
+  { priority: 60,
     patterns: [
       /\b(конспект|кратко|сократи|суммируй|выдели главное|тезисы)/i,
-      /\b(summary|summarize|tl;dr)/i,
     ],
-    model: "qwen15",
-    reason: "конспект",
-  },
-  {
-    priority: 40,
+    model: "qwen15", reason: "конспект" },
+  { priority: 40,
     patterns: [
       /^(привет|хай|hello|hi|как дела|что ты умеешь|кто ты)/i,
       /^.{0,30}$/,
     ],
-    model: "qwen05",
-    reason: "простой вопрос",
-  },
+    model: "qwen05", reason: "простой вопрос" },
 ];
 
 function detectBestModel(text) {
@@ -1450,7 +1392,7 @@ function pickByRam(preferred) {
 }
 
 // ============================================================
-// ПАРСЕР ФОРМУЛ
+// === ПАРСЕР ФОРМУЛ ===
 // ============================================================
 function detectFormulas(text) {
   const formulas = [];
@@ -1470,11 +1412,7 @@ function detectFormulas(text) {
     if (line.length < 3) continue;
     for (const p of patterns) {
       if (p.test(line)) {
-        formulas.push({
-          line: i,
-          text: line,
-          latex: textToLatex(line),
-        });
+        formulas.push({ line: i, text: line, latex: textToLatex(line) });
         break;
       }
     }
@@ -1505,7 +1443,7 @@ function textToLatex(text) {
 }
 
 // ============================================================
-// ОБРАБОТКА ФОТО (7 режимов)
+// === ОБРАБОТКА ФОТО ===
 // ============================================================
 function preprocessImage(dataUrl, level) {
   return new Promise((resolve) => {
@@ -1577,29 +1515,9 @@ function preprocessImage(dataUrl, level) {
 }
 
 // ============================================================
-// OCR
+// === INDEXEDDB ===
 // ============================================================
-async function runOCR(imageData, lang, onProgress) {
-  const T = await loadTesseract();
-  const worker = await T.createWorker(lang, 1, {
-    logger: m => {
-      if (m.status === 'recognizing text' && onProgress) {
-        onProgress(m.progress || 0);
-      }
-    }
-  });
-  const result = await worker.recognize(imageData);
-  await worker.terminate();
-  return {
-    text: (result.data.text || '').trim(),
-    confidence: result.data.confidence || 0,
-  };
-}
-
-// ============================================================
-// INDEXEDDB
-// ============================================================
-const DB_NAME = 'ai-db-v5';
+const DB_NAME = 'ai-db-v6';
 const DB_VERSION = 1;
 
 function openDB() {
@@ -1647,7 +1565,7 @@ async function dbAll(store) {
 }
 
 // ============================================================
-// ЧАТЫ
+// === ЧАТЫ ===
 // ============================================================
 async function loadChats() {
   chats = await dbAll('chats');
@@ -1789,13 +1707,11 @@ function importChats() {
 }
 window.importChats = importChats;
 
-function printChat() {
-  window.print();
-}
+function printChat() { window.print(); }
 window.printChat = printChat;
 
 // ============================================================
-// КЭШ МОДЕЛЕЙ
+// === КЭШ МОДЕЛЕЙ ===
 // ============================================================
 async function getCachedModels() {
   const cached = new Set();
@@ -1880,7 +1796,7 @@ async function clearModelCache() {
 window.clearModelCache = clearModelCache;
 
 // ============================================================
-// СПИСОК МОДЕЛЕЙ
+// === СПИСОК МОДЕЛЕЙ ===
 // ============================================================
 async function renderModelList() {
   const cached = await getCachedModels();
@@ -1929,7 +1845,7 @@ function autoSelectBest() {
 window.autoSelectBest = autoSelectBest;
 
 // ============================================================
-// ПЕРЕКЛЮЧЕНИЕ МОДЕЛЕЙ
+// === ПЕРЕКЛЮЧЕНИЕ МОДЕЛЕЙ ===
 // ============================================================
 async function switchModel(key, reason) {
   if (isLoading) { alert('Подожди загрузки.'); return; }
@@ -1939,10 +1855,7 @@ async function switchModel(key, reason) {
     closeModal('modal-models');
     return;
   }
-  if (!MODELS[key]) {
-    addMessage('error', 'Модель не найдена: ' + key);
-    return;
-  }
+  if (!MODELS[key]) { addMessage('error', 'Модель не найдена: ' + key); return; }
 
   if (messages.filter(m => m.role !== 'system').length > 0) await saveCurrentChat();
   if (engine) { try { await engine.unload(); } catch (e) {} engine = null; }
@@ -1964,7 +1877,7 @@ async function switchModel(key, reason) {
 window.switchModel = switchModel;
 
 // ============================================================
-// ИНИЦИАЛИЗАЦИЯ
+// === ИНИЦИАЛИЗАЦИЯ ===
 // ============================================================
 async function initEngine() {
   if (engine) return;
@@ -2035,7 +1948,7 @@ async function initEngine() {
 }
 
 // ============================================================
-// ТЕРМАЛЬНЫЙ СОВЕТНИК
+// === ТЕРМАЛЬНЫЙ СОВЕТНИК ===
 // ============================================================
 function checkThermal() {
   const since = nowSec() - lastRequestTime;
@@ -2047,7 +1960,7 @@ function checkThermal() {
 }
 
 // ============================================================
-// OCR-КАРТОЧКА
+// === OCR-КАРТОЧКА ===
 // ============================================================
 function renderOCRCard(opts) {
   const {
@@ -2152,7 +2065,7 @@ function renderOCRCard(opts) {
 }
 
 // ============================================================
-// ОБРАБОТКА ИЗОБРАЖЕНИЯ
+// === ОБРАБОТКА ИЗОБРАЖЕНИЯ ===
 // ============================================================
 async function processImage(imageData, filename) {
   if (!engine) { addMessage('warn', 'Модель загружается.'); return; }
@@ -2232,7 +2145,7 @@ async function processImage(imageData, filename) {
 }
 
 // ============================================================
-// ФАЙЛЫ
+// === ФАЙЛЫ ===
 // ============================================================
 async function processFile(file) {
   const name = file.name;
@@ -2416,35 +2329,22 @@ async function processPDF(file, name) {
 }
 
 // ============================================================
-// ОБРАБОТКА КОМАНД /preset
+// === КОМАНДЫ ===
 // ============================================================
 function parseCommand(text) {
   const cmdMatch = text.match(/^\/([a-z]+)\s*(.*)/i);
   if (!cmdMatch) return null;
   const cmd = cmdMatch[1].toLowerCase();
   const rest = cmdMatch[2] || '';
-
-  if (cmd === 'teacher') {
-    return { system: 'Ты учитель-наставник. НЕ давай готовый ответ. Задавай наводящие вопросы.',
-      prompt: rest, label: '👨‍🏫 Режим учителя' };
-  }
-  if (cmd === 'check') {
-    return { system: 'Проверь моё решение. Найди ошибки, объясни где неверно. Не давай ответ сразу.',
-      prompt: rest, label: '🔎 Проверка решения' };
-  }
-  if (cmd === 'explain') {
-    return { system: 'Объясни максимально подробно, с примерами.',
-      prompt: rest, label: '🔬 Подробный режим' };
-  }
-  if (cmd === 'short') {
-    return { system: 'Отвечай кратко, только суть.',
-      prompt: rest, label: '⚡ Краткий режим' };
-  }
+  if (cmd === 'teacher') return { system: 'Ты учитель-наставник. НЕ давай готовый ответ. Задавай наводящие вопросы.', prompt: rest, label: '👨‍🏫 Режим учителя' };
+  if (cmd === 'check') return { system: 'Проверь моё решение. Найди ошибки. Не давай ответ сразу.', prompt: rest, label: '🔎 Проверка решения' };
+  if (cmd === 'explain') return { system: 'Объясни максимально подробно, с примерами.', prompt: rest, label: '🔬 Подробный режим' };
+  if (cmd === 'short') return { system: 'Отвечай кратко, только суть.', prompt: rest, label: '⚡ Краткий режим' };
   return null;
 }
 
 // ============================================================
-// ЗАПРОС К LLM
+// === ЗАПРОС К LLM ===
 // ============================================================
 async function askLLM(prompt, overrideSystem) {
   if (!engine || isGenerating) { addMessage('warn', 'Модель занята.'); return; }
@@ -2455,11 +2355,7 @@ async function askLLM(prompt, overrideSystem) {
 
   let sys = getSystemPrompt();
   if (overrideSystem) sys = overrideSystem;
-
-  // Обновляем system message если нужно
-  if (messages[0] && messages[0].role === 'system') {
-    messages[0].content = sys;
-  }
+  if (messages[0] && messages[0].role === 'system') messages[0].content = sys;
 
   messages.push({ role: 'user', content: prompt });
   lastUserPrompt = prompt;
@@ -2470,7 +2366,6 @@ async function askLLM(prompt, overrideSystem) {
   isGenerating = true;
 
   const botDiv = addMessage('bot', '');
-  // Skeleton
   botDiv.innerHTML = '<span class="skeleton"></span>';
 
   let fullText = '';
@@ -2495,8 +2390,6 @@ async function askLLM(prompt, overrideSystem) {
       if (delta && tFirst === null) tFirst = nowSec();
       fullText += delta;
       tokens++;
-
-      // Показываем сырой текст (Markdown рендер после завершения)
       botDiv.textContent = fullText;
       if (autoScroll) chatEl.scrollTop = chatEl.scrollHeight;
     }
@@ -2511,7 +2404,6 @@ async function askLLM(prompt, overrideSystem) {
     stats.ttfts.push(ttft);
     sessionStats.tokens += tokens;
 
-    // Рендерим Markdown + KaTeX
     try {
       const html = await renderMarkdown(fullText);
       botDiv.innerHTML = html;
@@ -2519,7 +2411,6 @@ async function askLLM(prompt, overrideSystem) {
       botDiv.textContent = fullText;
     }
 
-    // Добавляем кнопки действий
     const actions = document.createElement('div');
     actions.className = 'msg-actions';
     actions.innerHTML = `
@@ -2536,10 +2427,6 @@ async function askLLM(prompt, overrideSystem) {
     else if (tps < 10) verdict = ' ✅';
     else verdict = ' 🚀';
 
-    const mem = performance.memory
-      ? (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + ' MB'
-      : '?';
-
     addMessage('stat',
       `${tokens} ток · ${fmtNum(tps)} т/с · TTFT ${fmtNum(ttft, 2)}с${verdict}`);
 
@@ -2548,7 +2435,6 @@ async function askLLM(prompt, overrideSystem) {
     messages.push({ role: 'assistant', content: fullText });
     await saveCurrentChat();
 
-    // TTS авто-озвучка
     if (SETTINGS.tts === 1 && 'speechSynthesis' in window) {
       speakText(fullText);
     }
@@ -2569,7 +2455,7 @@ async function askLLM(prompt, overrideSystem) {
 }
 
 // ============================================================
-// ОТПРАВКА
+// === ОТПРАВКА ===
 // ============================================================
 async function send() {
   if (!engine || isLoading || isGenerating) return;
@@ -2582,7 +2468,6 @@ async function send() {
   inputEl.value = '';
   autoResizeInput();
 
-  // Проверка команд
   const cmd = parseCommand(text);
   if (cmd) {
     addMessage('user', text);
@@ -2592,7 +2477,6 @@ async function send() {
     return;
   }
 
-  // Авто-выбор модели
   if (autoMode) {
     const detected = detectBestModel(text);
     if (detected) {
@@ -2625,7 +2509,7 @@ function stopGeneration() {
 }
 
 // ============================================================
-// ДЕЙСТВИЯ С СООБЩЕНИЯМИ
+// === ДЕЙСТВИЯ С СООБЩЕНИЯМИ ===
 // ============================================================
 function copyMsg(btn) {
   const msg = btn.closest('.msg');
@@ -2660,14 +2544,14 @@ async function regenMsg(btn) {
   const msg = btn.closest('.msg');
   if (msg) msg.remove();
   if (messages.length >= 2) {
-    messages.splice(-2, 2); // убираем последнюю пару user/assistant
+    messages.splice(-2, 2);
   }
   await askLLM(lastUserPrompt);
 }
 window.regenMsg = regenMsg;
 
 // ============================================================
-// ГОЛОСОВОЙ ВВОД
+// === ГОЛОС ===
 // ============================================================
 function initSpeechRecognition() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -2703,7 +2587,7 @@ function toggleMic() {
   if (!recognition) {
     recognition = initSpeechRecognition();
     if (!recognition) {
-      alert('Голосовой ввод не поддерживается в этом браузере.');
+      alert('Голосовой ввод не поддерживается.');
       return;
     }
   }
@@ -2723,7 +2607,7 @@ function toggleMic() {
 }
 
 // ============================================================
-// СТАТИСТИКА
+// === СТАТИСТИКА ===
 // ============================================================
 function renderStats() {
   const avgTps = stats.totalTime > 0 ? stats.totalTokens / stats.totalTime : 0;
@@ -2735,7 +2619,7 @@ function renderStats() {
 
   $('stats-content').innerHTML = `
     <p><b>Модель:</b> ${escapeHtml(MODELS[currentModelKey].name)}</p>
-    <p><b>Авто-режим:</b> ${autoMode ? '✅ вкл' : '❌ выкл'}</p>
+    <p><b>Авто-режим:</b> ${autoMode ? '✅' : '❌'}</p>
     <p><b>Предмет:</b> ${currentPreset !== 'default' ? PRESETS[currentPreset].name : 'общий'}</p>
     <p><b>Запросов:</b> ${stats.requests}</p>
     <p><b>Токенов:</b> ${stats.totalTokens}</p>
@@ -2745,31 +2629,22 @@ function renderStats() {
     <hr style="border:none;border-top:1px solid var(--bg3);margin:8px 0;">
     <p><b>OCR-запросов:</b> ${stats.ocrCount}</p>
     <p><b>OCR-времени:</b> ${fmtNum(stats.ocrTime, 1)} с</p>
-    <p><b>Распознано символов:</b> ${sessionStats.ocrChars}</p>
+    <p><b>Символов:</b> ${sessionStats.ocrChars}</p>
     <p><b>Файлов:</b> ${sessionStats.files}</p>
     <p><b>Авто-переключений:</b> ${stats.autoSwitches}</p>
-    <hr style="border:none;border-top:1px solid var(--bg3);margin:8px 0;">
-    <p><b>Сессия:</b> ${Math.floor(nowSec() - sessionStats.start)}с ·
-       ${sessionStats.tokens} ток · ${sessionStats.swaps} смен модели</p>
+    <p><b>Сессия:</b> ${Math.floor(nowSec() - sessionStats.start)}с</p>
   `;
 }
 
 function resetStats() {
-  stats = {
-    requests: 0, totalTokens: 0, totalTime: 0, ttfts: [],
-    ocrCount: 0, ocrTime: 0, autoSwitches: 0,
-  };
-  sessionStats.tokens = 0;
-  sessionStats.swaps = 0;
-  sessionStats.files = 0;
-  sessionStats.ocrChars = 0;
-  sessionStats.start = nowSec();
+  stats = { requests: 0, totalTokens: 0, totalTime: 0, ttfts: [], ocrCount: 0, ocrTime: 0, autoSwitches: 0 };
+  sessionStats = { tokens: 0, start: nowSec(), swaps: 0, files: 0, ocrChars: 0 };
   renderStats();
 }
 window.resetStats = resetStats;
 
 // ============================================================
-// БЕНЧМАРК
+// === БЕНЧМАРК ===
 // ============================================================
 async function runBenchmark() {
   if (benchRunning) return;
@@ -2783,24 +2658,14 @@ async function runBenchmark() {
   $('btn-bench-run').style.display = 'none';
   $('btn-bench-stop').style.display = 'block';
 
-  const benchModels = [
-    'smol360', 'qwen05', 'qwen3_06',
-    'llama1b', 'qwen15', 'smol17',
-    'qwen_math15', 'deepseek_r1', 'qwen_coder15',
-    'gemma2b', 'qwen3b', 'phi35',
-  ].filter(k => MODELS[k]);
+  const benchModels = ['smol360', 'qwen05', 'qwen3_06', 'llama1b', 'qwen15', 'smol17', 'qwen_math15', 'deepseek_r1', 'qwen_coder15', 'gemma2b', 'qwen3b', 'phi35'].filter(k => MODELS[k]);
   const originalModel = currentModelKey;
 
   for (const key of benchModels) {
     if (benchShouldStop) break;
-    content.innerHTML = `<p><span class="spinner"></span>
-      Тестирую <b>${escapeHtml(MODELS[key].name)}</b>
-      (${benchResults.length + 1}/${benchModels.length})</p>${renderBenchTable()}`;
+    content.innerHTML = `<p><span class="spinner"></span> Тестирую <b>${escapeHtml(MODELS[key].name)}</b> (${benchResults.length + 1}/${benchModels.length})</p>${renderBenchTable()}`;
 
-    const r = {
-      key, name: MODELS[key].name,
-      loadTime: null, ttft: null, tps: null, tokens: 0, error: null
-    };
+    const r = { key, name: MODELS[key].name, loadTime: null, ttft: null, tps: null, tokens: 0, error: null };
 
     try {
       if (engine) { try { await engine.unload(); } catch (e) {} engine = null; }
@@ -2826,8 +2691,7 @@ async function runBenchmark() {
       });
       for await (const ch of chunks) {
         if (benchShouldStop) break;
-        const d = ch.choices[0] && ch.choices[0].delta &&
-          ch.choices[0].delta.content || '';
+        const d = ch.choices[0] && ch.choices[0].delta && ch.choices[0].delta.content || '';
         if (d && tF === null) tF = nowSec();
         tok++;
       }
@@ -2852,24 +2716,12 @@ async function runBenchmark() {
 function renderBenchTable(final) {
   if (benchResults.length === 0) return '';
   const rows = benchResults.map(r => {
-    if (r.error) return `<tr><td>${escapeHtml(r.name)}</td>
-      <td colspan="4" class="bad">❌ ${escapeHtml(r.error.slice(0, 40))}</td></tr>`;
+    if (r.error) return `<tr><td>${escapeHtml(r.name)}</td><td colspan="4" class="bad">❌ ${escapeHtml(r.error.slice(0, 40))}</td></tr>`;
     const tps = r.tps || 0;
     const cls = tps > 8 ? 'good' : tps > 4 ? 'med' : 'bad';
-    return `<tr>
-      <td>${escapeHtml(r.name)}</td>
-      <td>${r.loadTime !== null ? fmtNum(r.loadTime, 1) + 'с' : '—'}</td>
-      <td>${r.ttft !== null ? fmtNum(r.ttft, 2) + 'с' : '—'}</td>
-      <td class="${cls}">${fmtNum(tps, 2)} т/с</td>
-      <td>${r.tokens} ток</td>
-    </tr>`;
+    return `<tr><td>${escapeHtml(r.name)}</td><td>${r.loadTime !== null ? fmtNum(r.loadTime, 1) + 'с' : '—'}</td><td>${r.ttft !== null ? fmtNum(r.ttft, 2) + 'с' : '—'}</td><td class="${cls}">${fmtNum(tps, 2)} т/с</td><td>${r.tokens} ток</td></tr>`;
   }).join('');
-  return `<table class="bench-table">
-    <thead><tr>
-      <th>Модель</th><th>Загрузка</th><th>TTFT</th><th>т/с</th><th>Токенов</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-  </table>${final ? '<p style="margin-top:10px;font-size:11px;">🟢 >8 — отлично, 🟡 4–8 — норм, 🔴 <4 — медленно.</p>' : ''}`;
+  return `<table class="bench-table"><thead><tr><th>Модель</th><th>Загрузка</th><th>TTFT</th><th>т/с</th><th>Токенов</th></tr></thead><tbody>${rows}</tbody></table>${final ? '<p style="margin-top:10px;font-size:11px;">🟢 >8 — отлично, 🟡 4–8 — норм, 🔴 <4 — медленно.</p>' : ''}`;
 }
 
 function stopBenchmark() {
@@ -2878,12 +2730,11 @@ function stopBenchmark() {
 }
 
 // ============================================================
-// ДИАГНОСТИКА
+// === ДИАГНОСТИКА ===
 // ============================================================
 async function runDiagnostics() {
   const out = [];
-  const push = (l, v, c) => out.push(
-    `<div class="diag-line"><b>${l}:</b> <span class="${c||''}">${v}</span></div>`);
+  const push = (l, v, c) => out.push(`<div class="diag-line"><b>${l}:</b> <span class="${c||''}">${v}</span></div>`);
 
   const ua = navigator.userAgent.match(/Chrome\/(\d+)/);
   push('Chrome', ua ? ua[1] : '?');
@@ -2891,41 +2742,27 @@ async function runDiagnostics() {
 
   if (navigator.gpu) {
     try {
-      const adapter = await navigator.gpu.requestAdapter({
-        powerPreference: 'high-performance'
-      });
+      const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
       if (adapter) {
         push('Adapter', '✅', 'ok');
         const f = adapter.features;
-        push('shader-f16', f.has('shader-f16') ? '✅' : '❌',
-          f.has('shader-f16') ? 'ok' : 'bad');
-        push('subgroups', f.has('subgroups') ? '✅' : '❌',
-          f.has('subgroups') ? 'ok' : 'bad');
-        push('maxBufferSize',
-          (adapter.limits.maxBufferSize / 1073741824).toFixed(2) + ' GB');
+        push('shader-f16', f.has('shader-f16') ? '✅' : '❌', f.has('shader-f16') ? 'ok' : 'bad');
+        push('subgroups', f.has('subgroups') ? '✅' : '❌', f.has('subgroups') ? 'ok' : 'bad');
+        push('maxBufferSize', (adapter.limits.maxBufferSize / 1073741824).toFixed(2) + ' GB');
 
         try {
           const device = await adapter.requestDevice();
           const N = 1048576;
-          const buf = device.createBuffer({
-            size: N * 4,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
-          });
-          const code = `
-            @group(0) @binding(0) var<storage, read_write> data: array<f32>;
-            @compute @workgroup_size(64)
-            fn main(@builtin(global_invocation_id) gid: vec3<u32>) {
-              let i = gid.x;
-              if (i < arrayLength(&data)) { data[i] = f32(i) * 2.0; }
-            }`;
+          const buf = device.createBuffer({ size: N * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST });
+          const code = `@group(0) @binding(0) var<storage, read_write> data: array<f32>;
+@compute @workgroup_size(64)
+fn main(@builtin(global_invocation_id) gid: vec3<u32>) {
+  let i = gid.x;
+  if (i < arrayLength(&data)) { data[i] = f32(i) * 2.0; }
+}`;
           const module = device.createShaderModule({ code });
-          const pipeline = device.createComputePipeline({
-            layout: 'auto', compute: { module }
-          });
-          const bind = device.createBindGroup({
-            layout: pipeline.getBindGroupLayout(0),
-            entries: [{ binding: 0, resource: { buffer: buf } }]
-          });
+          const pipeline = device.createComputePipeline({ layout: 'auto', compute: { module } });
+          const bind = device.createBindGroup({ layout: pipeline.getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: buf } }] });
           const t0 = performance.now();
           const cmd = device.createCommandEncoder();
           const pass = cmd.beginComputePass();
@@ -2936,23 +2773,16 @@ async function runDiagnostics() {
           device.queue.submit([cmd.finish()]);
           await device.queue.onSubmittedWorkDone();
           const dt = performance.now() - t0;
-          push('Compute test', dt.toFixed(0) + ' ms',
-            dt < 100 ? 'ok' : dt < 500 ? 'warn-txt' : 'bad');
+          push('Compute test', dt.toFixed(0) + ' ms', dt < 100 ? 'ok' : dt < 500 ? 'warn-txt' : 'bad');
           push('GFLOPS', ((N * 2) / 1e9 / (dt / 1000)).toFixed(2));
-        } catch (e) {
-          push('Compute', '❌ ' + e.message.slice(0, 40), 'bad');
-        }
+        } catch (e) { push('Compute', '❌ ' + e.message.slice(0, 40), 'bad'); }
       } else push('Adapter', '❌ null', 'bad');
-    } catch (e) {
-      push('requestAdapter', '❌ ' + e.message, 'bad');
-    }
+    } catch (e) { push('requestAdapter', '❌ ' + e.message, 'bad'); }
   }
 
   if (performance.memory) {
-    push('JS heap limit',
-      (performance.memory.jsHeapSizeLimit / 1048576).toFixed(0) + ' MB');
-    push('JS heap used',
-      (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + ' MB');
+    push('JS heap limit', (performance.memory.jsHeapSizeLimit / 1048576).toFixed(0) + ' MB');
+    push('JS heap used', (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + ' MB');
   }
   push('Device memory', navigator.deviceMemory ? navigator.deviceMemory + ' GB' : '?');
   push('Hardware concurrency', navigator.hardwareConcurrency || '?');
@@ -2982,18 +2812,14 @@ async function runDiagnostics() {
 }
 
 // ============================================================
-// КАМЕРА
+// === КАМЕРА ===
 // ============================================================
 let cameraStream = null;
 
 async function openCamera() {
   try {
     cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: 'environment',
-        width: { ideal: 1920 },
-        height: { ideal: 1080 }
-      }
+      video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
     });
     const video = $('camera-preview');
     video.srcObject = cameraStream;
@@ -3026,7 +2852,7 @@ async function snapPhoto() {
 }
 
 // ============================================================
-// ФАЙЛЫ
+// === ФАЙЛЫ ===
 // ============================================================
 async function onFileSelected(e) {
   const files = e.target.files;
@@ -3037,21 +2863,14 @@ async function onFileSelected(e) {
   e.target.value = '';
 }
 
-document.addEventListener('dragover', e => {
-  e.preventDefault();
-  document.body.classList.add('drop-active');
-});
-document.addEventListener('dragleave', e => {
-  if (e.target === document.body) document.body.classList.remove('drop-active');
-});
+document.addEventListener('dragover', e => { e.preventDefault(); document.body.classList.add('drop-active'); });
+document.addEventListener('dragleave', e => { if (e.target === document.body) document.body.classList.remove('drop-active'); });
 document.addEventListener('drop', async e => {
   e.preventDefault();
   document.body.classList.remove('drop-active');
   const files = e.dataTransfer.files;
   if (!files || files.length === 0) return;
-  for (let i = 0; i < files.length; i++) {
-    await processFile(files[i]);
-  }
+  for (let i = 0; i < files.length; i++) await processFile(files[i]);
 });
 
 document.addEventListener('paste', async e => {
@@ -3071,7 +2890,7 @@ document.addEventListener('paste', async e => {
 });
 
 // ============================================================
-// POMODORO
+// === POMODORO ===
 // ============================================================
 function updatePomodoroUI() {
   const m = Math.floor(pomodoro.timeLeft / 60);
@@ -3088,21 +2907,20 @@ function togglePomodoro() {
       if (!pomodoro.running) return;
       pomodoro.timeLeft--;
       if (pomodoro.timeLeft <= 0) {
-        // Переключение режима
         if (pomodoro.mode === 'work') {
           pomodoro.mode = 'break';
           pomodoro.timeLeft = pomodoro.breakMin * 60;
           if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('🍅 Работа завершена!', { body: 'Пора отдохнуть 5 минут.' });
+            new Notification('🍅 Работа завершена!', { body: 'Отдохни 5 минут.' });
           }
-          speakText('Работа завершена. Пора отдохнуть.');
+          speakText('Работа завершена. Отдохни.');
         } else {
           pomodoro.mode = 'work';
           pomodoro.timeLeft = pomodoro.workMin * 60;
           if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('☕ Перерыв завершён!', { body: 'Продолжаем учёбу.' });
+            new Notification('☕ Перерыв завершён!', { body: 'Продолжаем.' });
           }
-          speakText('Перерыв завершён. Продолжаем.');
+          speakText('Перерыв завершён.');
         }
       }
       updatePomodoroUI();
@@ -3119,18 +2937,13 @@ function resetPomodoro() {
 }
 
 // ============================================================
-// LORA
+// === LORA ===
 // ============================================================
 function downloadNotebook() {
   const notebook = {
     cells: [
-      { cell_type: "markdown", metadata: {}, source: [
-        "# QLoRA дообучение Qwen2.5 для учёбы\n",
-        "Загрузи свой датасет JSON и запусти все ячейки."
-      ]},
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
-        "!pip install -q transformers==4.45.0 peft==0.13.0 trl==0.11.0 bitsandbytes==0.44.0 accelerate==1.0.0 datasets==3.0.0 llama-cpp-python"
-      ]},
+      { cell_type: "markdown", metadata: {}, source: ["# QLoRA дообучение Qwen2.5\n", "Загрузи свой датасет JSON и запусти все ячейки."]},
+      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: ["!pip install -q transformers==4.45.0 peft==0.13.0 trl==0.11.0 bitsandbytes==0.44.0 accelerate==1.0.0 datasets==3.0.0 llama-cpp-python"]},
       { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
         "import torch\n",
         "from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig\n",
@@ -3197,10 +3010,7 @@ function downloadNotebook() {
         "files.download('qwen-tuned-Q4_K_M.gguf')"
       ]}
     ],
-    metadata: {
-      kernelspec: { display_name: "Python 3", name: "python3" },
-      language_info: { name: "python" }
-    },
+    metadata: { kernelspec: { display_name: "Python 3", name: "python3" }, language_info: { name: "python" } },
     nbformat: 4, nbformat_minor: 5,
   };
   const blob = new Blob([JSON.stringify(notebook, null, 2)], { type: 'application/json' });
@@ -3217,19 +3027,18 @@ function downloadDatasetTemplate() {
     { question: "Реши x²+5x+6=0", answer: "D=1, x₁=-2, x₂=-3" },
     { question: "Найди производную f(x)=x³+2x²", answer: "f'(x)=3x²+4x" },
     { question: "Теорема Пифагора?", answer: "a² + b² = c²" },
-    { question: "Татар теле нинди тел?", answer: "Татарский язык, тюркская семья." },
   ];
   const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'dataset-template.json';
   a.click();
-  addMessage('stat', '📥 Шаблон датасета скачан');
+  addMessage('stat', '📥 Шаблон скачан');
 }
 window.downloadDatasetTemplate = downloadDatasetTemplate;
 
 // ============================================================
-// ПРЕДМЕТЫ
+// === ПРЕДМЕТЫ ===
 // ============================================================
 function renderPresets() {
   const grid = $('preset-grid');
@@ -3249,20 +3058,7 @@ function applyPreset(key) {
   addMessage('sys', `${PRESETS[key].icon} Предмет: ${PRESETS[key].name}`);
   closeModal('modal-presets');
 
-  // Авто-выбор модели под предмет
-  const modelMap = {
-    math: 'qwen_math15',
-    physics: 'qwen_math15',
-    chemistry: 'qwen15',
-    biology: 'qwen15',
-    history: 'qwen15',
-    lang: 'qwen15',
-    code: 'qwen_coder15',
-    teacher: 'qwen15',
-    examiner: 'qwen15',
-    summary: 'qwen15',
-  };
-  const targetModel = modelMap[key] || 'qwen15';
+  const targetModel = PRESETS[key].model || 'qwen15';
   if (targetModel !== currentModelKey && autoMode) {
     switchModel(targetModel, 'под предмет ' + PRESETS[key].name);
   }
@@ -3270,7 +3066,7 @@ function applyPreset(key) {
 window.applyPreset = applyPreset;
 
 // ============================================================
-// UI EVENTS
+// === UI EVENTS ===
 // ============================================================
 $('btn-auto').onclick = () => {
   autoMode = !autoMode;
@@ -3346,7 +3142,6 @@ $('stop').onclick = stopGeneration;
 
 $('chat-search').oninput = e => renderChatList(e.target.value);
 
-// Pomodoro
 $('btn-pomodoro').onclick = () => {
   $('pomodoro-panel').classList.toggle('show');
   updatePomodoroUI();
@@ -3360,6 +3155,9 @@ inputEl.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
 });
 inputEl.addEventListener('input', autoResizeInput);
+inputEl.addEventListener('input', () => {
+  localStorage.setItem('ai-draft', inputEl.value);
+});
 
 document.querySelectorAll('.quick-btn').forEach(btn => {
   btn.onclick = () => {
@@ -3375,22 +3173,15 @@ document.querySelectorAll('.modal').forEach(m => {
   });
 });
 
-// Авто-скролл
 chatEl.addEventListener('scroll', () => {
   const atBottom = chatEl.scrollHeight - chatEl.scrollTop - chatEl.clientHeight < 50;
   autoScroll = atBottom;
 });
 
-// Черновик
-inputEl.addEventListener('input', () => {
-  localStorage.setItem('ai-draft', inputEl.value);
-});
-
 // ============================================================
-// PWA — Service Worker inline
+// === PWA ===
 // ============================================================
 async function initPWA() {
-  // Манифест
   const manifestEl = document.getElementById('pwa-manifest');
   if (manifestEl) {
     const manifestBlob = new Blob([manifestEl.textContent], { type: 'application/manifest+json' });
@@ -3401,22 +3192,11 @@ async function initPWA() {
     document.head.appendChild(link);
   }
 
-  // Service Worker — кэширует всё после первой загрузки
   if ('serviceWorker' in navigator) {
     const swCode = `
-      const CACHE = 'ai-cache-v1';
-      const URLS = [
-        self.location.href,
-        'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.esm.min.js',
-        'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs',
-        'https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js',
-        'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css',
-        'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.mjs',
-        'https://cdn.jsdelivr.net/npm/marked@12.0.0/lib/marked.esm.js',
-      ];
-      self.addEventListener('install', e => {
-        e.waitUntil(caches.open(CACHE).then(c => c.addAll(URLS).catch(() => {})));
-      });
+      const CACHE = 'ai-cache-v2';
+      self.addEventListener('install', e => self.skipWaiting());
+      self.addEventListener('activate', e => e.waitUntil(clients.claim()));
       self.addEventListener('fetch', e => {
         e.respondWith(
           caches.match(e.request).then(r => r || fetch(e.request).then(resp => {
@@ -3425,7 +3205,7 @@ async function initPWA() {
               caches.open(CACHE).then(c => c.put(e.request, clone));
             }
             return resp;
-          }))
+          }).catch(() => caches.match(e.request)))
         );
       });
     `;
@@ -3433,26 +3213,24 @@ async function initPWA() {
     const swUrl = URL.createObjectURL(swBlob);
     try {
       await navigator.serviceWorker.register(swUrl);
-      console.log('Service Worker registered');
+      console.log('SW registered');
     } catch (e) {
-      console.warn('SW registration failed:', e);
+      console.warn('SW failed:', e);
     }
   }
 }
 
 // ============================================================
-// СТАРТ
+// === СТАРТ ===
 // ============================================================
 (async () => {
   sessionStats.start = nowSec();
   updateAutoBtn();
   applyTheme(SETTINGS.theme);
 
-  // Восстанавливаем черновик
   const draft = localStorage.getItem('ai-draft');
   if (draft) { inputEl.value = draft; autoResizeInput(); }
 
-  // Инициализация PWA
   initPWA();
 
   if (!navigator.gpu) {
@@ -3463,9 +3241,7 @@ async function initPWA() {
 
   showStatus('Проверка GPU...', 'loading');
   try {
-    const adapter = await navigator.gpu.requestAdapter({
-      powerPreference: 'high-performance'
-    });
+    const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
     if (!adapter) {
       showStatus('GPU недоступен', 'error');
       addMessage('error', 'requestAdapter() вернул null.');
