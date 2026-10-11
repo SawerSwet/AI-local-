@@ -6,9 +6,8 @@
 <meta name="theme-color" content="#0d1117">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Умный ИИ">
-<title>🧠 Умный ИИ</title>
+<title>🧠 Умный учебный ИИ</title>
 
-<!-- Tesseract через script — работает всегда -->
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 
 <style>
@@ -18,7 +17,7 @@
     --accent: #1f6feb; --accent2: #238636;
     --warn: #d29922; --error: #f85149; --ok: #3fb950;
     --math: #a371f7; --file: #58a6ff;
-    --auto: #39d353;
+    --auto: #39d353; --py: #f7df1e;
   }
   [data-theme="light"] {
     --bg: #ffffff; --bg2: #f6f8fa; --bg3: #eaeef2;
@@ -26,7 +25,7 @@
     --accent: #0969da; --accent2: #1a7f37;
     --warn: #9a6700; --error: #cf222e; --ok: #1a7f37;
     --math: #8250df; --file: #0969da;
-    --auto: #1a7f37;
+    --auto: #1a7f37; --py: #9a6700;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
@@ -36,7 +35,6 @@
   }
   body { display: flex; flex-direction: column; }
 
-  /* ===== HEADER ===== */
   header {
     padding: 10px 12px; background: var(--bg2);
     border-bottom: 1px solid var(--border);
@@ -53,11 +51,10 @@
   #status.loading { color: var(--warn); }
   #status.error { color: var(--error); }
 
-  /* ===== TOOLBAR ===== */
   #toolbar {
     display: flex; gap: 6px; padding: 6px 8px;
     background: var(--bg2); border-bottom: 1px solid var(--border);
-    flex-shrink: 0; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    flex-shrink: 0; overflow-x: auto;
   }
   #toolbar::-webkit-scrollbar { display: none; }
   .tb-btn {
@@ -70,9 +67,9 @@
   .tb-btn:active { transform: scale(0.96); }
   .tb-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
   .tb-btn.auto-on { background: var(--auto); border-color: var(--auto); color: black; font-weight: 700; }
-  .tb-btn.danger { background: var(--error); border-color: var(--error); color: white; }
+  .tb-btn.py-on { background: var(--py); border-color: var(--py); color: black; font-weight: 700; }
+  .tb-btn.smart-on { background: var(--math); border-color: var(--math); color: white; font-weight: 700; }
 
-  /* ===== QUICK BAR ===== */
   .quick-bar {
     display: flex; gap: 5px; padding: 6px 8px;
     background: var(--bg3); border-bottom: 1px solid var(--border);
@@ -87,12 +84,10 @@
   }
   .quick-btn:active { background: var(--accent); color: white; }
 
-  /* ===== CHAT ===== */
   #chat {
     flex: 1; overflow-y: auto; padding: 12px;
     display: flex; flex-direction: column; gap: 12px;
     -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
   }
   .msg {
     max-width: 92%; padding: 10px 14px; border-radius: 16px;
@@ -134,6 +129,8 @@
     background: rgba(63,185,80,0.13); padding: 5px 12px;
     border-radius: 8px; border: 1px solid rgba(63,185,80,0.27);
   }
+  .stat.py { color: var(--py); background: rgba(247,223,30,0.13); border-color: rgba(247,223,30,0.4); }
+  .stat.math { color: var(--math); background: rgba(163,113,247,0.13); border-color: rgba(163,113,247,0.4); }
   .warn {
     align-self: center; font-size: 12px; color: var(--warn);
     background: rgba(210,153,34,0.13); padding: 9px 14px;
@@ -146,6 +143,28 @@
     border-radius: 10px; border: 1px solid rgba(248,81,73,0.4);
     max-width: 95%; text-align: center;
   }
+  .step {
+    align-self: flex-start;
+    background: var(--bg3);
+    border-left: 3px solid var(--math);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text2);
+    max-width: 92%;
+  }
+  .step b { color: var(--math); }
+  .consensus {
+    align-self: center;
+    background: rgba(57,211,83,0.1);
+    border: 1px solid rgba(57,211,83,0.4);
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--auto);
+    max-width: 95%;
+  }
+  .consensus b { color: var(--text); }
 
   .msg-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
   .msg-actions button {
@@ -155,7 +174,6 @@
   }
   .msg-actions button:active { background: var(--border); color: var(--text); }
 
-  /* ===== OCR CARD ===== */
   .ocr-card {
     align-self: stretch; max-width: 100%;
     background: var(--bg2); border: 1px solid var(--border);
@@ -206,15 +224,12 @@
     border: 1px solid var(--border); background: var(--bg3);
     color: var(--text); font-size: 12px; cursor: pointer;
   }
-  .ocr-actions button:active { transform: scale(0.97); }
-
   .ocr-progress { height: 4px; background: var(--bg); border-radius: 2px; overflow: hidden; margin: 8px 0; }
   .ocr-progress-bar {
     height: 100%; background: linear-gradient(90deg, var(--accent), var(--ok));
     width: 0%; transition: width 0.2s;
   }
 
-  /* ===== AUTO CARD ===== */
   .auto-card {
     align-self: center; background: rgba(57,211,83,0.1);
     border: 1px solid rgba(57,211,83,0.4); border-radius: 12px;
@@ -223,7 +238,6 @@
   }
   .auto-card b { color: var(--text); }
 
-  /* ===== STATS OVERLAY ===== */
   #stats {
     position: fixed; bottom: 84px; right: 10px;
     background: rgba(22,27,34,0.96); padding: 8px 12px;
@@ -234,7 +248,6 @@
   #stats.show { opacity: 1; }
   #stats b { color: var(--ok); }
 
-  /* ===== POMODORO ===== */
   #pomodoro-panel {
     position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
     background: rgba(22,27,34,0.98); padding: 12px 20px;
@@ -251,7 +264,6 @@
     font-size: 13px; cursor: pointer; margin: 3px;
   }
 
-  /* ===== INPUT AREA ===== */
   #input-area {
     display: flex; gap: 8px; padding: 10px;
     background: var(--bg2); border-top: 1px solid var(--border);
@@ -293,7 +305,6 @@
   }
   #stop.show { display: block; }
 
-  /* ===== PROGRESS ===== */
   #progress {
     position: fixed; top: 0; left: 0; right: 0;
     height: 3px; background: var(--border); z-index: 100; display: none;
@@ -304,7 +315,6 @@
     width: 0%; transition: width 0.3s;
   }
 
-  /* ===== MODALS ===== */
   .modal {
     position: fixed; inset: 0; background: rgba(0,0,0,0.92);
     display: none; z-index: 200; padding: 16px; overflow-y: auto;
@@ -319,7 +329,6 @@
   .modal-content p { font-size: 13px; color: var(--text2); margin: 6px 0; }
   .modal-content p b { color: var(--text); }
 
-  /* ===== MODEL LIST ===== */
   .model-opt {
     padding: 12px; border-radius: 12px; border: 1px solid var(--border);
     background: var(--bg3); margin-bottom: 8px; cursor: pointer;
@@ -348,6 +357,7 @@
   .model-opt .lang-badge.math { background: var(--math); }
   .model-opt .lang-badge.code { background: #58a6ff; }
   .model-opt .lang-badge.multi { background: #f778ba; color: black; }
+  .model-opt .lang-badge.reasoning { background: #d29922; color: black; }
 
   .category-label {
     font-size: 13px; color: var(--text2); margin: 14px 0 8px;
@@ -355,7 +365,6 @@
     display: inline-block; font-weight: 600;
   }
 
-  /* ===== STORAGE ===== */
   .storage-info {
     background: var(--bg); border-radius: 10px; padding: 12px;
     margin-bottom: 14px; font-size: 12px; color: var(--text2);
@@ -367,7 +376,6 @@
     width: 0%; transition: width 0.3s;
   }
 
-  /* ===== CHAT LIST ===== */
   .chat-item {
     padding: 12px; border-radius: 12px; background: var(--bg3);
     margin-bottom: 8px; cursor: pointer; font-size: 14px;
@@ -377,7 +385,6 @@
   .chat-item .title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .chat-item .del { color: var(--error); font-size: 18px; padding: 4px 10px; }
 
-  /* ===== BUTTONS ===== */
   .btn-primary {
     width: 100%; padding: 13px; border-radius: 12px;
     border: none; background: var(--accent); color: white;
@@ -397,7 +404,6 @@
     cursor: pointer; margin-top: 6px;
   }
 
-  /* ===== SETTINGS ===== */
   .settings-row {
     display: flex; justify-content: space-between; align-items: center;
     padding: 10px 0; border-bottom: 1px solid var(--bg3);
@@ -414,7 +420,6 @@
     background: var(--bg3); color: var(--text); font-size: 13px;
   }
 
-  /* ===== DIAG ===== */
   .diag-line { font-size: 12px; padding: 5px 0; border-bottom: 1px solid var(--bg3); }
   .diag-line b { color: var(--text2); font-weight: 500; }
   .ok { color: var(--ok); } .bad { color: var(--error); } .warn-txt { color: var(--warn); }
@@ -427,7 +432,6 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ===== BENCH ===== */
   .bench-table { width: 100%; font-size: 12px; border-collapse: collapse; margin-top: 12px; }
   .bench-table th {
     text-align: left; padding: 8px 5px;
@@ -439,14 +443,12 @@
   .bench-table .med { color: var(--warn); }
   .bench-table .bad { color: var(--error); }
 
-  /* ===== CAMERA ===== */
   #camera-preview {
     width: 100%; border-radius: 14px; margin-bottom: 12px;
     display: none; background: #000;
   }
   #camera-preview.show { display: block; }
 
-  /* ===== PRESETS ===== */
   .preset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
   .preset-btn {
     padding: 12px; border-radius: 12px;
@@ -457,7 +459,6 @@
   .preset-btn .icon { font-size: 22px; margin-right: 8px; }
   .preset-btn .sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
 
-  /* ===== SKELETON ===== */
   .skeleton {
     display: inline-block; width: 10px; height: 16px;
     background: var(--accent); border-radius: 3px;
@@ -465,6 +466,18 @@
     vertical-align: middle; margin-left: 3px;
   }
   @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+  /* Индикатор SymPy */
+  #sympy-indicator {
+    position: fixed; bottom: 84px; left: 10px;
+    background: rgba(247,223,30,0.15);
+    border: 1px solid rgba(247,223,30,0.4);
+    padding: 4px 10px; border-radius: 8px;
+    font-size: 11px; color: var(--py);
+    display: none; z-index: 50;
+  }
+  #sympy-indicator.show { display: block; }
+  #sympy-indicator.ready { color: var(--ok); background: rgba(63,185,80,0.13); border-color: rgba(63,185,80,0.4); }
 
   @media print {
     header, #toolbar, .quick-bar, #input-area, #stats,
@@ -487,9 +500,11 @@
 </header>
 
 <div id="toolbar">
-  <button class="tb-btn auto-on" id="btn-auto">🎯 Авто ✓</button>
-  <button class="tb-btn" id="btn-models">🧠 Модели</button>
-  <button class="tb-btn" id="btn-chats">💬 Чаты</button>
+  <button class="tb-btn auto-on" id="btn-auto">🎯 Авто</button>
+  <button class="tb-btn py-on" id="btn-py">🐍 SymPy</button>
+  <button class="tb-btn smart-on" id="btn-smart">🧠 Умный</button>
+  <button class="tb-btn" id="btn-models">📦 Модели</button>
+  <button class="tb-btn" id="btn-chats">💬</button>
   <button class="tb-btn" id="btn-new">➕</button>
   <button class="tb-btn" id="btn-presets">📚</button>
   <button class="tb-btn" id="btn-settings">⚙️</button>
@@ -497,28 +512,30 @@
 </div>
 
 <div class="quick-bar">
-  <button class="quick-btn" data-p="Реши уравнение: ">🧮 Уравнение</button>
-  <button class="quick-btn" data-p="Объясни тему: ">📖 Объясни</button>
-  <button class="quick-btn" data-p="Переведи на русский: ">🌐 Перевод</button>
-  <button class="quick-btn" data-p="Составь конспект: ">📝 Конспект</button>
-  <button class="quick-btn" data-p="Придумай 5 вопросов по теме: ">❓ Вопросы</button>
-  <button class="quick-btn" data-p="/teacher Помоги, не давай ответ">👨‍🏫 Учитель</button>
+  <button class="quick-btn" data-p="/solve ">🧮 Реши</button>
+  <button class="quick-btn" data-p="/equation ">📐 Уравнение</button>
+  <button class="quick-btn" data-p="/geometry ">📏 Геометрия</button>
+  <button class="quick-btn" data-p="/explain ">📖 Объясни</button>
+  <button class="quick-btn" data-p="/check ">✅ Проверь</button>
+  <button class="quick-btn" data-p="/teacher ">👨‍🏫 Учитель</button>
+  <button class="quick-btn" data-p="/steps ">🎯 Пошагово</button>
 </div>
 
 <div id="chat">
   <div class="msg sys">
     <b>🧠 Умный учебный ИИ</b><br>
-    Модели отвечают на <b>русском</b>, <b>английском</b>, <b>татарском</b><br>
-    📷 Камера · 🎤 Голос · 🔊 Озвучка · ⚡ Офлайн
+    🐍 SymPy · 🎯 Self-consistency · ✅ Верификация<br>
+    📷 OCR · 🎤 Голос · 📚 8 класс · 🇷🇺 Русский
   </div>
 </div>
 
 <div id="stats"></div>
+<div id="sympy-indicator">🐍 Pyodide не загружен</div>
 
 <div id="pomodoro-panel">
   <div id="pomodoro-label">🍅 Работа</div>
   <div id="pomodoro-time">25:00</div>
-  <button id="pomodoro-toggle">▶ Старт</button>
+  <button id="pomodoro-toggle">▶</button>
   <button id="pomodoro-reset">↺</button>
   <button id="pomodoro-close">✕</button>
 </div>
@@ -529,18 +546,24 @@
   <input type="file" id="file-input" multiple
     accept="image/*,.pdf,.txt,.md,.docx,application/pdf,text/plain" style="display:none">
   <button class="icon-btn mic" id="btn-mic">🎤</button>
-  <textarea id="input" rows="1" placeholder="Спроси..." disabled></textarea>
+  <textarea id="input" rows="1" placeholder="Задай вопрос..." disabled></textarea>
   <button id="stop">■</button>
   <button id="send" disabled>➤</button>
 </div>
 
-<!-- Модалки -->
+<!-- ==================== МОДАЛКИ ==================== -->
+
 <div class="modal" id="modal-models">
   <div class="modal-content">
-    <h2>🧠 Модели</h2>
+    <h2>📦 Модели</h2>
     <div id="storage-info" class="storage-info"><span class="spinner"></span>Проверка...</div>
-    <p style="font-size:12px;">Каждая модель показывает:<br>
-    <b>языки</b> · размер · RAM · скорость</p>
+    <p style="font-size:12px;">Бейджи: <span class="model-opt" style="display:inline-block;padding:0;margin:0;border:none;background:none;">
+      <span class="lang-badge rus">RUS</span>
+      <span class="lang-badge math">MATH</span>
+      <span class="lang-badge code">CODE</span>
+      <span class="lang-badge multi">MULTI</span>
+      <span class="lang-badge reasoning">THINK</span>
+    </span></p>
     <div id="model-list"></div>
     <button class="btn-secondary" onclick="autoSelectBest()">🎯 Подобрать под RAM</button>
     <button class="btn-secondary" onclick="clearModelCache()">🗑 Очистить кэш</button>
@@ -594,10 +617,10 @@
     <button class="btn-secondary" onclick="openModal('modal-stats')">📊 Статистика</button>
     <button class="btn-secondary" onclick="openModal('modal-bench')">⚡ Бенчмарк</button>
     <button class="btn-secondary" onclick="openModal('modal-diag')">🔍 Диагностика</button>
-    <button class="btn-secondary" onclick="openModal('modal-lora')">✨ LoRA обучение</button>
+    <button class="btn-secondary" onclick="openModal('modal-lora')">✨ LoRA</button>
     <button class="btn-secondary" id="btn-theme">🌙 Тема</button>
     <button class="btn-secondary" onclick="showPomodoro()">🍅 Pomodoro</button>
-    <button class="btn-secondary" onclick="printChat()">🖨 Печать / PDF</button>
+    <button class="btn-secondary" onclick="printChat()">🖨 Печать</button>
     <button class="btn-secondary" onclick="closeModal('modal-more')">Закрыть</button>
   </div>
 </div>
@@ -605,7 +628,7 @@
 <div class="modal" id="modal-presets">
   <div class="modal-content">
     <h2>📚 Предметы</h2>
-    <p>Установит специальный промпт для предмета.</p>
+    <p>Устанавливает специальный промпт для предмета.</p>
     <div class="preset-grid" id="preset-grid"></div>
     <button class="btn-secondary" onclick="closeModal('modal-presets')">Закрыть</button>
   </div>
@@ -616,25 +639,24 @@
     <h2>⚙️ Настройки</h2>
     <div class="settings-row">
       <label>Температура</label>
-      <input type="range" id="s-temp" min="0" max="1.5" step="0.05" value="0.3">
-      <span class="val" id="v-temp">0.30</span>
+      <input type="range" id="s-temp" min="0" max="1.5" step="0.05" value="0.2">
+      <span class="val" id="v-temp">0.20</span>
     </div>
     <div class="settings-row">
       <label>Max токенов</label>
-      <input type="range" id="s-maxtok" min="100" max="2000" step="50" value="400">
-      <span class="val" id="v-maxtok">400</span>
+      <input type="range" id="s-maxtok" min="100" max="2000" step="50" value="600">
+      <span class="val" id="v-maxtok">600</span>
     </div>
     <div class="settings-row">
       <label>Контекст</label>
-      <input type="range" id="s-ctx" min="512" max="4096" step="512" value="1024">
-      <span class="val" id="v-ctx">1024</span>
+      <input type="range" id="s-ctx" min="512" max="4096" step="512" value="2048">
+      <span class="val" id="v-ctx">2048</span>
     </div>
     <div class="settings-row">
       <label>Язык ответа</label>
       <select id="s-lang">
         <option value="rus" selected>Русский</option>
         <option value="eng">English</option>
-        <option value="tat">Татарский</option>
         <option value="auto">Авто</option>
       </select>
     </div>
@@ -645,14 +667,6 @@
         <option value="rus+eng+tat">Рус + Eng + Тат</option>
         <option value="rus">Русский</option>
         <option value="eng">English</option>
-        <option value="deu">Deutsch</option>
-        <option value="fra">Français</option>
-        <option value="spa">Español</option>
-        <option value="ukr">Українська</option>
-        <option value="kaz">Қазақша</option>
-        <option value="tur">Türkçe</option>
-        <option value="chi_sim">中文简体</option>
-        <option value="jpn">日本語</option>
         <option value="equ">Math (цифры)</option>
       </select>
     </div>
@@ -666,6 +680,13 @@
         <option value="4" selected>4 — Ч/Б + резкость</option>
         <option value="5">5 — Тени</option>
         <option value="6">6 — Максимум</option>
+      </select>
+    </div>
+    <div class="settings-row">
+      <label>Self-consistency</label>
+      <select id="s-consistency">
+        <option value="1">1 ответ (быстро)</option>
+        <option value="3" selected>3 ответа (точно)</option>
       </select>
     </div>
     <div class="settings-row">
@@ -706,9 +727,6 @@
     <canvas id="camera-canvas" style="display:none"></canvas>
     <button class="btn-primary" id="btn-snap">📸 Снять и распознать</button>
     <button class="btn-secondary" id="btn-close-camera">Отмена</button>
-    <p style="font-size:12px; margin-top:10px;">
-      💡 Держи ровно, освещение яркое. Для формул — крупно.
-    </p>
   </div>
 </div>
 
@@ -716,12 +734,151 @@
 import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
 // ============================================================
-// === ВНЕШНИЕ БИБЛИОТЕКИ ===
+// === PYODIDE + SYMPY ===
 // ============================================================
-let katex = null;
-let marked = null;
-let pdfjsLib = null;
-let mammoth = null;
+let pyodide = null;
+let pyReady = false;
+let sympyReady = false;
+
+async function loadPyodide() {
+  if (pyodide) return pyodide;
+  const ind = document.getElementById('sympy-indicator');
+  ind.textContent = '🐍 Загрузка Pyodide (~10 MB)...';
+  ind.classList.add('show');
+
+  try {
+    const mod = await import('https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.mjs');
+    pyodide = await mod.loadPyodide({
+      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/',
+    });
+    pyReady = true;
+    ind.textContent = '🐍 Установка SymPy...';
+
+    await pyodide.loadPackage('sympy');
+    sympyReady = true;
+    ind.textContent = '🐍 SymPy готов ✅';
+    ind.classList.add('ready');
+    setTimeout(() => ind.classList.remove('show'), 3000);
+
+    addMessage('stat py', '🐍 Pyodide + SymPy готовы');
+    return pyodide;
+  } catch (e) {
+    ind.textContent = '🐍 Ошибка: ' + e.message;
+    console.error('Pyodide error:', e);
+    throw e;
+  }
+}
+
+async function sympyEval(code) {
+  if (!sympyReady) throw new Error('SymPy не загружен');
+  try {
+    // Оборачиваем для безопасного вычисления
+    const fullCode = `
+import sympy as sp
+from sympy import *
+x, y, z, a, b, c = symbols('x y z a b c')
+${code}
+`;
+    const result = await pyodide.runPythonAsync(fullCode);
+    return String(result);
+  } catch (e) {
+    throw new Error('SymPy: ' + e.message);
+  }
+}
+
+// ============================================================
+// === ОБНАРУЖЕНИЕ МАТЕМАТИКИ ===
+// ============================================================
+function looksLikeMath(text) {
+  const patterns = [
+    /[=<>≤≥≠±]/,
+    /\d+\s*[+\-*/^×÷]\s*\d+/,
+    /\^/,
+    /[√∑∏∫π∞]/,
+    /[a-zA-Z]\s*[²³¹⁰]/,
+    /\b(sin|cos|tan|log|ln|sqrt)\b/i,
+    /\b\d+x\s*[+\-=]/i,
+    /[a-zA-Z]\s*=\s*/,
+    /\b(реши|вычисли|найди|упрости|разложи|докажи)\b/i,
+    /\b(уравнение|дискриминант|теорема|пифагор|виет|производная|интеграл)\b/i,
+    /\b\d+\s*%\s*от\b/i,
+  ];
+  return patterns.some(p => p.test(text));
+}
+
+function extractEquation(text) {
+  // Пытаемся найти уравнение в тексте
+  const patterns = [
+    /([a-z]\s*[\^²³]?\s*[+\-]?\s*\d*\s*[a-z]?\s*[+\-]?\s*\d*\s*=\s*\d+)/i,
+    /(\d+x\s*[+\-]\s*\d+\s*=\s*\d+)/,
+    /([a-z]\s*=\s*[^,\.\n]+)/i,
+    /(\d+[+\-*/^]\d+)/,
+  ];
+  for (const p of patterns) {
+    const m = text.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+// ============================================================
+// === БАЗА ФОРМУЛ 8 КЛАССА ===
+// ============================================================
+const FORMULA_8 = {
+  'квадратное уравнение': 'ax² + bx + c = 0; D = b² − 4ac; x = (−b ± √D) / 2a',
+  'дискриминант': 'D = b² − 4ac. Если D > 0 — 2 корня, D = 0 — 1 корень, D < 0 — нет корней',
+  'теорема виета': 'x₁ + x₂ = −b/a; x₁ · x₂ = c/a',
+  'теорема пифагора': 'c² = a² + b², где c — гипотенуза, a и b — катеты',
+  'площадь треугольника': 'S = ½ · a · h (через основание и высоту)',
+  'площадь прямоугольника': 'S = a · b',
+  'периметр прямоугольника': 'P = 2(a + b)',
+  'проценты': 'x% от числа a = a · x / 100',
+  'степени': 'aᵐ · aⁿ = aᵐ⁺ⁿ; aᵐ / aⁿ = aᵐ⁻ⁿ; (aᵐ)ⁿ = aᵐⁿ',
+  'корни': '√(a²b) = a√b; √a · √b = √(ab); √a / √b = √(a/b)',
+  'линейная функция': 'y = kx + b, где k — угловой коэффициент',
+  'подобие треугольников': 'Отношение сторон подобных треугольников равно коэффициенту подобия',
+};
+
+function findFormulas(text) {
+  const lower = text.toLowerCase();
+  const found = [];
+  for (const [key, value] of Object.entries(FORMULA_8)) {
+    if (lower.includes(key)) found.push({ name: key, formula: value });
+  }
+  return found;
+}
+
+// ============================================================
+// === OCR ===
+// ============================================================
+function checkTesseract() {
+  if (typeof window.Tesseract === 'undefined') return { ok: false, error: 'Tesseract не загружен' };
+  if (typeof window.Tesseract.createWorker !== 'function') return { ok: false, error: 'createWorker недоступна' };
+  return { ok: true, api: window.Tesseract };
+}
+
+async function runOCR(imageData, lang, onProgress) {
+  const chk = checkTesseract();
+  if (!chk.ok) throw new Error(chk.error);
+  const T = chk.api;
+  const worker = await T.createWorker(lang, 1, {
+    logger: m => { if (m.status === 'recognizing text' && onProgress) onProgress(m.progress || 0); }
+  });
+  try {
+    const r = await worker.recognize(imageData);
+    return {
+      text: (r.data && r.data.text ? r.data.text : '').trim(),
+      confidence: (r.data && r.data.confidence) || 0,
+    };
+  } finally {
+    try { await worker.terminate(); } catch (e) {}
+  }
+}
+
+// ============================================================
+// === БИБЛИОТЕКИ ===
+// ============================================================
+let katex = null, marked = null, pdfjsLib = null, mammoth = null;
 
 async function loadKatex() {
   if (katex) return katex;
@@ -760,150 +917,111 @@ async function loadMammoth() {
 }
 
 // ============================================================
-// === OCR ===
-// ============================================================
-function checkTesseract() {
-  if (typeof window.Tesseract === 'undefined') return { ok: false, error: 'Tesseract не загружен' };
-  if (typeof window.Tesseract.createWorker !== 'function') return { ok: false, error: 'createWorker недоступна' };
-  return { ok: true, api: window.Tesseract };
-}
-
-async function runOCR(imageData, lang, onProgress) {
-  const chk = checkTesseract();
-  if (!chk.ok) throw new Error(chk.error);
-  const T = chk.api;
-  const worker = await T.createWorker(lang, 1, {
-    logger: m => { if (m.status === 'recognizing text' && onProgress) onProgress(m.progress || 0); }
-  });
-  try {
-    const r = await worker.recognize(imageData);
-    return {
-      text: (r.data && r.data.text ? r.data.text : '').trim(),
-      confidence: (r.data && r.data.confidence) || 0,
-    };
-  } finally {
-    try { await worker.terminate(); } catch (e) {}
-  }
-}
-
-// ============================================================
-// === МОДЕЛИ С МЕТКАМИ ЯЗЫКОВ ===
+// === МОДЕЛИ С ЯЗЫКАМИ ===
 // ============================================================
 const MODELS = {
   // БЫСТРЫЕ
-  "smol360": {
-    id: "SmolLM2-360M-Instruct-q4f16_1-MLC",
-    name: "SmolLM2 360M", size: "250 MB", ram: "~600 MB", speed: "25–40",
-    category: "🚀 Быстрые",
-    langs: ["eng"], langsLabel: "Английский (слабо рус)",
-    quality: 1, tags: ["fast"],
-  },
   "qwen05": {
     id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
     name: "Qwen2.5 0.5B", size: "350 MB", ram: "~800 MB", speed: "18–28",
-    category: "🚀 Быстрые",
+    category: "🚀 Быстрые", quality: 2,
     langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, 29 языков",
-    quality: 2, tags: ["fast", "rus"],
+    tags: ["fast", "rus"],
   },
   "qwen3_06": {
     id: "Qwen3-0.6B-q4f16_1-MLC",
     name: "Qwen3 0.6B", size: "400 MB", ram: "~900 MB", speed: "15–25",
-    category: "🚀 Быстрые",
-    langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, thinking",
-    quality: 2, tags: ["fast", "rus", "reasoning"],
+    category: "🚀 Быстрые", quality: 2,
+    langs: ["rus", "eng", "multi", "reasoning"],
+    langsLabel: "Русский, английский, thinking",
+    tags: ["fast", "rus"],
   },
 
   // ОПТИМУМ
-  "llama1b": {
-    id: "Llama-3.2-1B-Instruct-q4f16_1-MLC",
-    name: "Llama 3.2 1B", size: "700 MB", ram: "~1.5 GB", speed: "12–18",
-    category: "⚖️ Оптимум",
-    langs: ["eng", "rus"], langsLabel: "Английский (рус слабо)",
-    quality: 3, tags: ["text"],
-  },
   "qwen15": {
     id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
     name: "Qwen2.5 1.5B ⭐", size: "1 GB", ram: "~2 GB", speed: "8–14",
-    category: "⚖️ Оптимум", default: true,
+    category: "⚖️ Оптимум", default: true, quality: 4,
     langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, татарский, 29 языков",
-    quality: 4, tags: ["text", "rus"],
+    tags: ["text", "rus", "math-ok"],
   },
   "qwen3_17": {
     id: "Qwen3-1.7B-q4f16_1-MLC",
     name: "Qwen3 1.7B", size: "1.1 GB", ram: "~2.1 GB", speed: "7–12",
-    category: "⚖️ Оптимум",
-    langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, thinking",
-    quality: 4, tags: ["text", "rus", "reasoning"],
+    category: "⚖️ Оптимум", quality: 4,
+    langs: ["rus", "eng", "multi", "reasoning"],
+    langsLabel: "Русский, английский, thinking",
+    tags: ["text", "rus", "reasoning"],
+  },
+  "llama1b": {
+    id: "Llama-3.2-1B-Instruct-q4f16_1-MLC",
+    name: "Llama 3.2 1B", size: "700 MB", ram: "~1.5 GB", speed: "12–18",
+    category: "⚖️ Оптимум", quality: 3,
+    langs: ["eng"], langsLabel: "Английский (рус слабо)",
+    tags: ["text"],
   },
   "smol17": {
     id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC",
     name: "SmolLM2 1.7B", size: "1 GB", ram: "~2 GB", speed: "7–12",
-    category: "⚖️ Оптимум",
+    category: "⚖️ Оптимум", quality: 3,
     langs: ["eng"], langsLabel: "Английский",
-    quality: 3, tags: ["text"],
-  },
-  "stable16": {
-    id: "StableLM-2-1.6B-q4f16_1-MLC",
-    name: "StableLM 2 1.6B", size: "1 GB", ram: "~2 GB", speed: "7–12",
-    category: "⚖️ Оптимум",
-    langs: ["eng"], langsLabel: "Английский",
-    quality: 3, tags: ["text"],
+    tags: ["text"],
   },
 
-  // МАТЕМАТИКА
+  // МАТЕМАТИКА (8 класс)
   "qwen_math15": {
     id: "Qwen2.5-Math-1.5B-Instruct-q4f16_1-MLC",
     name: "Qwen2.5 Math 1.5B 🧮", size: "1 GB", ram: "~2 GB", speed: "8–12",
-    category: "🧮 Математика",
-    langs: ["eng"], langsLabel: "⚠️ Только английский и формулы! Русский плохо",
-    quality: 4, tags: ["math"],
-    warn: "Не задавай русские вопросы — отвечает мусором! Используй формулами: 'x^2+5x+6=0'",
+    category: "🧮 Математика", quality: 4,
+    langs: ["eng", "math"], langsLabel: "⚠️ Английский + формулы (рус плохо)",
+    tags: ["math"],
+    warn: "На русском отвечает мусором. Используй ТОЛЬКО для формул: 'x^2+5x+6=0'",
   },
   "deepseek_r1": {
     id: "DeepSeek-R1-Distill-Qwen-1.5B-q4f16_1-MLC",
     name: "DeepSeek R1 1.5B 🧠", size: "1 GB", ram: "~2 GB", speed: "6–10",
-    category: "🧮 Математика",
-    langs: ["eng", "rus"], langsLabel: "Английский, русский базово",
-    quality: 4, tags: ["math", "reasoning"],
+    category: "🧮 Математика", quality: 4,
+    langs: ["rus", "eng", "reasoning"], langsLabel: "Русский, английский, рассуждения",
+    tags: ["math", "reasoning"],
   },
 
   // КОД
   "qwen_coder15": {
     id: "Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC",
     name: "Qwen2.5 Coder 1.5B 💻", size: "1 GB", ram: "~2 GB", speed: "8–12",
-    category: "💻 Код",
-    langs: ["eng"], langsLabel: "Английский (для кода нормально)",
-    quality: 4, tags: ["code"],
+    category: "💻 Код", quality: 4,
+    langs: ["eng", "code"], langsLabel: "Английский + код",
+    tags: ["code"],
   },
 
   // УМНЫЕ
+  "qwen3b": {
+    id: "Qwen2.5-3B-Instruct-q4f16_1-MLC",
+    name: "Qwen2.5 3B 🔥", size: "2 GB", ram: "~3.5 GB", speed: "3–5",
+    category: "🧠 Умные", quality: 5,
+    langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, 29 языков — ЛУЧШИЙ для 8 класса",
+    tags: ["text", "rus", "math-best"],
+  },
   "gemma2b": {
     id: "gemma-2-2b-it-q4f16_1-MLC",
     name: "Gemma 2 2B", size: "1.5 GB", ram: "~3 GB", speed: "4–7",
-    category: "🧠 Умные",
+    category: "🧠 Умные", quality: 4,
     langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, 140 языков",
-    quality: 4, tags: ["text", "rus"],
+    tags: ["text", "rus"],
   },
   "llama3b": {
     id: "Llama-3.2-3B-Instruct-q4f16_1-MLC",
     name: "Llama 3.2 3B", size: "2 GB", ram: "~3.5 GB", speed: "3–5",
-    category: "🧠 Умные",
-    langs: ["eng", "rus"], langsLabel: "Английский (рус средне)",
-    quality: 4, tags: ["text"],
-  },
-  "qwen3b": {
-    id: "Qwen2.5-3B-Instruct-q4f16_1-MLC",
-    name: "Qwen2.5 3B", size: "2 GB", ram: "~3.5 GB", speed: "3–5",
-    category: "🧠 Умные",
-    langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, татарский, 29 языков",
-    quality: 5, tags: ["text", "rus"],
+    category: "🧠 Умные", quality: 4,
+    langs: ["eng"], langsLabel: "Английский",
+    tags: ["text"],
   },
   "phi35": {
     id: "Phi-3.5-mini-instruct-q4f16_1-MLC",
     name: "Phi-3.5 Mini (3.8B)", size: "2.2 GB", ram: "~4 GB", speed: "2–4",
-    category: "🧠 Умные",
-    langs: ["eng"], langsLabel: "Английский (рус плохо)",
-    quality: 5, tags: ["text", "reasoning"],
+    category: "🧠 Умные", quality: 5,
+    langs: ["eng"], langsLabel: "Английский (математика отличная)",
+    tags: ["text", "math-eng"],
   },
 };
 
@@ -911,16 +1029,56 @@ const MODELS = {
 // === ПРЕСЕТЫ ===
 // ============================================================
 const PRESETS = {
-  math: { icon: '🧮', name: 'Математика', sub: 'Уравнения, задачи', system: 'Ты учитель математики. Решай пошагово. Отвечай ТОЛЬКО на русском языке. Используй LaTeX для формул.', model: 'qwen15' },
-  physics: { icon: '⚛️', name: 'Физика', sub: 'Задачи', system: 'Ты учитель физики. Решай пошагово. Отвечай ТОЛЬКО на русском языке.', model: 'qwen15' },
-  chemistry: { icon: '🧪', name: 'Химия', sub: 'Реакции', system: 'Ты учитель химии. Отвечай ТОЛЬКО на русском языке.', model: 'qwen15' },
-  biology: { icon: '🧬', name: 'Биология', sub: 'Клетки', system: 'Ты учитель биологии. Отвечай ТОЛЬКО на русском языке.', model: 'qwen15' },
-  history: { icon: '📜', name: 'История', sub: 'Даты', system: 'Ты учитель истории. Отвечай ТОЛЬКО на русском языке.', model: 'qwen15' },
-  lang: { icon: '🌐', name: 'Языки', sub: 'Перевод', system: 'Ты преподаватель языков. Отвечай на языке запроса.', model: 'qwen15' },
-  code: { icon: '💻', name: 'Код', sub: 'Python', system: 'Ты программист. Пиши код с комментариями на русском.', model: 'qwen_coder15' },
-  teacher: { icon: '👨‍🏫', name: 'Учитель', sub: 'Наводящие', system: 'Ты учитель. НЕ давай готовый ответ. Задавай наводящие вопросы. Отвечай на русском.', model: 'qwen15' },
-  examiner: { icon: '📝', name: 'Экзамен', sub: 'Тесты', system: 'Ты экзаменатор. Отвечай на русском.', model: 'qwen15' },
-  summary: { icon: '📄', name: 'Конспект', sub: 'Сжатие', system: 'Делай конспект: заголовки, тезисы, формулы. На русском языке.', model: 'qwen15' },
+  math: {
+    icon: '🧮', name: 'Математика 8 кл.', sub: 'Уравнения, геометрия',
+    system: 'Ты учитель математики 8 класса. Решай пошагово, объясняй каждый шаг. Используй LaTeX для формул. Отвечай ТОЛЬКО на русском языке.',
+    model: 'qwen3b',
+  },
+  geometry: {
+    icon: '📏', name: 'Геометрия', sub: 'Пифагор, подобие',
+    system: 'Ты учитель геометрии. Используй теорему Пифагора, подобие треугольников. Рисуй словами, объясняй пошагово. Только русский.',
+    model: 'qwen3b',
+  },
+  rus: {
+    icon: '🇷🇺', name: 'Русский язык', sub: 'Орфография, пунктуация',
+    system: 'Ты учитель русского языка. Проверяй орфографию, пунктуацию, стиль. Объясняй правила. Отвечай ТОЛЬКО на русском.',
+    model: 'qwen15',
+  },
+  phys: {
+    icon: '⚛️', name: 'Физика', sub: 'Задачи 8 класса',
+    system: 'Ты учитель физики 8 класса. Указывай единицы измерения, проверяй размерность. LaTeX. Только русский.',
+    model: 'qwen3b',
+  },
+  chem: {
+    icon: '🧪', name: 'Химия', sub: 'Реакции, задачи',
+    system: 'Ты учитель химии. Балансируй уравнения, объясняй механизмы. Только русский.',
+    model: 'qwen15',
+  },
+  hist: {
+    icon: '📜', name: 'История', sub: 'Даты, события',
+    system: 'Ты учитель истории. Структурируй: причины, события, последствия. Даты и персоналии. Только русский.',
+    model: 'qwen15',
+  },
+  lang: {
+    icon: '🌐', name: 'Языки', sub: 'Перевод',
+    system: 'Ты преподаватель языков. Переводи точно, объясняй грамматику.',
+    model: 'qwen15',
+  },
+  teacher: {
+    icon: '👨‍🏫', name: 'Учитель', sub: 'Наводящие вопросы',
+    system: 'Ты учитель-наставник. НЕ давай готовый ответ. Задавай наводящие вопросы, веди ученика. Только русский.',
+    model: 'qwen15',
+  },
+  examiner: {
+    icon: '📝', name: 'Экзамен', sub: 'Тесты',
+    system: 'Ты экзаменатор. Задавай вопросы, оценивай, объясняй ошибки. Только русский.',
+    model: 'qwen15',
+  },
+  summary: {
+    icon: '📄', name: 'Конспект', sub: 'Сжатие',
+    system: 'Делай конспект: заголовки, тезисы, формулы. Только русский.',
+    model: 'qwen15',
+  },
 };
 
 // ============================================================
@@ -930,6 +1088,8 @@ let engine = null;
 let currentModelKey = localStorage.getItem('ai-model') || 'qwen15';
 let currentPreset = localStorage.getItem('ai-preset') || 'default';
 let autoMode = localStorage.getItem('ai-auto') !== '0';
+let pyMode = localStorage.getItem('ai-py') !== '0';
+let smartMode = localStorage.getItem('ai-smart') !== '0';
 let messages = [];
 let currentChatId = null;
 let chats = [];
@@ -946,7 +1106,11 @@ let isRecording = false;
 let autoScroll = true;
 let lastUserPrompt = null;
 
-let stats = { requests: 0, totalTokens: 0, totalTime: 0, ttfts: [], ocrCount: 0, ocrTime: 0, autoSwitches: 0 };
+let stats = {
+  requests: 0, totalTokens: 0, totalTime: 0, ttfts: [],
+  ocrCount: 0, ocrTime: 0, autoSwitches: 0,
+  pyRequests: 0, consensusWins: 0,
+};
 let sessionStats = { tokens: 0, start: 0, swaps: 0, files: 0, ocrChars: 0 };
 let pomodoro = { workMin: 25, breakMin: 5, timeLeft: 25 * 60, mode: 'work', running: false, interval: null };
 
@@ -961,35 +1125,38 @@ const progressBar = $('progress-bar');
 const statsEl = $('stats');
 
 // ============================================================
-// === НАСТРОЙКИ (обновлены для правильной работы) ===
+// === НАСТРОЙКИ ===
 // ============================================================
 const DEFAULT_SETTINGS = {
-  temperature: 0.3,           // ниже для стабильности
-  max_tokens: 400,
-  context_window_size: 1024,
+  temperature: 0.2,
+  max_tokens: 600,
+  context_window_size: 2048,
   prefill_chunk_size: 256,
   top_p: 0.9,
   kvCacheDtype: "q4f16_1",
   ocrLang: "rus+eng",
-  preprocess: 4,              // Ч/Б + резкость (было 1 — плохо)
+  preprocess: 4,
   autoMode: 1,
+  pyMode: 1,
+  smartMode: 1,
+  consistency: 3,
   tts: 0,
   theme: "dark",
-  answerLang: "rus",          // новое: язык ответа
+  answerLang: "rus",
 };
 
 let SETTINGS = loadSettings();
 
 function loadSettings() {
   try {
-    const raw = localStorage.getItem('ai-settings-v8');
+    const raw = localStorage.getItem('ai-settings-v10');
     if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
   } catch (e) {}
   return { ...DEFAULT_SETTINGS };
 }
 
 function saveSettings() {
-  try { localStorage.setItem('ai-settings-v8', JSON.stringify(SETTINGS)); } catch (e) {}
+  try { localStorage.setItem('ai-settings-v10', JSON.stringify(SETTINGS)); } catch (e) {}
 }
 
 function applySettings() {
@@ -999,18 +1166,19 @@ function applySettings() {
   SETTINGS.answerLang = $('s-lang').value;
   SETTINGS.ocrLang = $('s-ocr-lang').value;
   SETTINGS.preprocess = parseInt($('s-preprocess').value);
+  SETTINGS.consistency = parseInt($('s-consistency').value);
   SETTINGS.autoMode = parseInt($('s-auto').value);
   SETTINGS.tts = parseInt($('s-tts').value);
   autoMode = SETTINGS.autoMode === 1;
-  updateAutoBtn();
+  updateToolbar();
   saveSettings();
   addMessage('sys', '⚙️ Настройки сохранены');
   closeModal('modal-settings');
 }
 window.applySettings = applySettings;
 
-function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
 }
 
 // ============================================================
@@ -1044,6 +1212,23 @@ function addMessage(cls, text, opts) {
   return div;
 }
 
+function addStep(text) {
+  const div = document.createElement('div');
+  div.className = 'step';
+  div.innerHTML = text;
+  chatEl.appendChild(div);
+  chatEl.scrollTop = chatEl.scrollHeight;
+  return div;
+}
+
+function addConsensus(text) {
+  const div = document.createElement('div');
+  div.className = 'consensus';
+  div.innerHTML = text;
+  chatEl.appendChild(div);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+
 function addAutoCard(text) {
   const div = document.createElement('div');
   div.className = 'auto-card';
@@ -1075,43 +1260,38 @@ function autoResizeInput() {
   inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
 }
 
+function updateToolbar() {
+  const a = $('btn-auto');
+  if (autoMode) { a.classList.add('auto-on'); a.textContent = '🎯 Авто'; }
+  else { a.classList.remove('auto-on'); a.textContent = '🎯 Авто'; }
+
+  const p = $('btn-py');
+  if (pyMode) p.classList.add('py-on');
+  else p.classList.remove('py-on');
+
+  const s = $('btn-smart');
+  if (smartMode) s.classList.add('smart-on');
+  else s.classList.remove('smart-on');
+}
+
 // ============================================================
-// === SYSTEM PROMPT — жёсткое указание языка ===
+// === SYSTEM PROMPT ===
 // ============================================================
 function getSystemPrompt() {
   let langRule = '';
   if (SETTINGS.answerLang === 'rus') {
-    langRule = '\n\n⚠️ КРИТИЧНО: Отвечай ТОЛЬКО на русском языке. ' +
-               'Не используй китайский, английский или другие языки. ' +
-               'Только РУССКИЙ.';
+    langRule = '\n\n⚠️ КРИТИЧНО: Отвечай ТОЛЬКО на русском языке. Никаких других языков.';
   } else if (SETTINGS.answerLang === 'eng') {
-    langRule = '\n\n⚠️ Answer ONLY in English. Do not use other languages.';
-  } else if (SETTINGS.answerLang === 'tat') {
-    langRule = '\n\n⚠️ Отвечай на татарском языке.';
+    langRule = '\n\n⚠️ Answer ONLY in English.';
   }
+
+  const mathRule = '\n\n📐 МАТЕМАТИКА: Решай пошагово. ' +
+    'Каждый шаг нумеруй. В конце выдели ОТВЕТ. Используй LaTeX для формул.';
 
   if (currentPreset !== 'default' && PRESETS[currentPreset]) {
-    return PRESETS[currentPreset].system + langRule;
+    return PRESETS[currentPreset].system + langRule + mathRule;
   }
-  const info = MODELS[currentModelKey];
-  if (info && info.tags && info.tags.includes('math')) {
-    return 'Ты учитель математики. Решай пошагово.' + langRule;
-  }
-  if (info && info.tags && info.tags.includes('code')) {
-    return 'Ты программист. Пиши код с комментариями.' + langRule;
-  }
-  return 'Ты помощник для учёбы. Отвечай кратко и по делу.' + langRule;
-}
-
-function updateAutoBtn() {
-  const b = $('btn-auto');
-  if (autoMode) {
-    b.classList.add('auto-on');
-    b.textContent = '🎯 Авто ✓';
-  } else {
-    b.classList.remove('auto-on');
-    b.textContent = '🎯 Авто';
-  }
+  return 'Ты помощник для учёбы, 8 класс. Отвечай ясно, по делу.' + langRule + mathRule;
 }
 
 // ============================================================
@@ -1148,42 +1328,7 @@ async function renderMarkdown(text) {
 }
 
 // ============================================================
-// === АВТО-ВЫБОР МОДЕЛИ (только по правильным категориям) ===
-// ============================================================
-function detectBestModel(text) {
-  if (!text || text.length < 2) return null;
-  const t = text.trim();
-
-  // Математика → только Qwen2.5 1.5B (НЕ Math — она ломается на русском)
-  if (/[√∑∫π∞±≤≥≠]|\^|[²³¹⁰]|\b\d+\s*[+\-*/×÷]\s*\d+|\b(уравнени|дискриминант|производн|интеграл|реши|вычисли)\b/i.test(t)) {
-    return { model: 'qwen15', reason: 'математика (универсальная модель)' };
-  }
-  // Программирование
-  if (/\b(код|программ|python|javascript|функци|алгоритм)\b/i.test(t)) {
-    return { model: 'qwen_coder15', reason: 'программирование' };
-  }
-  // Всё остальное → базовый Qwen 1.5B
-  if (t.length < 30) {
-    return { model: 'qwen05', reason: 'короткий вопрос' };
-  }
-  return { model: 'qwen15', reason: 'общий вопрос' };
-}
-
-function pickByRam(preferred) {
-  const ram = navigator.deviceMemory || 4;
-  const info = MODELS[preferred];
-  if (!info) return preferred;
-  const r = parseFloat(info.ram.replace('~', '').replace(' GB', '').replace(' MB', ''));
-  const isMb = info.ram.includes('MB');
-  const ramGb = isMb ? r / 1024 : r;
-  if (ram >= 8) return preferred;
-  if (ram >= 6 && ramGb > 4) return 'qwen15';
-  if (ram >= 4 && ramGb > 2) return 'qwen05';
-  return preferred;
-}
-
-// ============================================================
-// === ПАРСЕР ФОРМУЛ ===
+// === ФОРМУЛЫ ===
 // ============================================================
 function detectFormulas(text) {
   const out = [];
@@ -1214,27 +1359,23 @@ function textToLatex(text) {
 }
 
 // ============================================================
-// === ОБРАБОТКА ФОТО — улучшенная ===
+// === ОБРАБОТКА ФОТО ===
 // ============================================================
 function preprocessImage(dataUrl, level) {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      // Увеличиваем для лучшего OCR
       const maxDim = 2400;
       let w = img.width, h = img.height;
       const scaleUp = Math.max(1, Math.min(2, maxDim / Math.max(w, h)));
-      w = Math.round(w * scaleUp);
-      h = Math.round(h * scaleUp);
+      w = Math.round(w * scaleUp); h = Math.round(h * scaleUp);
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
       ctx.drawImage(img, 0, 0, w, h);
 
       if (level > 0) {
         const d = ctx.getImageData(0, 0, w, h).data;
-
-        // 1: контраст
         if (level >= 1) {
           const f = 1.5;
           for (let i = 0; i < d.length; i += 4) {
@@ -1243,8 +1384,6 @@ function preprocessImage(dataUrl, level) {
             d[i+2] = Math.min(255, Math.max(0, (d[i+2] - 128) * f + 128));
           }
         }
-
-        // 2, 4, 6: Ч/Б адаптивный
         if (level === 2 || level === 4 || level === 6) {
           let sum = 0;
           for (let i = 0; i < d.length; i += 4) sum += 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
@@ -1256,8 +1395,6 @@ function preprocessImage(dataUrl, level) {
             d[i] = d[i+1] = d[i+2] = v;
           }
         }
-
-        // 3, 4, 6: резкость
         if (level === 3 || level === 4 || level === 6) {
           const cp = new Uint8ClampedArray(d);
           for (let y = 1; y < h - 1; y++) {
@@ -1268,8 +1405,6 @@ function preprocessImage(dataUrl, level) {
             }
           }
         }
-
-        // 5, 6: удаление теней
         if (level === 5 || level === 6) {
           for (let i = 0; i < d.length; i += 4) {
             const g = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
@@ -1277,7 +1412,6 @@ function preprocessImage(dataUrl, level) {
             else if (g < 60) d[i] = d[i+1] = d[i+2] = 0;
           }
         }
-
         ctx.putImageData(new ImageData(d, w, h), 0, 0);
       }
       resolve(canvas.toDataURL('image/jpeg', 0.92));
@@ -1290,7 +1424,7 @@ function preprocessImage(dataUrl, level) {
 // ============================================================
 // === INDEXEDDB ===
 // ============================================================
-const DB_NAME = 'ai-db-v8';
+const DB_NAME = 'ai-db-v10';
 const DB_VERSION = 1;
 
 function openDB() {
@@ -1516,12 +1650,10 @@ async function renderModelList() {
     ${ms.map(([k, m]) => {
       const isC = cached.has(k);
       const isS = k === currentModelKey;
-      // Бейджи языков
       const langBadges = (m.langs || []).map(l => {
-        const cls = l === 'rus' ? 'rus' : l === 'math' ? 'math' : l === 'code' ? 'code' : l === 'multi' ? 'multi' : '';
+        const cls = l === 'rus' ? 'rus' : l === 'math' ? 'math' : l === 'code' ? 'code' : l === 'multi' ? 'multi' : l === 'reasoning' ? 'reasoning' : '';
         return `<span class="lang-badge ${cls}">${l.toUpperCase()}</span>`;
       }).join('');
-      // Предупреждение
       const warnHtml = m.warn ? `<div style="font-size:11px;color:var(--warn);margin-top:6px;padding:6px 8px;background:rgba(210,153,34,0.13);border-radius:6px;">⚠️ ${escapeHtml(m.warn)}</div>` : '';
       return `
         <div class="model-opt ${isS ? 'selected' : ''} ${isC ? 'cached' : ''}" onclick="switchModel('${k}')">
@@ -1544,9 +1676,9 @@ async function renderModelList() {
 function autoSelectBest() {
   const ram = navigator.deviceMemory || 4;
   let p = 'qwen15';
-  if (ram >= 8) p = 'qwen15';
+  if (ram >= 12) p = 'qwen3b';
+  else if (ram >= 8) p = 'qwen15';
   else if (ram >= 6) p = 'qwen15';
-  else if (ram >= 4) p = 'qwen15';
   else p = 'qwen05';
   if (confirm(`RAM: ${ram} GB. Рекомендую ${MODELS[p].name}. Использовать?`)) {
     if (currentModelKey !== p) switchModel(p);
@@ -1580,11 +1712,7 @@ async function switchModel(key, reason) {
   clearChat();
   closeModal('modal-models');
 
-  // Предупреждение для Math модели
-  if (MODELS[key].warn) {
-    addMessage('warn', '⚠️ ' + MODELS[key].warn);
-  }
-
+  if (MODELS[key].warn) addMessage('warn', '⚠️ ' + MODELS[key].warn);
   if (reason) addAutoCard(`<b>🎯 ${reason}</b><br>Модель: <b>${MODELS[key].name}</b>`);
 
   await initEngine();
@@ -1592,7 +1720,7 @@ async function switchModel(key, reason) {
 window.switchModel = switchModel;
 
 // ============================================================
-// === ИНИЦИАЛИЗАЦИЯ ===
+// === ИНИЦИАЛИЗАЦИЯ МОДЕЛИ ===
 // ============================================================
 async function initEngine() {
   if (engine) return;
@@ -1668,8 +1796,6 @@ function checkThermal() {
 function renderOCRCard(o) {
   const card = document.createElement('div');
   card.className = 'ocr-card';
-
-  // Проверка качества OCR
   const hasText = o.ocrText && o.ocrText.length > 5;
   const isGarbage = o.ocrText && o.ocrText.length < 30 && o.confidence < 60;
   const badgeCls = o.isFile ? 'file' : (o.formulas.length > 0 ? 'math' : (isGarbage ? 'warn' : ''));
@@ -1705,7 +1831,6 @@ function renderOCRCard(o) {
     const confColor = o.confidence < 60 ? 'var(--warn)' : 'var(--text2)';
     h += `<div style="font-size:11px;color:${confColor};margin-top:8px;">
       ⏱ ${fmtNum(o.ocrTime, 2)}с · уверенность ${conf}%
-      ${o.confidence < 60 ? ' · попробуй другое фото' : ''}
     </div>`;
   }
   card.innerHTML = h;
@@ -1737,7 +1862,6 @@ function renderOCRCard(o) {
 // ============================================================
 async function processImage(imageData, filename) {
   if (!engine) { addMessage('warn', 'Модель грузится.'); return; }
-
   addMessage('user', `📷 ${filename || 'Изображение'}`);
 
   const card = document.createElement('div');
@@ -1774,53 +1898,33 @@ async function processImage(imageData, filename) {
 
     card.remove();
     renderOCRCard({
-      imageData: processed,
-      filename: filename || 'Снимок',
-      ocrText: result.text,
-      formulas: formulas,
-      ocrTime: dt,
-      confidence: result.confidence,
+      imageData: processed, filename: filename || 'Снимок',
+      ocrText: result.text, formulas: formulas,
+      ocrTime: dt, confidence: result.confidence,
     });
 
-    addMessage('stat',
-      `OCR: ${fmtNum(dt, 2)}с · ${result.text.length} симв · ` +
-      `${formulas.length} формул · ${fmtNum(result.confidence, 0)}%`);
+    addMessage('stat', `OCR: ${fmtNum(dt, 2)}с · ${result.text.length} симв · ${formulas.length} формул`);
 
     showStatus('Готов ✅', 'ready');
 
-    // Проверка качества OCR
     if (!result.text || result.text.length < 10) {
-      addMessage('warn', '⚠️ Не удалось распознать текст. Попробуй:\n' +
-        '• Другое освещение\n' +
-        '• Ближе к тексту\n' +
-        '• Другую обработку в настройках');
+      addMessage('warn', '⚠️ Не удалось распознать текст. Попробуй другое фото.');
       return;
     }
 
-    if (result.confidence < 50) {
-      addMessage('warn', '⚠️ Низкая уверенность OCR (' + fmtNum(result.confidence, 0) + '%). ' +
-        'Результат может быть неточным.');
-    }
-
-    // Авто-выбор модели
     if (autoMode) {
       const d = detectBestModel(result.text);
-      if (d && d.model !== currentModelKey) {
+      if (d && d.model !== currentModelKey && d.model !== 'qwen_math15') {
         const r = pickByRam(d.model);
-        if (r !== currentModelKey) {
-          await switchModel(r, 'по OCR: ' + d.reason);
-        }
+        if (r !== currentModelKey) await switchModel(r, 'по OCR: ' + d.reason);
       }
     }
 
-    // Отправка в LLM — только если OCR не мусор
     if (result.text.length > 15) {
       const prompt = formulas.length > 0
-        ? `Распознанный текст:\n\n${result.text}\n\nНайдено формул: ${formulas.length}.\n\nПроанализируй и объясни.`
-        : `Распознанный текст:\n\n${result.text}\n\nПроанализируй и ответь.`;
+        ? `Распознанный текст:\n\n${result.text}\n\nФормул: ${formulas.length}.\n\nПроанализируй и реши.`
+        : `Распознанный текст:\n\n${result.text}\n\nПроанализируй.`;
       await askLLM(prompt);
-    } else {
-      addMessage('sys', 'Текст слишком короткий — не отправляю в ИИ.');
     }
   } catch (e) {
     console.error(e);
@@ -1840,42 +1944,19 @@ async function processFile(file) {
 
   if (type.startsWith('image/') || ['jpg','jpeg','png','webp','bmp','gif'].includes(ext)) {
     const d = await readFileAsDataURL(file);
-    await processImage(d, name);
-    return;
+    await processImage(d, name); return;
   }
   if (type === 'application/pdf' || ext === 'pdf') { await processPDF(file, name); return; }
   if (type.indexOf('word') >= 0 || ext === 'docx') { await processDocx(file, name); return; }
   if (type.startsWith('text/') || ['txt','md','markdown','csv','json','log'].includes(ext)) {
-    await processText(file, name);
-    return;
+    await processText(file, name); return;
   }
   addMessage('error', `Формат .${ext} не поддержан.`);
 }
 
-function readFileAsDataURL(f) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = e => res(e.target.result);
-    r.onerror = () => rej(new Error('err'));
-    r.readAsDataURL(f);
-  });
-}
-function readFileAsText(f) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = e => res(e.target.result);
-    r.onerror = () => rej(new Error('err'));
-    r.readAsText(f);
-  });
-}
-function readFileAsArrayBuffer(f) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = e => res(e.target.result);
-    r.onerror = () => rej(new Error('err'));
-    r.readAsArrayBuffer(f);
-  });
-}
+function readFileAsDataURL(f) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('err')); r.readAsDataURL(f); }); }
+function readFileAsText(f) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('err')); r.readAsText(f); }); }
+function readFileAsArrayBuffer(f) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('err')); r.readAsArrayBuffer(f); }); }
 
 async function processText(file, name) {
   addMessage('user', `📄 ${name}`);
@@ -1889,9 +1970,7 @@ async function processText(file, name) {
       isFile: true, fileType: 'TXT',
     });
     addMessage('stat', `📄 ${text.length} символов`);
-    if (text.length > 20) {
-      await askLLM(`Файл ${name}:\n\n${text.slice(0, 5000)}\n\nПроанализируй.`);
-    }
+    if (text.length > 20) await askLLM(`Файл ${name}:\n\n${text.slice(0, 5000)}\n\nПроанализируй.`);
   } catch (e) { addMessage('error', 'Ошибка: ' + e.message); }
 }
 
@@ -1953,9 +2032,7 @@ async function processPDF(file, name) {
       });
       lastOCRText = ocr.text;
       addMessage('stat', `📕 PDF-scan OCR ${fmtNum(dt, 1)}с`);
-      if (ocr.text.length > 15) {
-        await askLLM(`Скан PDF ${name}:\n\n${ocr.text}\n\nПроанализируй.`);
-      }
+      if (ocr.text.length > 15) await askLLM(`Скан PDF ${name}:\n\n${ocr.text}\n\nПроанализируй.`);
     } else {
       renderOCRCard({
         imageData: imgs[0] || null, filename: name,
@@ -1977,22 +2054,72 @@ async function processPDF(file, name) {
 // === КОМАНДЫ ===
 // ============================================================
 function parseCommand(text) {
-  const m = text.match(/^\/([a-z]+)\s*(.*)/i);
+  const m = text.match(/^\/([a-z]+)\s*([\s\S]*)/i);
   if (!m) return null;
-  const c = m[1].toLowerCase(), r = m[2] || '';
-  if (c === 'teacher') return { system: 'Ты учитель. НЕ давай готовый ответ. Задавай наводящие вопросы. Отвечай на русском.', prompt: r, label: '👨‍🏫 Учитель' };
-  if (c === 'check') return { system: 'Проверь решение, найди ошибки. Отвечай на русском.', prompt: r, label: '🔎 Проверка' };
-  if (c === 'explain') return { system: 'Объясни подробно с примерами. Отвечай на русском.', prompt: r, label: '🔬 Подробно' };
-  if (c === 'short') return { system: 'Отвечай кратко. На русском.', prompt: r, label: '⚡ Кратко' };
+  const c = m[1].toLowerCase();
+  const r = m[2] || '';
+  if (c === 'teacher') return { system: 'Ты учитель. НЕ давай готовый ответ. Задавай наводящие вопросы. Только русский.', prompt: r || 'Помоги', label: '👨‍🏫 Учитель' };
+  if (c === 'check') return { system: 'Проверь решение. Найди ошибки. Только русский.', prompt: r || 'Проверь', label: '✅ Проверка' };
+  if (c === 'explain') return { system: 'Объясни подробно с примерами. Только русский.', prompt: r, label: '📖 Подробно' };
+  if (c === 'short') return { system: 'Отвечай кратко. Русский.', prompt: r, label: '⚡ Кратко' };
+  if (c === 'solve' || c === 'equation' || c === 'geometry' || c === 'steps') {
+    return { system: getSystemPrompt(), prompt: r || 'Реши', label: '🧮 Математика', forceMath: true };
+  }
   return null;
 }
 
 // ============================================================
-// === ЗАПРОС К LLM ===
+// === РОУТЕР ===
 // ============================================================
-async function askLLM(prompt, overrideSystem) {
-  if (!engine) { addMessage('warn', 'Модель не загружена. Подожди.'); return; }
+function routeTask(text) {
+  if (looksLikeMath(text)) return 'MATH';
+  if (/\b(код|программ|python|javascript|функци|алгоритм)\b/i.test(text)) return 'CODE';
+  if (/\b(переведи|перевод)\b/i.test(text)) return 'TRANSLATE';
+  return 'CHAT';
+}
+
+// ============================================================
+// === АВТО-ВЫБОР МОДЕЛИ ===
+// ============================================================
+function detectBestModel(text) {
+  if (!text || text.length < 2) return null;
+  const t = text.trim();
+
+  if (looksLikeMath(t)) {
+    // НЕ использовать Qwen2.5 Math — она ломается на русском
+    return { model: 'qwen15', reason: 'математика (Qwen 1.5B)' };
+  }
+  if (/\b(код|программ|python|javascript|функци|алгоритм)\b/i.test(t)) {
+    return { model: 'qwen_coder15', reason: 'программирование' };
+  }
+  if (t.length < 30) return { model: 'qwen05', reason: 'короткий вопрос' };
+  return { model: 'qwen15', reason: 'общий вопрос' };
+}
+
+function pickByRam(preferred) {
+  const ram = navigator.deviceMemory || 4;
+  const info = MODELS[preferred];
+  if (!info) return preferred;
+  const r = parseFloat(info.ram.replace('~', '').replace(' GB', '').replace(' MB', ''));
+  const isMb = info.ram.includes('MB');
+  const ramGb = isMb ? r / 1024 : r;
+  if (ram >= 8) return preferred;
+  if (ram >= 6 && ramGb > 4) return 'qwen15';
+  if (ram >= 4 && ramGb > 2) return 'qwen05';
+  return preferred;
+}
+
+// ============================================================
+// === ОСНОВНОЙ ЗАПРОС К LLM ===
+// ============================================================
+async function askLLM(prompt, overrideSystem, opts) {
+  if (!engine) { addMessage('warn', 'Модель не загружена.'); return; }
   if (isGenerating) { addMessage('warn', 'Подожди ответа.'); return; }
+
+  opts = opts || {};
+  const isMath = opts.forceMath || looksLikeMath(prompt);
+  const useConsensus = smartMode && isMath && SETTINGS.consistency > 1;
+  const useSymPy = pyMode && sympyReady && isMath;
 
   if (messages.length > 14) {
     messages.splice(1, messages.length - 11);
@@ -2002,74 +2129,109 @@ async function askLLM(prompt, overrideSystem) {
   let sys = overrideSystem || getSystemPrompt();
   if (messages[0] && messages[0].role === 'system') messages[0].content = sys;
 
-  messages.push({ role: 'user', content: prompt });
-  lastUserPrompt = prompt;
+  // Символьные вычисления через SymPy
+  let sympyResult = null;
+  if (useSymPy) {
+    const equation = extractEquation(prompt);
+    if (equation) {
+      showStatus('🐍 SymPy считает...', 'loading');
+      try {
+        // Пытаемся решить как уравнение
+        const cleaned = equation.replace(/[^\dx+\-*/^=().,a-z ]/gi, '');
+        let code = '';
+        if (cleaned.includes('=')) {
+          const [lhs, rhs] = cleaned.split('=');
+          code = `solve(Eq(${lhs}, ${rhs}), x)`;
+        } else if (cleaned.includes('x') || cleaned.includes('y')) {
+          code = `solve(${cleaned}, x)`;
+        } else {
+          code = `simplify(${cleaned})`;
+        }
+        sympyResult = await sympyEval(code);
+        stats.pyRequests++;
+        addStep(`<b>🐍 SymPy:</b> ${escapeHtml(equation)} → <code>${escapeHtml(sympyResult)}</code>`);
+      } catch (e) {
+        console.warn('SymPy failed:', e.message);
+      }
+    }
+  }
 
-  inputEl.disabled = true;
-  sendBtn.disabled = true;
-  stopBtn.classList.add('show');
-  isGenerating = true;
+  // Self-consistency: 3 запроса
+  const nRuns = useConsensus ? SETTINGS.consistency : 1;
+  const results = [];
 
-  const botDiv = addMessage('bot', '');
-  botDiv.innerHTML = '<span class="skeleton"></span>';
+  if (nRuns > 1) {
+    addStep(`<b>🎯 Self-consistency:</b> делаю ${nRuns} независимых решений для точности...`);
+  }
 
-  let full = '', tokens = 0;
-  const t0 = nowSec();
-  let tFirst = null;
-  abortController = new AbortController();
+  for (let run = 0; run < nRuns; run++) {
+    if (abortController && abortController.signal.aborted) break;
 
-  try {
-    const chunks = await engine.chat.completions.create({
-      messages,
-      temperature: SETTINGS.temperature,
-      top_p: SETTINGS.top_p,
-      max_tokens: SETTINGS.max_tokens,
-      stream: true,
-    });
+    inputEl.disabled = true;
+    sendBtn.disabled = true;
+    stopBtn.classList.add('show');
+    isGenerating = true;
 
-    for await (const c of chunks) {
-      if (abortController && abortController.signal.aborted) break;
-      const d = c.choices[0] && c.choices[0].delta && c.choices[0].delta.content || '';
-      if (d && tFirst === null) tFirst = nowSec();
-      full += d;
-      tokens++;
-      botDiv.textContent = full;
-      if (autoScroll) chatEl.scrollTop = chatEl.scrollHeight;
+    if (run === 0) {
+      const botDiv = addMessage('bot', '');
+      botDiv.innerHTML = '<span class="skeleton"></span>';
+      results.push({ div: botDiv, text: '', tokens: 0, t0: nowSec(), tFirst: null });
+    } else {
+      // Дополнительные варианты — в свёрнутом виде
+      const botDiv = addMessage('bot', '');
+      botDiv.style.opacity = '0.6';
+      botDiv.style.fontSize = '13px';
+      botDiv.innerHTML = `<div style="color:var(--text2);font-size:11px;margin-bottom:6px;">Вариант ${run + 1}:</div><span class="skeleton"></span>`;
+      results.push({ div: botDiv, text: '', tokens: 0, t0: nowSec(), tFirst: null });
     }
 
-    const total = nowSec() - t0;
-    const ttft = tFirst ? (tFirst - t0) : 0;
-    const tps = tokens / Math.max(total, 0.001);
+    const cur = results[results.length - 1];
+    let sysForRun = sys;
+    if (sympyResult) {
+      sysForRun += `\n\n🐍 SymPy уже посчитал: ${sympyResult}. Используй этот ответ.`;
+    }
+    if (run > 0) {
+      sysForRun += '\n\nДай независимое решение. Не повторяй предыдущий ответ.';
+    }
 
-    stats.requests++;
-    stats.totalTokens += tokens;
-    stats.totalTime += total;
-    stats.ttfts.push(ttft);
-    sessionStats.tokens += tokens;
+    const runMessages = [
+      { role: 'system', content: sysForRun },
+      ...messages.slice(1).slice(-6),
+      { role: 'user', content: prompt },
+    ];
+
+    abortController = new AbortController();
 
     try {
-      const h = await renderMarkdown(full);
-      botDiv.innerHTML = h;
-    } catch (e) { botDiv.textContent = full; }
+      const chunks = await engine.chat.completions.create({
+        messages: runMessages,
+        temperature: run === 0 ? SETTINGS.temperature : SETTINGS.temperature + 0.2,
+        top_p: SETTINGS.top_p,
+        max_tokens: SETTINGS.max_tokens,
+        stream: true,
+      });
 
-    const ac = document.createElement('div');
-    ac.className = 'msg-actions';
-    ac.innerHTML = `<button onclick="copyMsg(this)">📋 Копировать</button>
-                    <button onclick="speakMsg(this)">🔊 Озвучить</button>
-                    <button onclick="regenMsg(this)">🔄 Заново</button>`;
-    botDiv.appendChild(ac);
+      for await (const c of chunks) {
+        if (abortController && abortController.signal.aborted) break;
+        const d = c.choices[0] && c.choices[0].delta && c.choices[0].delta.content || '';
+        if (d && cur.tFirst === null) cur.tFirst = nowSec();
+        cur.text += d;
+        cur.tokens++;
+        cur.div.textContent = cur.text;
+        if (autoScroll) chatEl.scrollTop = chatEl.scrollHeight;
+      }
+    } catch (e) {
+      if (e.name !== 'AbortError') {
+        cur.div.textContent = 'Ошибка: ' + e.message;
+      }
+    }
 
-    let v = tps < 3 ? ' ❌' : tps < 6 ? ' ⚠️' : tps < 10 ? ' ✅' : ' 🚀';
-    addMessage('stat', `${tokens} ток · ${fmtNum(tps)} т/с · TTFT ${fmtNum(ttft, 2)}с${v}`);
-    showStats(`<b>${fmtNum(tps)}</b> т/с · TTFT ${fmtNum(ttft, 2)}с · ${tokens} ток`);
-
-    messages.push({ role: 'assistant', content: full });
-    await saveCurrentChat();
-
-    if (SETTINGS.tts === 1 && 'speechSynthesis' in window) speakText(full);
-  } catch (e) {
-    if (e.name === 'AbortError') botDiv.textContent = full + '\n\n[прервано]';
-    else botDiv.textContent = 'Ошибка: ' + e.message;
+    // Рендер markdown
+    try {
+      const html = await renderMarkdown(cur.text);
+      if (run === 0) cur.div.innerHTML = html;
+      else cur.div.innerHTML = `<div style="color:var(--text2);font-size:11px;margin-bottom:6px;">Вариант ${run + 1}:</div>` + html;
+    } catch (e) {}
   }
 
   abortController = null;
@@ -2078,6 +2240,79 @@ async function askLLM(prompt, overrideSystem) {
   sendBtn.disabled = false;
   stopBtn.classList.remove('show');
   inputEl.focus();
+
+  // Голосование: выбираем самый похожий
+  let finalText = results[0].text;
+  if (nRuns > 1 && results.length > 1) {
+    const votes = results.map(r => ({ text: r.text, votes: 0 }));
+    for (const a of votes) {
+      for (const b of votes) {
+        if (a !== b && similarity(a.text, b.text) > 0.6) a.votes++;
+      }
+    }
+    votes.sort((a, b) => b.votes - a.votes);
+    if (votes[0].votes > 0) {
+      finalText = votes[0].text;
+      stats.consensusWins++;
+      addConsensus(`🎯 <b>Self-consistency:</b> выбрано решение с ${votes[0].votes + 1} совпадениями из ${nRuns}`);
+
+      // Показываем финальный ответ ярко
+      const finalDiv = addMessage('bot', '');
+      const html = await renderMarkdown(finalText);
+      finalDiv.innerHTML = `<div style="color:var(--ok);font-size:11px;margin-bottom:6px;">✅ Консенсусный ответ:</div>` + html;
+
+      const ac = document.createElement('div');
+      ac.className = 'msg-actions';
+      ac.innerHTML = `<button onclick="copyMsg(this)">📋 Копировать</button>
+                      <button onclick="speakMsg(this)">🔊 Озвучить</button>
+                      <button onclick="regenMsg(this)">🔄 Заново</button>`;
+      finalDiv.appendChild(ac);
+    }
+  } else {
+    // Стандартный рендер
+    const div = results[0].div;
+    const ac = document.createElement('div');
+    ac.className = 'msg-actions';
+    ac.innerHTML = `<button onclick="copyMsg(this)">📋 Копировать</button>
+                    <button onclick="speakMsg(this)">🔊 Озвучить</button>
+                    <button onclick="regenMsg(this)">🔄 Заново</button>`;
+    div.appendChild(ac);
+  }
+
+  // Статистика
+  const totalTokens = results.reduce((s, r) => s + r.tokens, 0);
+  const totalTime = results.reduce((s, r) => s + (nowSec() - r.t0), 0);
+  const tps = totalTokens / Math.max(totalTime, 0.001);
+
+  stats.requests++;
+  stats.totalTokens += totalTokens;
+  stats.totalTime += totalTime;
+  sessionStats.tokens += totalTokens;
+
+  const tpsStr = fmtNum(tps) + ' т/с';
+  const v = tps < 3 ? ' ❌' : tps < 6 ? ' ⚠️' : tps < 10 ? ' ✅' : ' 🚀';
+  const finalStat = document.createElement('div');
+  finalStat.className = 'stat';
+  finalStat.textContent = `${totalTokens} ток · ${tpsStr} · ${nRuns > 1 ? nRuns + ' прогонов · ' : ''}${v}`;
+  chatEl.appendChild(finalStat);
+
+  showStats(`<b>${tpsStr}</b> · ${totalTokens} ток ${v}`);
+
+  messages.push({ role: 'user', content: prompt });
+  messages.push({ role: 'assistant', content: finalText });
+  lastUserPrompt = prompt;
+  await saveCurrentChat();
+
+  if (SETTINGS.tts === 1 && 'speechSynthesis' in window) speakText(finalText);
+}
+
+function similarity(a, b) {
+  if (!a || !b) return 0;
+  const wa = new Set(a.toLowerCase().split(/\s+/).filter(w => w.length > 3));
+  const wb = new Set(b.toLowerCase().split(/\s+/).filter(w => w.length > 3));
+  let inter = 0;
+  for (const w of wa) if (wb.has(w)) inter++;
+  return (2 * inter) / (wa.size + wb.size);
 }
 
 // ============================================================
@@ -2097,32 +2332,36 @@ async function send() {
   if (cmd) {
     addMessage('user', text);
     addMessage('sys', cmd.label);
-    await askLLM(cmd.prompt || 'Продолжай', cmd.system);
+    await askLLM(cmd.prompt || 'Продолжай', cmd.system, { forceMath: cmd.forceMath });
     return;
   }
 
-  // Авто-выбор: НЕ переключаем на Math модель (ломается на русском)
-  if (autoMode) {
-    const d = detectBestModel(text);
-    if (d && d.model !== currentModelKey && d.model !== 'qwen_math15') {
-      const r = pickByRam(d.model);
-      if (r !== currentModelKey) {
-        addMessage('user', text);
-        await switchModel(r, d.reason);
-        let p = text;
-        if (lastOCRText && text.length < 200) p = `Ранее распознано:\n${lastOCRText.slice(0, 3000)}\n\nЗапрос: ${text}`;
-        await askLLM(p);
-        return;
-      }
-    }
+  // Роутер
+  const route = routeTask(text);
+
+  if (autoMode && route === 'CODE' && currentModelKey !== 'qwen_coder15') {
+    addMessage('user', text);
+    await switchModel('qwen_coder15', 'программирование');
+    await askLLM(text);
+    return;
+  }
+
+  if (autoMode && route === 'MATH' && currentModelKey === 'qwen_math15') {
+    // Не отправляем математику в Math-модель (она ломается на русском)
+    addMessage('user', text);
+    await switchModel('qwen15', 'математика (переключение с Math)');
+    await askLLM(text, null, { forceMath: true });
+    return;
   }
 
   addMessage('user', text);
+
   let p = text;
   if (lastOCRText && text.length < 200) {
     p = `Ранее распознанный текст:\n${lastOCRText.slice(0, 3000)}\n\nЗапрос: ${text}`;
   }
-  await askLLM(p);
+
+  await askLLM(p, null, { forceMath: route === 'MATH' });
 }
 
 function stopGeneration() {
@@ -2130,7 +2369,7 @@ function stopGeneration() {
 }
 
 // ============================================================
-// === ДЕЙСТВИЯ С СООБЩЕНИЯМИ ===
+// === ДЕЙСТВИЯ ===
 // ============================================================
 function copyMsg(btn) {
   const m = btn.closest('.msg');
@@ -2163,7 +2402,6 @@ async function regenMsg(btn) {
   if (!lastUserPrompt) { alert('Нет вопроса.'); return; }
   const m = btn.closest('.msg');
   if (m) m.remove();
-  if (messages.length >= 2) messages.splice(-2, 2);
   await askLLM(lastUserPrompt);
 }
 window.regenMsg = regenMsg;
@@ -2198,7 +2436,10 @@ function toggleMic() {
     if (!recognition) { alert('Голосовой ввод не поддерживается.'); return; }
   }
   if (isRecording) { recognition.stop(); isRecording = false; $('btn-mic').classList.remove('rec'); }
-  else { try { recognition.start(); isRecording = true; $('btn-mic').classList.add('rec'); } catch (e) { alert('Ошибка: ' + e.message); } }
+  else {
+    try { recognition.start(); isRecording = true; $('btn-mic').classList.add('rec'); }
+    catch (e) { alert('Ошибка: ' + e.message); }
+  }
 }
 
 // ============================================================
@@ -2206,28 +2447,28 @@ function toggleMic() {
 // ============================================================
 function renderStats() {
   const avg = stats.totalTime > 0 ? stats.totalTokens / stats.totalTime : 0;
-  const avgT = stats.ttfts.length > 0 ? stats.ttfts.reduce((a, b) => a + b, 0) / stats.ttfts.length : 0;
   const mem = performance.memory ? (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + ' MB' : '?';
   $('stats-content').innerHTML = `
     <p><b>Модель:</b> ${escapeHtml(MODELS[currentModelKey].name)}</p>
     <p><b>Языки:</b> ${escapeHtml(MODELS[currentModelKey].langsLabel)}</p>
     <p><b>Авто-режим:</b> ${autoMode ? '✅' : '❌'}</p>
+    <p><b>SymPy:</b> ${sympyReady ? '✅ активен' : '❌ не загружен'}</p>
+    <p><b>Умный режим:</b> ${smartMode ? '✅' : '❌'}</p>
     <p><b>Запросов:</b> ${stats.requests}</p>
     <p><b>Токенов:</b> ${stats.totalTokens}</p>
     <p><b>Средняя скорость:</b> ${fmtNum(avg, 2)} т/с</p>
-    <p><b>Средний TTFT:</b> ${fmtNum(avgT, 2)} с</p>
     <p><b>JS heap:</b> ${mem}</p>
     <hr style="border:none;border-top:1px solid var(--bg3);margin:8px 0;">
+    <p><b>🐍 SymPy-вычислений:</b> ${stats.pyRequests}</p>
+    <p><b>🎯 Консенсусов:</b> ${stats.consensusWins}</p>
     <p><b>OCR-запросов:</b> ${stats.ocrCount}</p>
     <p><b>OCR-времени:</b> ${fmtNum(stats.ocrTime, 1)} с</p>
-    <p><b>Символов распознано:</b> ${sessionStats.ocrChars}</p>
-    <p><b>Файлов:</b> ${sessionStats.files}</p>
     <p><b>Авто-переключений:</b> ${stats.autoSwitches}</p>
     <p><b>Сессия:</b> ${Math.floor(nowSec() - sessionStats.start)}с</p>
   `;
 }
 function resetStats() {
-  stats = { requests: 0, totalTokens: 0, totalTime: 0, ttfts: [], ocrCount: 0, ocrTime: 0, autoSwitches: 0 };
+  stats = { requests: 0, totalTokens: 0, totalTime: 0, ttfts: [], ocrCount: 0, ocrTime: 0, autoSwitches: 0, pyRequests: 0, consensusWins: 0 };
   sessionStats = { tokens: 0, start: nowSec(), swaps: 0, files: 0, ocrChars: 0 };
   renderStats();
 }
@@ -2247,7 +2488,7 @@ async function runBenchmark() {
   $('btn-bench-run').style.display = 'none';
   $('btn-bench-stop').style.display = 'block';
 
-  const bm = ['smol360', 'qwen05', 'qwen3_06', 'llama1b', 'qwen15', 'qwen3_17', 'gemma2b'].filter(k => MODELS[k]);
+  const bm = ['qwen05', 'qwen3_06', 'qwen15', 'qwen3_17'].filter(k => MODELS[k]);
   const orig = currentModelKey;
 
   for (const k of bm) {
@@ -2269,10 +2510,10 @@ async function runBenchmark() {
       let tF = null, tok = 0;
       const ch = await engine.chat.completions.create({
         messages: [
-          { role: 'system', content: 'Отвечай на русском.' },
-          { role: 'user', content: 'Скажи: раз, два, три.' }
+          { role: 'system', content: 'Решай пошагово. Отвечай на русском.' },
+          { role: 'user', content: 'Реши x² − 5x + 6 = 0' }
         ],
-        temperature: 0.3, max_tokens: 60, stream: true
+        temperature: 0.2, max_tokens: 200, stream: true
       });
       for await (const x of ch) {
         if (benchShouldStop) break;
@@ -2304,7 +2545,7 @@ function renderBenchTable(final) {
     const cls = t > 8 ? 'good' : t > 4 ? 'med' : 'bad';
     return `<tr><td>${escapeHtml(r.name)}</td><td>${r.loadTime !== null ? fmtNum(r.loadTime, 1) + 'с' : '—'}</td><td>${r.ttft !== null ? fmtNum(r.ttft, 2) + 'с' : '—'}</td><td class="${cls}">${fmtNum(t, 2)} т/с</td><td>${r.tokens}</td></tr>`;
   }).join('');
-  return `<table class="bench-table"><thead><tr><th>Модель</th><th>Загрузка</th><th>TTFT</th><th>т/с</th><th>Токенов</th></tr></thead><tbody>${rows}</tbody></table>`;
+  return `<table class="bench-table"><thead><tr><th>Модель</th><th>Загрузка</th><th>TTFT</th><th>т/с</th><th>Токенов</th></tr></thead><tbody>${rows}</tbody></table>${final ? '<p style="margin-top:10px;font-size:11px;">🟢 >8 — отлично, 🟡 4–8 — норм, 🔴 <4 — медленно.</p>' : ''}`;
 }
 function stopBenchmark() { benchShouldStop = true; addMessage('warn', 'Остановлено.'); }
 
@@ -2316,33 +2557,27 @@ async function runDiagnostics() {
   const p = (l, v, c) => o.push(`<div class="diag-line"><b>${l}:</b> <span class="${c||''}">${v}</span></div>`);
   const ua = navigator.userAgent.match(/Chrome\/(\d+)/);
   p('Chrome', ua ? ua[1] : '?');
-  p('Tesseract', typeof window.Tesseract !== 'undefined' ? '✅ загружен' : '❌ нет',
-    typeof window.Tesseract !== 'undefined' ? 'ok' : 'bad');
-  if (typeof window.Tesseract !== 'undefined') {
-    p('createWorker', typeof window.Tesseract.createWorker === 'function' ? '✅' : '❌');
-  }
-  p('navigator.gpu', navigator.gpu ? '✅' : '❌', navigator.gpu ? 'ok' : 'bad');
+  p('WebGPU', navigator.gpu ? '✅' : '❌', navigator.gpu ? 'ok' : 'bad');
   if (navigator.gpu) {
     try {
       const a = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
       if (a) {
-        p('Adapter', '✅ получен', 'ok');
+        p('Adapter', '✅', 'ok');
         p('shader-f16', a.features.has('shader-f16') ? '✅' : '❌',
           a.features.has('shader-f16') ? 'ok' : 'bad');
-        p('subgroups', a.features.has('subgroups') ? '✅' : '❌');
       } else p('Adapter', '❌ null', 'bad');
     } catch (e) { p('Adapter', '❌ ' + e.message, 'bad'); }
   }
+  p('Tesseract', typeof window.Tesseract !== 'undefined' ? '✅' : '❌',
+    typeof window.Tesseract !== 'undefined' ? 'ok' : 'bad');
+  p('🐍 Pyodide', pyReady ? '✅ загружен' : '❌ нет', pyReady ? 'ok' : 'bad');
+  p('🐍 SymPy', sympyReady ? '✅ работает' : '❌ нет', sympyReady ? 'ok' : 'bad');
   if (performance.memory) {
     p('JS heap used', (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + ' MB');
-    p('JS heap limit', (performance.memory.jsHeapSizeLimit / 1048576).toFixed(0) + ' MB');
   }
   p('Device memory', navigator.deviceMemory ? navigator.deviceMemory + ' GB' : '?');
-  p('Hardware threads', navigator.hardwareConcurrency || '?');
   p('SpeechRecognition', ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) ? '✅' : '❌');
   p('SpeechSynthesis', 'speechSynthesis' in window ? '✅' : '❌');
-  p('Service Worker', 'serviceWorker' in navigator ? '✅' : '❌');
-
   $('diag-content').innerHTML = o.join('');
 }
 
@@ -2364,10 +2599,7 @@ async function openCamera() {
 }
 
 function closeCamera() {
-  if (cameraStream) {
-    cameraStream.getTracks().forEach(t => t.stop());
-    cameraStream = null;
-  }
+  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
   $('camera-preview').classList.remove('show');
   closeModal('modal-camera');
 }
@@ -2376,8 +2608,7 @@ async function snapPhoto() {
   const v = $('camera-preview');
   const c = $('camera-canvas');
   if (!v.videoWidth) { alert('Не готова.'); return; }
-  c.width = v.videoWidth;
-  c.height = v.videoHeight;
+  c.width = v.videoWidth; c.height = v.videoHeight;
   c.getContext('2d').drawImage(v, 0, 0);
   const d = c.toDataURL('image/jpeg', 0.95);
   closeCamera();
@@ -2445,7 +2676,6 @@ function applyPreset(k) {
   addMessage('sys', `${PRESETS[k].icon} Предмет: ${PRESETS[k].name}`);
   closeModal('modal-presets');
   if (PRESETS[k].model && PRESETS[k].model !== currentModelKey && autoMode) {
-    // Никогда не переключаем на Math модель автоматически
     if (PRESETS[k].model !== 'qwen_math15') {
       switchModel(PRESETS[k].model, 'предмет ' + PRESETS[k].name);
     }
@@ -2459,11 +2689,80 @@ window.applyPreset = applyPreset;
 function downloadNotebook() {
   const nb = {
     cells: [
-      { cell_type: "markdown", metadata: {}, source: ["# QLoRA дообучение Qwen2.5"] },
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: ["!pip install -q transformers peft trl bitsandbytes accelerate datasets"] },
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: ["# См. полный код в репозитории\nprint('Готово')"] },
+      { cell_type: "markdown", metadata: {}, source: ["# QLoRA дообучение Qwen2.5 для 8 класса\n", "Обучаем модель решать задачи 8 класса по русскому"] },
+      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: ["!pip install -q transformers==4.45.0 peft==0.13.0 trl==0.11.0 bitsandbytes==0.44.0 accelerate==1.0.0 datasets==3.0.0"] },
+      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
+        "import torch\n",
+        "from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig\n",
+        "from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training\n",
+        "\n",
+        "MODEL_NAME = 'Qwen/Qwen2.5-1.5B-Instruct'\n",
+        "bnb = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type='nf4',\n",
+        "    bnb_4bit_compute_dtype=torch.float16, bnb_4bit_use_double_quant=True)\n",
+        "tok = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)\n",
+        "if tok.pad_token is None: tok.pad_token = tok.eos_token\n",
+        "model = AutoModelForCausalLM.from_pretrained(MODEL_NAME,\n",
+        "    quantization_config=bnb, device_map='auto', trust_remote_code=True)\n",
+        "model = prepare_model_for_kbit_training(model)\n",
+        "lora = LoraConfig(r=16, lora_alpha=32,\n",
+        "    target_modules=['q_proj','k_proj','v_proj','o_proj','gate_proj','up_proj','down_proj'],\n",
+        "    lora_dropout=0.05, bias='none', task_type='CAUSAL_LM')\n",
+        "model = get_peft_model(model, lora)\n",
+        "model.print_trainable_parameters()"
+      ]},
+      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
+        "# Датасет 8 класса (пример — замени своими)\n",
+        "data = [\n",
+        "  {'q': 'Реши x² - 5x + 6 = 0', 'a': 'D = 25 - 24 = 1. x₁ = 3, x₂ = 2. Ответ: 2 и 3'},\n",
+        "  {'q': 'Катеты 3 и 4. Найди гипотенузу.', 'a': 'c² = 9 + 16 = 25. c = 5. Ответ: 5'},\n",
+        "  {'q': 'Реши систему: 2x+y=7, x-y=2', 'a': 'Из 2: x = y+2. Подставим: 2(y+2)+y=7. 3y=3. y=1. x=3. Ответ: (3, 1)'},\n",
+        "  {'q': 'Найди 20% от 150', 'a': '20% от 150 = 150 × 0.2 = 30. Ответ: 30'},\n",
+        "]\n",
+        "SYSTEM = 'Ты учитель математики 8 класса. Решай пошагово. Отвечай на русском.'\n",
+        "def fmt(ex):\n",
+        "    return {'text': f'<|im_start|>system\\n{SYSTEM}<|im_end|>\\n<|im_start|>user\\n{ex[\"q\"]}<|im_end|>\\n<|im_start|>assistant\\n{ex[\"a\"]}<|im_end|>'}\n",
+        "from datasets import Dataset\n",
+        "ds = Dataset.from_list(data).map(fmt)\n",
+        "split = ds.train_test_split(test_size=0.2, seed=42)"
+      ]},
+      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
+        "from transformers import TrainingArguments\n",
+        "from trl import SFTTrainer\n",
+        "args = TrainingArguments(output_dir='./qwen-lora', num_train_epochs=3,\n",
+        "    per_device_train_batch_size=2, gradient_accumulation_steps=4,\n",
+        "    gradient_checkpointing=True, learning_rate=2e-4,\n",
+        "    lr_scheduler_type='cosine', warmup_ratio=0.05,\n",
+        "    logging_steps=10, save_strategy='epoch', eval_strategy='epoch',\n",
+        "    save_total_limit=2, fp16=True, optim='paged_adamw_8bit',\n",
+        "    report_to='none', max_grad_norm=0.3)\n",
+        "trainer = SFTTrainer(model=model, tokenizer=tok, train_dataset=split['train'],\n",
+        "    eval_dataset=split['test'], args=args, dataset_text_field='text',\n",
+        "    max_seq_length=1024, packing=False)\n",
+        "trainer.train()\n",
+        "trainer.save_model('./qwen-lora')\n",
+        "tok.save_pretrained('./qwen-lora')"
+      ]},
+      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
+        "from peft import PeftModel\n",
+        "base = AutoModelForCausalLM.from_pretrained(MODEL_NAME,\n",
+        "    torch_dtype=torch.float16, device_map='auto', trust_remote_code=True)\n",
+        "merged = PeftModel.from_pretrained(base, './qwen-lora').merge_and_unload()\n",
+        "merged.save_pretrained('./qwen-merged')\n",
+        "tok.save_pretrained('./qwen-merged')"
+      ]},
+      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
+        "!git clone --depth 1 https://github.com/ggerganov/llama.cpp\n",
+        "!cd llama.cpp && pip install -r requirements.txt\n",
+        "!python llama.cpp/convert_hf_to_gguf.py ./qwen-merged --outfile qwen-f16.gguf --outtype f16\n",
+        "!cd llama.cpp && make quantize -j4\n",
+        "!./llama.cpp/quantize qwen-f16.gguf qwen-tuned-Q4_K_M.gguf Q4_K_M"
+      ]},
+      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
+        "from google.colab import files\n",
+        "files.download('qwen-tuned-Q4_K_M.gguf')"
+      ]}
     ],
-    metadata: { kernelspec: { display_name: "Python 3", name: "python3" } },
+    metadata: { kernelspec: { display_name: "Python 3", name: "python3" }, language_info: { name: "python" } },
     nbformat: 4, nbformat_minor: 5,
   };
   const b = new Blob([JSON.stringify(nb, null, 2)], { type: 'application/json' });
@@ -2476,12 +2775,16 @@ window.downloadNotebook = downloadNotebook;
 
 function downloadDatasetTemplate() {
   const t = [
-    { question: "Реши x²+5x+6=0", answer: "D=1, x₁=-2, x₂=-3" },
+    { question: "Реши x² - 5x + 6 = 0", answer: "D = 1. x₁ = 3, x₂ = 2." },
+    { question: "Катеты 3 и 4, найди гипотенузу", answer: "c² = 9 + 16 = 25. c = 5." },
+    { question: "Реши систему: 2x+y=7, x-y=2", answer: "x = 3, y = 1" },
+    { question: "Найди 20% от 150", answer: "30" },
+    { question: "Упрости: (a+b)²", answer: "a² + 2ab + b²" },
   ];
   const b = new Blob([JSON.stringify(t, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(b);
-  a.download = 'dataset.json';
+  a.download = 'dataset-8class.json';
   a.click();
 }
 window.downloadDatasetTemplate = downloadDatasetTemplate;
@@ -2493,8 +2796,34 @@ $('btn-auto').onclick = () => {
   autoMode = !autoMode;
   SETTINGS.autoMode = autoMode ? 1 : 0;
   saveSettings();
-  updateAutoBtn();
+  updateToolbar();
   addMessage('sys', autoMode ? '🎯 Авто вкл' : '🎯 Авто выкл');
+};
+
+$('btn-py').onclick = async () => {
+  pyMode = !pyMode;
+  SETTINGS.pyMode = pyMode ? 1 : 0;
+  saveSettings();
+  updateToolbar();
+  if (pyMode && !sympyReady) {
+    addMessage('sys', '🐍 Загружаю Pyodide + SymPy...');
+    try {
+      await loadPyodide();
+      addMessage('stat py', '🐍 SymPy готов');
+    } catch (e) {
+      addMessage('error', 'Ошибка Pyodide: ' + e.message);
+    }
+  } else {
+    addMessage('sys', pyMode ? '🐍 SymPy вкл' : '🐍 SymPy выкл');
+  }
+};
+
+$('btn-smart').onclick = () => {
+  smartMode = !smartMode;
+  SETTINGS.smartMode = smartMode ? 1 : 0;
+  saveSettings();
+  updateToolbar();
+  addMessage('sys', smartMode ? '🧠 Умный режим вкл (self-consistency)' : '🧠 Умный режим выкл');
 };
 
 $('btn-models').onclick = async () => {
@@ -2512,6 +2841,7 @@ $('btn-chats').onclick = async () => {
 
 $('btn-new').onclick = newChat;
 $('btn-presets').onclick = () => { renderPresets(); openModal('modal-presets'); };
+
 $('btn-settings').onclick = () => {
   $('s-temp').value = SETTINGS.temperature;
   $('s-maxtok').value = SETTINGS.max_tokens;
@@ -2519,6 +2849,7 @@ $('btn-settings').onclick = () => {
   $('s-lang').value = SETTINGS.answerLang;
   $('s-ocr-lang').value = SETTINGS.ocrLang;
   $('s-preprocess').value = SETTINGS.preprocess;
+  $('s-consistency').value = SETTINGS.consistency;
   $('s-auto').value = SETTINGS.autoMode;
   $('s-tts').value = SETTINGS.tts;
   $('v-temp').textContent = SETTINGS.temperature.toFixed(2);
@@ -2526,12 +2857,14 @@ $('btn-settings').onclick = () => {
   $('v-ctx').textContent = SETTINGS.context_window_size;
   openModal('modal-settings');
 };
+
 $('btn-more').onclick = () => openModal('modal-more');
 $('btn-theme').onclick = () => {
   SETTINGS.theme = SETTINGS.theme === 'dark' ? 'light' : 'dark';
   saveSettings();
   applyTheme(SETTINGS.theme);
 };
+
 $('btn-bench-run').onclick = runBenchmark;
 $('btn-bench-stop').onclick = stopBenchmark;
 $('btn-camera').onclick = openCamera;
@@ -2542,6 +2875,7 @@ $('btn-snap').onclick = snapPhoto;
 $('btn-close-camera').onclick = closeCamera;
 $('stop').onclick = stopGeneration;
 $('chat-search').oninput = e => renderChatList(e.target.value);
+
 $('pomodoro-toggle').onclick = togglePomo;
 $('pomodoro-reset').onclick = () => {
   pomodoro.running = false;
@@ -2571,9 +2905,7 @@ document.querySelectorAll('.quick-btn').forEach(b => {
 });
 
 document.querySelectorAll('.modal').forEach(m => {
-  m.addEventListener('click', e => {
-    if (e.target === m) m.classList.remove('show');
-  });
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
 });
 
 chatEl.addEventListener('scroll', () => {
@@ -2585,7 +2917,7 @@ chatEl.addEventListener('scroll', () => {
 // ============================================================
 (async () => {
   sessionStats.start = nowSec();
-  updateAutoBtn();
+  updateToolbar();
   applyTheme(SETTINGS.theme);
 
   const d = localStorage.getItem('ai-draft');
@@ -2602,8 +2934,7 @@ chatEl.addEventListener('scroll', () => {
     const a = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
     if (!a) { showStatus('GPU недоступен', 'error'); return; }
     const f16 = a.features.has('shader-f16');
-    const tCheck = typeof window.Tesseract !== 'undefined' && typeof window.Tesseract.createWorker === 'function';
-    addMessage('sys', `✅ GPU. shader-f16: ${f16 ? '✅' : '❌'}. Tesseract: ${tCheck ? '✅' : '❌'}`);
+    addMessage('sys', `✅ GPU. shader-f16: ${f16 ? '✅' : '❌'}`);
   } catch (e) {
     showStatus('Ошибка GPU', 'error');
     return;
@@ -2611,10 +2942,15 @@ chatEl.addEventListener('scroll', () => {
 
   await loadChats();
   await initEngine();
+
+  // Загружаем Pyodide в фоне (если включён)
+  if (pyMode) {
+    loadPyodide().catch(e => console.warn('Pyodide bg:', e));
+  }
 })();
 
 // ============================================================
-// ЭКСПОРТЫ
+// === ЭКСПОРТЫ ===
 // ============================================================
 window.switchModel = switchModel;
 window.openChat = openChat;
@@ -2634,6 +2970,8 @@ window.copyMsg = copyMsg;
 window.speakMsg = speakMsg;
 window.regenMsg = regenMsg;
 window.showPomodoro = showPomodoro;
+window.downloadNotebook = downloadNotebook;
+window.downloadDatasetTemplate = downloadDatasetTemplate;
 </script>
 </body>
 </html>
