@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0d1117">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Умный ИИ">
-<meta name="mobile-web-app-capable" content="yes">
 <title>🧠 Умный учебный ИИ</title>
+
+<!-- Tesseract.js через script тег (не import) — работает всегда -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
+
 <style>
   :root {
     --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
@@ -16,7 +18,7 @@
     --accent: #1f6feb; --accent2: #238636;
     --warn: #d29922; --error: #f85149; --ok: #3fb950;
     --math: #a371f7; --file: #58a6ff; --lora: #f778ba;
-    --auto: #39d353; --highlight: #ffd33d;
+    --auto: #39d353;
   }
   [data-theme="light"] {
     --bg: #ffffff; --bg2: #f6f8fa; --bg3: #eaeef2;
@@ -24,14 +26,13 @@
     --accent: #0969da; --accent2: #1a7f37;
     --warn: #9a6700; --error: #cf222e; --ok: #1a7f37;
     --math: #8250df; --file: #0969da; --lora: #bf3989;
-    --auto: #1a7f37; --highlight: #bf8700;
+    --auto: #1a7f37;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
     margin: 0; height: 100%; overflow: hidden;
     font-family: system-ui, -apple-system, sans-serif;
     background: var(--bg); color: var(--text);
-    transition: background 0.2s, color 0.2s;
   }
   body { display: flex; flex-direction: column; }
 
@@ -54,7 +55,7 @@
   #toolbar {
     display: flex; gap: 6px; padding: 6px 8px;
     background: var(--bg2); border-bottom: 1px solid var(--border);
-    flex-shrink: 0; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    flex-shrink: 0; overflow-x: auto;
   }
   #toolbar::-webkit-scrollbar { display: none; }
   .tb-btn {
@@ -62,10 +63,8 @@
     background: var(--bg3); color: var(--text); font-size: 12px;
     cursor: pointer; white-space: nowrap; flex-shrink: 0;
   }
-  .tb-btn:active { background: var(--border); }
   .tb-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
   .tb-btn.auto { background: var(--auto); border-color: var(--auto); color: black; font-weight: 600; }
-  .tb-btn.auto.on { box-shadow: 0 0 8px var(--auto); }
   .tb-btn.pomodoro { background: var(--warn); border-color: var(--warn); color: black; }
 
   .quick-bar {
@@ -80,7 +79,6 @@
     color: var(--text); font-size: 11px; cursor: pointer;
     white-space: nowrap; flex-shrink: 0;
   }
-  .quick-btn:active { background: var(--accent); color: white; }
 
   #chat {
     flex: 1; overflow-y: auto; padding: 10px;
@@ -89,8 +87,7 @@
   }
   .msg {
     max-width: 92%; padding: 9px 13px; border-radius: 14px;
-    line-height: 1.55; word-wrap: break-word;
-    font-size: 14px;
+    line-height: 1.55; word-wrap: break-word; font-size: 14px;
   }
   .msg img { max-width: 100%; border-radius: 8px; margin-top: 6px; display: block; }
   .msg p { margin: 6px 0; }
@@ -102,45 +99,31 @@
   .msg code {
     background: rgba(110,118,129,0.25);
     padding: 1px 5px; border-radius: 4px;
-    font-family: 'SF Mono', Consolas, monospace;
-    font-size: 12.5px;
+    font-family: 'SF Mono', Consolas, monospace; font-size: 12.5px;
   }
   .msg pre {
     background: rgba(110,118,129,0.18);
-    padding: 10px; border-radius: 8px;
-    overflow-x: auto; margin: 8px 0;
-    font-family: 'SF Mono', Consolas, monospace;
+    padding: 10px; border-radius: 8px; overflow-x: auto;
+    margin: 8px 0; font-family: 'SF Mono', Consolas, monospace;
     font-size: 12px; line-height: 1.4;
   }
   .msg pre code { background: none; padding: 0; }
   .msg blockquote {
     border-left: 3px solid var(--accent);
-    padding-left: 10px; margin: 6px 0;
-    color: var(--text2);
+    padding-left: 10px; margin: 6px 0; color: var(--text2);
   }
-  .msg table {
-    border-collapse: collapse; margin: 8px 0;
-    font-size: 12px; width: 100%;
-  }
-  .msg th, .msg td {
-    border: 1px solid var(--border);
-    padding: 4px 8px; text-align: left;
-  }
+  .msg table { border-collapse: collapse; margin: 8px 0; font-size: 12px; width: 100%; }
+  .msg th, .msg td { border: 1px solid var(--border); padding: 4px 8px; text-align: left; }
   .msg th { background: var(--bg3); }
   .msg .katex { font-size: 1em !important; }
   .msg .katex-display { margin: 8px 0; overflow-x: auto; overflow-y: hidden; }
 
-  .user { align-self: flex-end; background: var(--accent); color: white;
-    border-bottom-right-radius: 4px; }
-  .bot { align-self: flex-start; background: var(--bg3);
-    border-bottom-left-radius: 4px; }
-  .sys { align-self: center; font-size: 10px; color: var(--text2);
-    text-align: center; max-width: 95%; white-space: pre-wrap; }
+  .user { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 4px; }
+  .bot { align-self: flex-start; background: var(--bg3); border-bottom-left-radius: 4px; }
+  .sys { align-self: center; font-size: 10px; color: var(--text2); text-align: center; max-width: 95%; white-space: pre-wrap; }
   .stat { align-self: center; font-size: 10px; color: var(--ok);
     background: rgba(63,185,80,0.13); padding: 4px 10px;
     border-radius: 6px; border: 1px solid rgba(63,185,80,0.27); }
-  .stat.auto { color: var(--auto); background: rgba(57,211,83,0.13);
-    border-color: rgba(57,211,83,0.4); }
   .warn { align-self: center; font-size: 11px; color: var(--warn);
     background: rgba(210,153,34,0.13); padding: 8px 12px;
     border-radius: 8px; border: 1px solid rgba(210,153,34,0.4);
@@ -150,20 +133,13 @@
     border-radius: 8px; border: 1px solid rgba(248,81,73,0.4);
     max-width: 95%; text-align: center; }
 
-  .msg-actions {
-    display: flex; gap: 4px; margin-top: 6px;
-    flex-wrap: wrap; opacity: 0.6;
-    transition: opacity 0.2s;
-  }
+  .msg-actions { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; opacity: 0.6; }
   .msg:hover .msg-actions, .msg-actions:active { opacity: 1; }
   .msg-actions button {
     padding: 3px 8px; border-radius: 6px;
-    border: 1px solid var(--border);
-    background: rgba(0,0,0,0.15);
-    color: var(--text2); font-size: 10px;
-    cursor: pointer;
+    border: 1px solid var(--border); background: rgba(0,0,0,0.15);
+    color: var(--text2); font-size: 10px; cursor: pointer;
   }
-  .msg-actions button:active { background: var(--border); color: var(--text); }
 
   .ocr-card {
     align-self: stretch; max-width: 100%;
@@ -191,8 +167,7 @@
   .ocr-card .img-wrap img { width: 100%; display: block; }
   .ocr-card .ocr-tabs {
     display: flex; gap: 4px; margin-bottom: 8px;
-    border-bottom: 1px solid var(--border); padding-bottom: 6px;
-    overflow-x: auto;
+    border-bottom: 1px solid var(--border); padding-bottom: 6px; overflow-x: auto;
   }
   .ocr-card .ocr-tabs::-webkit-scrollbar { display: none; }
   .ocr-card .ocr-tab {
@@ -200,14 +175,11 @@
     cursor: pointer; white-space: nowrap; flex-shrink: 0;
     color: var(--text2); border: 1px solid transparent;
   }
-  .ocr-card .ocr-tab.active {
-    background: var(--bg3); color: var(--text); border-color: var(--border);
-  }
+  .ocr-card .ocr-tab.active { background: var(--bg3); color: var(--text); border-color: var(--border); }
   .ocr-card .ocr-content {
-    font-size: 12px; line-height: 1.5;
-    background: var(--bg); border-radius: 8px;
-    padding: 8px 10px; max-height: 300px; overflow-y: auto;
-    font-family: 'SF Mono', Consolas, monospace;
+    font-size: 12px; line-height: 1.5; background: var(--bg);
+    border-radius: 8px; padding: 8px 10px; max-height: 300px;
+    overflow-y: auto; font-family: 'SF Mono', Consolas, monospace;
     white-space: pre-wrap; word-wrap: break-word; color: var(--text);
   }
   .ocr-card .ocr-content.hidden { display: none; }
@@ -218,22 +190,17 @@
     border-radius: 4px; color: #d2a8ff;
     font-family: 'Times New Roman', serif; font-size: 13px;
   }
-  .ocr-card .ocr-actions {
-    display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;
-  }
+  .ocr-card .ocr-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
   .ocr-card .ocr-actions button {
     padding: 5px 10px; border-radius: 8px;
     border: 1px solid var(--border); background: var(--bg3);
     color: var(--text); font-size: 11px; cursor: pointer;
   }
-  .ocr-card .ocr-actions button:active { background: var(--border); }
 
   .auto-card {
-    align-self: center;
-    background: rgba(57,211,83,0.1);
-    border: 1px solid rgba(57,211,83,0.4);
-    border-radius: 10px; padding: 8px 12px;
-    font-size: 11px; color: var(--auto);
+    align-self: center; background: rgba(57,211,83,0.1);
+    border: 1px solid rgba(57,211,83,0.4); border-radius: 10px;
+    padding: 8px 12px; font-size: 11px; color: var(--auto);
     max-width: 95%; text-align: center;
   }
   .auto-card b { color: var(--text); }
@@ -249,22 +216,14 @@
   #stats b { color: var(--ok); }
 
   #pomodoro-panel {
-    position: fixed; top: 60px; left: 50%;
-    transform: translateX(-50%);
-    background: rgba(22,27,34,0.98);
-    padding: 10px 16px; border-radius: 12px;
-    border: 1px solid var(--warn);
-    display: none; z-index: 60;
-    font-size: 13px; color: var(--text);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    text-align: center;
+    position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
+    background: rgba(22,27,34,0.98); padding: 10px 16px;
+    border-radius: 12px; border: 1px solid var(--warn);
+    display: none; z-index: 60; font-size: 13px; color: var(--text);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5); text-align: center;
   }
   #pomodoro-panel.show { display: block; }
-  #pomodoro-time {
-    font-size: 24px; font-weight: 700;
-    color: var(--warn); font-family: monospace;
-    margin: 6px 0;
-  }
+  #pomodoro-time { font-size: 24px; font-weight: 700; color: var(--warn); font-family: monospace; margin: 6px 0; }
   #pomodoro-panel button {
     padding: 4px 10px; border-radius: 6px;
     border: 1px solid var(--border);
@@ -281,8 +240,7 @@
     flex: 1; padding: 10px 14px; border-radius: 20px;
     border: 1px solid var(--border); background: var(--bg);
     color: var(--text); font-size: 14px; outline: none;
-    resize: none; max-height: 100px; min-width: 0;
-    font-family: inherit;
+    resize: none; max-height: 100px; min-width: 0; font-family: inherit;
   }
   #input:focus { border-color: var(--accent); }
   .icon-btn {
@@ -290,7 +248,6 @@
     background: var(--bg3); color: var(--text); font-size: 16px;
     cursor: pointer; width: 42px; height: 42px; flex-shrink: 0;
   }
-  .icon-btn:active { background: var(--border); }
   .icon-btn.file { background: var(--file); color: white; }
   .icon-btn.mic.rec { background: var(--error); animation: pulse 1s infinite; }
   @keyframes pulse {
@@ -338,16 +295,12 @@
 
   .model-opt {
     padding: 10px; border-radius: 10px; border: 1px solid var(--border);
-    background: var(--bg3); margin-bottom: 6px; cursor: pointer;
-    position: relative;
+    background: var(--bg3); margin-bottom: 6px; cursor: pointer; position: relative;
   }
   .model-opt.selected { border-color: var(--accent); background: rgba(31,111,235,0.13); }
   .model-opt.cached { border-color: var(--ok); }
   .model-opt .name { font-weight: 600; font-size: 13px; margin-bottom: 3px; padding-right: 60px; }
-  .model-opt .meta {
-    font-size: 10px; color: var(--text2);
-    display: flex; gap: 8px; flex-wrap: wrap;
-  }
+  .model-opt .meta { font-size: 10px; color: var(--text2); display: flex; gap: 8px; flex-wrap: wrap; }
   .model-opt .cached-badge {
     position: absolute; top: 8px; right: 8px;
     font-size: 9px; padding: 2px 6px; border-radius: 4px;
@@ -361,29 +314,19 @@
   }
 
   .storage-info {
-    background: var(--bg); border-radius: 8px;
-    padding: 10px; margin-bottom: 12px;
-    font-size: 11px; color: var(--text2);
+    background: var(--bg); border-radius: 8px; padding: 10px;
+    margin-bottom: 12px; font-size: 11px; color: var(--text2);
   }
   .storage-info b { color: var(--text); }
-  .storage-bar {
-    height: 6px; background: var(--bg3);
-    border-radius: 3px; overflow: hidden; margin: 6px 0;
-  }
-  .storage-bar-fill {
-    height: 100%; background: linear-gradient(90deg, var(--accent), var(--ok));
-    width: 0%; transition: width 0.3s;
-  }
+  .storage-bar { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; margin: 6px 0; }
+  .storage-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--ok)); width: 0%; transition: width 0.3s; }
 
   .chat-item {
     padding: 10px; border-radius: 10px; background: var(--bg3);
     margin-bottom: 6px; cursor: pointer; font-size: 13px;
-    display: flex; justify-content: space-between; align-items: center;
-    gap: 6px;
+    display: flex; justify-content: space-between; align-items: center; gap: 6px;
   }
-  .chat-item:active { background: var(--border); }
-  .chat-item .title { flex: 1; overflow: hidden;
-    text-overflow: ellipsis; white-space: nowrap; }
+  .chat-item .title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .chat-item .del { color: var(--error); font-size: 16px; padding: 4px 8px; }
 
   .btn-primary {
@@ -405,26 +348,19 @@
   }
 
   .settings-row {
-    display: flex; justify-content: space-between;
-    align-items: center; padding: 8px 0;
-    border-bottom: 1px solid var(--bg3); font-size: 12px; gap: 8px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid var(--bg3);
+    font-size: 12px; gap: 8px;
   }
   .settings-row label { color: var(--text2); flex-shrink: 0; }
   .settings-row input[type="range"] { flex: 1; min-width: 0; }
-  .settings-row .val {
-    font-family: monospace; color: var(--accent);
-    min-width: 50px; text-align: right;
-  }
+  .settings-row .val { font-family: monospace; color: var(--accent); min-width: 50px; text-align: right; }
   .settings-row select {
-    padding: 4px 8px; border-radius: 6px;
-    border: 1px solid var(--border);
+    padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border);
     background: var(--bg3); color: var(--text); font-size: 12px;
   }
 
-  .diag-line {
-    font-size: 11px; padding: 3px 0;
-    border-bottom: 1px solid var(--bg3);
-  }
+  .diag-line { font-size: 11px; padding: 3px 0; border-bottom: 1px solid var(--bg3); }
   .diag-line b { color: var(--text2); font-weight: 500; }
   .ok { color: var(--ok); } .bad { color: var(--error); } .warn-txt { color: var(--warn); }
 
@@ -436,65 +372,38 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .bench-table {
-    width: 100%; font-size: 11px; border-collapse: collapse; margin-top: 10px;
-  }
-  .bench-table th {
-    text-align: left; padding: 6px 4px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text2); font-weight: 500;
-  }
+  .bench-table { width: 100%; font-size: 11px; border-collapse: collapse; margin-top: 10px; }
+  .bench-table th { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--border); color: var(--text2); font-weight: 500; }
   .bench-table td { padding: 6px 4px; border-bottom: 1px solid var(--bg3); }
   .bench-table .good { color: var(--ok); }
   .bench-table .med { color: var(--warn); }
   .bench-table .bad { color: var(--error); }
 
-  #camera-preview {
-    width: 100%; border-radius: 12px; margin-bottom: 10px;
-    display: none; background: #000;
-  }
+  #camera-preview { width: 100%; border-radius: 12px; margin-bottom: 10px; display: none; background: #000; }
   #camera-preview.show { display: block; }
 
-  .drop-active { outline: 3px dashed var(--accent); outline-offset: -10px; }
+  .ocr-progress { height: 3px; background: var(--bg); border-radius: 2px; overflow: hidden; margin: 6px 0; }
+  .ocr-progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--ok)); width: 0%; transition: width 0.2s; }
 
-  .ocr-progress {
-    height: 3px; background: var(--bg);
-    border-radius: 2px; overflow: hidden; margin: 6px 0;
-  }
-  .ocr-progress-bar {
-    height: 100%; background: linear-gradient(90deg, var(--accent), var(--ok));
-    width: 0%; transition: width 0.2s;
-  }
-
-  .preset-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr);
-    gap: 6px; margin: 10px 0;
-  }
+  .preset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 10px 0; }
   .preset-btn {
     padding: 10px; border-radius: 10px;
     border: 1px solid var(--border); background: var(--bg3);
-    color: var(--text); font-size: 12px; cursor: pointer;
-    text-align: left;
+    color: var(--text); font-size: 12px; cursor: pointer; text-align: left;
   }
-  .preset-btn:active { background: var(--border); }
   .preset-btn .icon { font-size: 18px; margin-right: 6px; }
   .preset-btn .sub { font-size: 10px; color: var(--text2); margin-top: 2px; }
 
   .skeleton {
     display: inline-block; width: 8px; height: 14px;
     background: var(--accent); border-radius: 2px;
-    animation: blink 0.8s infinite;
-    vertical-align: middle; margin-left: 2px;
+    animation: blink 0.8s infinite; vertical-align: middle; margin-left: 2px;
   }
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.2; }
-  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
   @media print {
     header, #toolbar, .quick-bar, #input-area, #stats,
-    #pomodoro-panel, #progress, .msg-actions, .ocr-actions,
-    .modal { display: none !important; }
+    #pomodoro-panel, #progress, .msg-actions, .ocr-actions, .modal { display: none !important; }
     body { background: white; color: black; }
     #chat { overflow: visible; height: auto; padding: 20px; }
     .msg { max-width: 100%; break-inside: avoid; }
@@ -513,16 +422,15 @@
 </header>
 
 <div id="toolbar">
-  <button class="tb-btn auto on" id="btn-auto">🎯 Авто ✓</button>
+  <button class="tb-btn auto" id="btn-auto">🎯 Авто ✓</button>
   <button class="tb-btn" id="btn-models">🧠</button>
   <button class="tb-btn" id="btn-chats">💬</button>
   <button class="tb-btn" id="btn-new">➕</button>
   <button class="tb-btn" id="btn-stats">📊</button>
   <button class="tb-btn" id="btn-bench">⚡</button>
   <button class="tb-btn" id="btn-diag">🔍</button>
-  <button class="tb-btn" id="btn-presets">📚 Предметы</button>
+  <button class="tb-btn" id="btn-presets">📚</button>
   <button class="tb-btn pomodoro" id="btn-pomodoro">🍅</button>
-  <button class="tb-btn" id="btn-lora">✨</button>
   <button class="tb-btn" id="btn-theme">🌙</button>
   <button class="tb-btn" id="btn-settings">⚙️</button>
 </div>
@@ -534,19 +442,16 @@
   <button class="quick-btn" data-p="Составь план конспекта: ">📝 Конспект</button>
   <button class="quick-btn" data-p="Придумай 5 вопросов: ">❓ Вопросы</button>
   <button class="quick-btn" data-p="Реши пошагово: ">🎯 Пошагово</button>
-  <button class="quick-btn" data-p="Докажи тождество: ">📐 Доказать</button>
-  <button class="quick-btn" data-p="Напиши код на Python: ">💻 Код</button>
-  <button class="quick-btn" data-p="/teacher Проверь меня, не давай ответ">👨‍🏫 Учитель</button>
+  <button class="quick-btn" data-p="/teacher Помоги, не давай ответ">👨‍🏫 Учитель</button>
   <button class="quick-btn" data-p="/check Проверь моё решение">🔎 Проверка</button>
-  <button class="quick-btn" data-p="/explain Объясни максимально подробно">🔬 Подробно</button>
-  <button class="quick-btn" data-p="/short Ответь кратко, только суть">⚡ Кратко</button>
+  <button class="quick-btn" data-p="/short Кратко">⚡ Кратко</button>
 </div>
 
 <div id="chat">
   <div class="msg sys">
     <b>🧠 Умный учебный ИИ</b><br>
-    🎯 Авто-выбор модели · 📷 OCR · 🎤 Голос · 🔊 Озвучка<br>
-    📚 30+ моделей · ⚡ Офлайн после первой загрузки
+    Tesseract через script · 100+ языков · математика<br>
+    🎯 Авто-выбор модели · 📷 OCR · 🎤 Голос · 🔊 Озвучка
   </div>
 </div>
 
@@ -556,7 +461,7 @@
   <div id="pomodoro-label">🍅 Работа</div>
   <div id="pomodoro-time">25:00</div>
   <button id="pomodoro-toggle">▶ Старт</button>
-  <button id="pomodoro-reset">↺ Сброс</button>
+  <button id="pomodoro-reset">↺</button>
   <button id="pomodoro-close">✕</button>
 </div>
 
@@ -564,24 +469,19 @@
   <button class="icon-btn" id="btn-camera">📷</button>
   <button class="icon-btn file" id="btn-file">📎</button>
   <input type="file" id="file-input" multiple
-    accept="image/*,.pdf,.txt,.md,.docx,application/pdf,text/plain"
-    style="display:none">
+    accept="image/*,.pdf,.txt,.md,.docx,application/pdf,text/plain" style="display:none">
   <button class="icon-btn mic" id="btn-mic">🎤</button>
   <textarea id="input" rows="1" placeholder="Спроси..." disabled></textarea>
   <button id="stop">■</button>
   <button id="send" disabled>➤</button>
 </div>
 
-<!-- Модалки -->
 <div class="modal" id="modal-models">
   <div class="modal-content">
-    <h2>🧠 Все модели</h2>
-    <div id="storage-info" class="storage-info">
-      <span class="spinner"></span>Проверка хранилища...
-    </div>
-    <p>💾 — уже в кэше.</p>
+    <h2>🧠 Модели</h2>
+    <div id="storage-info" class="storage-info"><span class="spinner"></span>Проверка...</div>
     <div id="model-list"></div>
-    <button class="btn-secondary" onclick="autoSelectBest()">🎯 Подобрать по RAM</button>
+    <button class="btn-secondary" onclick="autoSelectBest()">🎯 По RAM</button>
     <button class="btn-secondary" onclick="clearModelCache()">🗑 Очистить кэш</button>
     <button class="btn-secondary" onclick="closeModal('modal-models')">Закрыть</button>
   </div>
@@ -589,11 +489,9 @@
 
 <div class="modal" id="modal-chats">
   <div class="modal-content">
-    <h2>💬 Сохранённые чаты</h2>
+    <h2>💬 Чаты</h2>
     <input type="text" id="chat-search" placeholder="🔍 Поиск..."
-      style="width:100%;padding:8px 12px;border-radius:8px;
-      border:1px solid var(--border);background:var(--bg);
-      color:var(--text);font-size:13px;margin-bottom:10px;">
+      style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;margin-bottom:10px;">
     <div id="chat-list"></div>
     <button class="btn-primary" onclick="newChat()">➕ Новый</button>
     <button class="btn-secondary" onclick="exportChats()">📤 JSON</button>
@@ -616,11 +514,9 @@
 <div class="modal" id="modal-bench">
   <div class="modal-content">
     <h2>⚡ Бенчмарк</h2>
-    <div id="bench-content">
-      <p style="color:var(--text2);">Нажми «Запустить».</p>
-    </div>
+    <div id="bench-content"><p style="color:var(--text2);">Нажми «Запустить».</p></div>
     <button class="btn-primary" id="btn-bench-run">▶ Запустить</button>
-    <button class="btn-danger" id="btn-bench-stop" style="display:none;">■ Остановить</button>
+    <button class="btn-danger" id="btn-bench-stop" style="display:none;">■ Стоп</button>
     <button class="btn-secondary" onclick="closeModal('modal-bench')">Закрыть</button>
   </div>
 </div>
@@ -635,28 +531,9 @@
 
 <div class="modal" id="modal-presets">
   <div class="modal-content">
-    <h2>📚 Пресеты предметов</h2>
+    <h2>📚 Предметы</h2>
     <div class="preset-grid" id="preset-grid"></div>
     <button class="btn-secondary" onclick="closeModal('modal-presets')">Закрыть</button>
-  </div>
-</div>
-
-<div class="modal" id="modal-lora">
-  <div class="modal-content">
-    <h2>✨ Дообучение LoRA</h2>
-    <p>LoRA — патч (~20–50 MB) поверх базовой модели. Обучается в Google Colab.</p>
-    <p style="color:var(--warn);font-size:11px;">
-    ⚠️ Обучать можно только на ПК/Colab.</p>
-    <ol style="font-size:11px;color:var(--text2);padding-left:20px;">
-      <li>Собери датасет: 100–1000 пар</li>
-      <li>Скачай train.ipynb</li>
-      <li>Открой colab.research.google.com</li>
-      <li>Запусти ячейки (~30–40 мин)</li>
-      <li>Скачай qwen-tuned-Q4_K_M.gguf</li>
-    </ol>
-    <button class="btn-primary" onclick="downloadNotebook()">📥 train.ipynb</button>
-    <button class="btn-secondary" onclick="downloadDatasetTemplate()">📥 Шаблон датасета</button>
-    <button class="btn-secondary" onclick="closeModal('modal-lora')">Закрыть</button>
   </div>
 </div>
 
@@ -688,38 +565,51 @@
       <select id="s-ocr-lang">
         <option value="rus+eng">Рус + Eng</option>
         <option value="rus+eng+tat">Рус + Eng + Тат</option>
-        <option value="rus">Рус</option>
-        <option value="eng">Eng</option>
+        <option value="rus">Русский</option>
+        <option value="eng">English</option>
         <option value="deu">Deutsch</option>
         <option value="fra">Français</option>
         <option value="spa">Español</option>
+        <option value="ita">Italiano</option>
+        <option value="por">Português</option>
         <option value="ukr">Українська</option>
+        <option value="bel">Беларуская</option>
+        <option value="kaz">Қазақша</option>
+        <option value="uzb">O'zbek</option>
+        <option value="tur">Türkçe</option>
+        <option value="ara">العربية</option>
+        <option value="chi_sim">中文简体</option>
+        <option value="chi_tra">中文繁體</option>
+        <option value="jpn">日本語</option>
+        <option value="kor">한국어</option>
+        <option value="hin">हिन्दी</option>
+        <option value="equ">🧮 Math (только цифры и символы)</option>
       </select>
     </div>
     <div class="settings-row">
       <label>Обработка фото</label>
       <select id="s-preprocess">
-        <option value="0">0 — Без обработки</option>
+        <option value="0">0 — Без</option>
         <option value="1" selected>1 — Контраст</option>
-        <option value="2">2 — Ч/Б адаптивный</option>
+        <option value="2">2 — Ч/Б</option>
         <option value="3">3 — Резкость</option>
         <option value="4">4 — Ч/Б + резкость</option>
-        <option value="5">5 — Удаление теней</option>
+        <option value="5">5 — Тени</option>
         <option value="6">6 — Максимум</option>
       </select>
     </div>
     <div class="settings-row">
       <label>Авто-выбор</label>
       <select id="s-auto">
-        <option value="1" selected>Включён</option>
-        <option value="0">Выключен</option>
+        <option value="1" selected>Вкл</option>
+        <option value="0">Выкл</option>
       </select>
     </div>
     <div class="settings-row">
       <label>Озвучка</label>
       <select id="s-tts">
-        <option value="0">Выключена</option>
-        <option value="1">Автоматически</option>
+        <option value="0">Выкл</option>
+        <option value="1">Авто</option>
       </select>
     </div>
     <div class="settings-row">
@@ -744,91 +634,33 @@
   </div>
 </div>
 
-<script type="application/manifest+json" id="pwa-manifest">
-{
-  "name": "Умный учебный ИИ",
-  "short_name": "Умный ИИ",
-  "start_url": ".",
-  "display": "standalone",
-  "background_color": "#0d1117",
-  "theme_color": "#0d1117",
-  "orientation": "portrait",
-  "icons": [{
-    "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjM2IiBmaWxsPSIjMWY2ZmViIi8+PHRleHQgeD0iOTYiIHk9IjEzMCIgZm9udC1zaXplPSIxMDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIj7in6A8L3RleHQ+PC9zdmc+",
-    "sizes": "192x192",
-    "type": "image/svg+xml"
-  }]
-}
-</script>
-
 <script type="module">
 import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
 // ============================================================
-// === ВНЕШНИЕ БИБЛИОТЕКИ ===
+// === OCR — TESSERACT ЧЕРЕЗ WINDOW ===
 // ============================================================
-let Tesseract = null;
-let pdfjsLib = null;
-let mammoth = null;
-let katex = null;
-let marked = null;
+// Tesseract загружен через <script> тег в <head>.
+// window.Tesseract доступен сразу — не нужен import().
 
-// ---------- TESSERACT OCR (ИСПРАВЛЕНО) ----------
-async function loadTesseract() {
-  if (Tesseract) return Tesseract;
-  addMessage('sys', 'Загрузка OCR-движка (~10 MB)...');
-
-  // Список источников и версий
-  const sources = [
-    // v5 ESM
-    'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.esm.min.js',
-    'https://unpkg.com/tesseract.js@5.1.0/dist/tesseract.esm.min.js',
-    // v4 ESM
-    'https://cdn.jsdelivr.net/npm/tesseract.js@4.1.4/dist/tesseract.esm.min.js',
-    'https://unpkg.com/tesseract.js@4.1.4/dist/tesseract.esm.min.js',
-  ];
-
-  let api = null;
-  let lastError = null;
-
-  for (const url of sources) {
-    try {
-      const mod = await import(url);
-      // Извлекаем API из .default или из модуля
-      const candidate = mod.default || mod;
-      if (candidate && typeof candidate.createWorker === 'function') {
-        api = candidate;
-        console.log('[Tesseract] loaded from:', url);
-        break;
-      } else if (mod && typeof mod.createWorker === 'function') {
-        api = mod;
-        console.log('[Tesseract] loaded (module.createWorker) from:', url);
-        break;
-      }
-    } catch (e) {
-      console.warn('[Tesseract] failed from', url, e.message);
-      lastError = e;
-    }
+function checkTesseract() {
+  if (typeof window.Tesseract === 'undefined') {
+    return { ok: false, error: 'Tesseract не загружен (нет интернета?)' };
   }
-
-  if (!api) {
-    addMessage('error',
-      'Не удалось загрузить Tesseract. Проверь интернет и обнови страницу. ' +
-      (lastError ? '(' + lastError.message + ')' : ''));
-    throw new Error('Tesseract not loaded');
+  const T = window.Tesseract;
+  if (typeof T.createWorker !== 'function') {
+    return { ok: false, error: 'createWorker не найден. Версия: ' + (T.version || '?') };
   }
-
-  Tesseract = api;
-  addMessage('stat', '✅ OCR готов');
-  return Tesseract;
+  return { ok: true, api: T };
 }
 
 async function runOCR(imageData, lang, onProgress) {
-  const T = await loadTesseract();
-
-  if (!T || typeof T.createWorker !== 'function') {
-    throw new Error('Tesseract.createWorker недоступна');
+  const check = checkTesseract();
+  if (!check.ok) {
+    throw new Error(check.error);
   }
+
+  const T = check.api;
 
   const worker = await T.createWorker(lang, 1, {
     logger: m => {
@@ -849,29 +681,12 @@ async function runOCR(imageData, lang, onProgress) {
   }
 }
 
-// ---------- PDF.js ----------
-async function loadPdfJs() {
-  if (pdfjsLib) return pdfjsLib;
-  addMessage('sys', 'Загрузка PDF.js...');
-  const mod = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs');
-  mod.GlobalWorkerOptions.workerSrc =
-    'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
-  pdfjsLib = mod;
-  addMessage('stat', '✅ PDF готов');
-  return pdfjsLib;
-}
+// ============================================================
+// === MARKED + KATEX ===
+// ============================================================
+let katex = null;
+let marked = null;
 
-// ---------- Mammoth (DOCX) ----------
-async function loadMammoth() {
-  if (mammoth) return mammoth;
-  addMessage('sys', 'Загрузка DOCX...');
-  const mod = await import('https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js');
-  mammoth = mod.default || mod;
-  addMessage('stat', '✅ DOCX готов');
-  return mammoth;
-}
-
-// ---------- KaTeX ----------
 async function loadKatex() {
   if (katex) return katex;
   if (!document.getElementById('katex-css')) {
@@ -883,188 +698,115 @@ async function loadKatex() {
   }
   const mod = await import('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.mjs');
   katex = mod.default || mod;
-  addMessage('stat', '✅ KaTeX готов');
   return katex;
 }
 
-// ---------- Marked (Markdown) ----------
 async function loadMarked() {
   if (marked) return marked;
   const mod = await import('https://cdn.jsdelivr.net/npm/marked@12.0.0/lib/marked.esm.js');
   marked = mod.marked || mod;
-  if (marked.setOptions) {
-    marked.setOptions({ breaks: true, gfm: true });
-  }
+  if (marked.setOptions) marked.setOptions({ breaks: true, gfm: true });
   return marked;
 }
 
+async function renderMarkdown(text) {
+  try {
+    const md = await loadMarked();
+    const kx = await loadKatex();
+
+    const formulas = [];
+    let processed = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, f) => {
+      formulas.push({ type: 'block', formula: f });
+      return `\n\nFORMULA_BLOCK_${formulas.length - 1}\n\n`;
+    });
+    processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, f) => {
+      formulas.push({ type: 'inline', formula: f });
+      return `FORMULA_INLINE_${formulas.length - 1}`;
+    });
+
+    let html = md.parse(processed);
+
+    html = html.replace(/FORMULA_BLOCK_(\d+)/g, (_, i) => {
+      const f = formulas[parseInt(i)];
+      try { return kx.renderToString(f.formula, { displayMode: true, throwOnError: false }); }
+      catch (e) { return '<code>' + escapeHtml(f.formula) + '</code>'; }
+    });
+    html = html.replace(/FORMULA_INLINE_(\d+)/g, (_, i) => {
+      const f = formulas[parseInt(i)];
+      try { return kx.renderToString(f.formula, { displayMode: false, throwOnError: false }); }
+      catch (e) { return '<code>' + escapeHtml(f.formula) + '</code>'; }
+    });
+
+    return html;
+  } catch (e) {
+    console.warn('MD error:', e);
+    return escapeHtml(text);
+  }
+}
+
 // ============================================================
-// === РЕЕСТР МОДЕЛЕЙ ===
+// === PDF.js ===
+// ============================================================
+let pdfjsLib = null;
+async function loadPdfJs() {
+  if (pdfjsLib) return pdfjsLib;
+  addMessage('sys', 'Загрузка PDF.js...');
+  const mod = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs');
+  mod.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
+  pdfjsLib = mod;
+  addMessage('stat', '✅ PDF готов');
+  return pdfjsLib;
+}
+
+// ============================================================
+// === Mammoth ===
+// ============================================================
+let mammoth = null;
+async function loadMammoth() {
+  if (mammoth) return mammoth;
+  const mod = await import('https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js');
+  mammoth = mod.default || mod;
+  return mammoth;
+}
+
+// ============================================================
+// === МОДЕЛИ ===
 // ============================================================
 const MODELS = {
-  "smol360": {
-    id: "SmolLM2-360M-Instruct-q4f16_1-MLC",
-    name: "SmolLM2 360M", size: "250 MB", ram: "~600 MB", speed: "25–40",
-    category: "🚀 Быстрые", desc: "Мгновенная", tags: ["быстрые"],
-  },
-  "qwen05": {
-    id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
-    name: "Qwen2.5 0.5B", size: "350 MB", ram: "~800 MB", speed: "18–28",
-    category: "🚀 Быстрые", desc: "Максимум скорости", tags: ["быстрые"],
-  },
-  "qwen3_06": {
-    id: "Qwen3-0.6B-q4f16_1-MLC",
-    name: "Qwen3 0.6B", size: "400 MB", ram: "~900 MB", speed: "15–25",
-    category: "🚀 Быстрые", desc: "Новая Qwen", tags: ["быстрые"],
-  },
-  "llama1b": {
-    id: "Llama-3.2-1B-Instruct-q4f16_1-MLC",
-    name: "Llama 3.2 1B", size: "700 MB", ram: "~1.5 GB", speed: "12–18",
-    category: "⚖️ Оптимум", desc: "Быстрая", tags: ["текст"],
-  },
-  "tinyllama": {
-    id: "TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC",
-    name: "TinyLlama 1.1B", size: "700 MB", ram: "~1.5 GB", speed: "10–16",
-    category: "⚖️ Оптимум", desc: "Классика", tags: ["текст"],
-  },
-  "qwen15": {
-    id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
-    name: "Qwen2.5 1.5B ⭐", size: "1 GB", ram: "~2 GB", speed: "8–14",
-    category: "⚖️ Оптимум", default: true,
-    desc: "Лучший баланс", tags: ["текст", "общее"],
-  },
-  "qwen3_17": {
-    id: "Qwen3-1.7B-q4f16_1-MLC",
-    name: "Qwen3 1.7B", size: "1.1 GB", ram: "~2.1 GB", speed: "7–12",
-    category: "⚖️ Оптимум", desc: "Thinking", tags: ["текст", "reasoning"],
-  },
-  "smol17": {
-    id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC",
-    name: "SmolLM2 1.7B", size: "1 GB", ram: "~2 GB", speed: "7–12",
-    category: "⚖️ Оптимум", desc: "Код", tags: ["код"],
-  },
-  "stable16": {
-    id: "StableLM-2-1.6B-q4f16_1-MLC",
-    name: "StableLM 2 1.6B", size: "1 GB", ram: "~2 GB", speed: "7–12",
-    category: "⚖️ Оптимум", desc: "Нейтральная", tags: ["текст"],
-  },
-  "phi2": {
-    id: "Phi-2-q4f16_1-MLC",
-    name: "Phi-2 (2.7B)", size: "1.5 GB", ram: "~3 GB", speed: "4–7",
-    category: "⚖️ Оптимум", desc: "Логика", tags: ["математика"],
-  },
-  "qwen_math15": {
-    id: "Qwen2.5-Math-1.5B-Instruct-q4f16_1-MLC",
-    name: "Qwen2.5 Math 1.5B 🧮", size: "1 GB", ram: "~2 GB", speed: "8–12",
-    category: "🧮 Математика", desc: "Уравнения",
-    tags: ["математика", "физика"],
-  },
-  "deepseek_r1": {
-    id: "DeepSeek-R1-Distill-Qwen-1.5B-q4f16_1-MLC",
-    name: "DeepSeek R1 1.5B 🧠", size: "1 GB", ram: "~2 GB", speed: "6–10",
-    category: "🧮 Математика", desc: "Chain-of-thought",
-    tags: ["математика", "reasoning"],
-  },
-  "deepseek_r1_7b": {
-    id: "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC",
-    name: "DeepSeek R1 7B", size: "4.5 GB", ram: "~7 GB", speed: "0.5–1.5",
-    category: "🧮 Математика", desc: "Много RAM",
-    tags: ["математика", "heavy"],
-  },
-  "qwen_coder15": {
-    id: "Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC",
-    name: "Qwen2.5 Coder 1.5B 💻", size: "1 GB", ram: "~2 GB", speed: "8–12",
-    category: "💻 Код", desc: "Программирование", tags: ["код"],
-  },
-  "qwen_coder7b": {
-    id: "Qwen2.5-Coder-7B-Instruct-q4f16_1-MLC",
-    name: "Qwen2.5 Coder 7B", size: "4.5 GB", ram: "~7 GB", speed: "0.5–1.5",
-    category: "💻 Код", desc: "Серьёзный код", tags: ["код", "heavy"],
-  },
-  "gemma2b": {
-    id: "gemma-2-2b-it-q4f16_1-MLC",
-    name: "Gemma 2 2B", size: "1.5 GB", ram: "~3 GB", speed: "4–7",
-    category: "🧠 Умные", desc: "Google", tags: ["текст"],
-  },
-  "llama3b": {
-    id: "Llama-3.2-3B-Instruct-q4f16_1-MLC",
-    name: "Llama 3.2 3B", size: "2 GB", ram: "~3.5 GB", speed: "3–5",
-    category: "🧠 Умные", desc: "Умнее", tags: ["текст"],
-  },
-  "qwen3b": {
-    id: "Qwen2.5-3B-Instruct-q4f16_1-MLC",
-    name: "Qwen2.5 3B", size: "2 GB", ram: "~3.5 GB", speed: "3–5",
-    category: "🧠 Умные", desc: "Больше знаний", tags: ["текст"],
-  },
-  "redpajama3b": {
-    id: "RedPajama-INCITE-Chat-3B-v1-q4f16_1-MLC",
-    name: "RedPajama 3B", size: "2 GB", ram: "~3.5 GB", speed: "3–5",
-    category: "🧠 Умные", desc: "Открытая", tags: ["текст"],
-  },
-  "phi35": {
-    id: "Phi-3.5-mini-instruct-q4f16_1-MLC",
-    name: "Phi-3.5 Mini (3.8B)", size: "2.2 GB", ram: "~4 GB", speed: "2–4",
-    category: "🧠 Умные", desc: "Логика",
-    tags: ["математика", "reasoning"],
-  },
-  "mistral7b": {
-    id: "Mistral-7B-Instruct-v0.3-q4f16_1-MLC",
-    name: "Mistral 7B", size: "4.5 GB", ram: "~7 GB", speed: "0.5–1.5",
-    category: "🧠 Умные", desc: "Мощная", tags: ["текст", "heavy"],
-  },
-  "llama31_8b": {
-    id: "Llama-3.1-8B-Instruct-q4f16_1-MLC",
-    name: "Llama 3.1 8B", size: "4.9 GB", ram: "~7.5 GB", speed: "0.5–1.2",
-    category: "🧠 Умные", desc: "Топ качество", tags: ["текст", "heavy"],
-  },
-  "qwen_qwq": {
-    id: "QwQ-32B-Preview-q4f16_1-MLC",
-    name: "QwQ 32B", size: "18 GB", ram: "~24 GB", speed: "<0.3",
-    category: "🔬 Reasoning", desc: "Только ПК",
-    tags: ["reasoning", "huge"],
-  },
-  "phi35v": {
-    id: "Phi-3.5-vision-instruct-q4f16_1-MLC",
-    name: "Phi-3.5 Vision 👁️", size: "3.5 GB", ram: "~5.5 GB", speed: "0.3–1",
-    category: "👁️ Vision", desc: "Картинки",
-    tags: ["vision", "heavy"],
-  },
+  "smol360": { id: "SmolLM2-360M-Instruct-q4f16_1-MLC", name: "SmolLM2 360M", size: "250 MB", ram: "~600 MB", speed: "25–40", category: "🚀 Быстрые", desc: "Мгновенная", tags: ["быстрые"] },
+  "qwen05": { id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC", name: "Qwen2.5 0.5B", size: "350 MB", ram: "~800 MB", speed: "18–28", category: "🚀 Быстрые", desc: "Максимум скорости", tags: ["быстрые"] },
+  "qwen3_06": { id: "Qwen3-0.6B-q4f16_1-MLC", name: "Qwen3 0.6B", size: "400 MB", ram: "~900 MB", speed: "15–25", category: "🚀 Быстрые", desc: "Новая Qwen", tags: ["быстрые"] },
+  "llama1b": { id: "Llama-3.2-1B-Instruct-q4f16_1-MLC", name: "Llama 3.2 1B", size: "700 MB", ram: "~1.5 GB", speed: "12–18", category: "⚖️ Оптимум", desc: "Быстрая", tags: ["текст"] },
+  "tinyllama": { id: "TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC", name: "TinyLlama 1.1B", size: "700 MB", ram: "~1.5 GB", speed: "10–16", category: "⚖️ Оптимум", desc: "Классика", tags: ["текст"] },
+  "qwen15": { id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC", name: "Qwen2.5 1.5B ⭐", size: "1 GB", ram: "~2 GB", speed: "8–14", category: "⚖️ Оптимум", desc: "Лучший баланс", tags: ["текст", "общее"], default: true },
+  "qwen3_17": { id: "Qwen3-1.7B-q4f16_1-MLC", name: "Qwen3 1.7B", size: "1.1 GB", ram: "~2.1 GB", speed: "7–12", category: "⚖️ Оптимум", desc: "Thinking", tags: ["текст"] },
+  "smol17": { id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC", name: "SmolLM2 1.7B", size: "1 GB", ram: "~2 GB", speed: "7–12", category: "⚖️ Оптимум", desc: "Код", tags: ["код"] },
+  "stable16": { id: "StableLM-2-1.6B-q4f16_1-MLC", name: "StableLM 2 1.6B", size: "1 GB", ram: "~2 GB", speed: "7–12", category: "⚖️ Оптимум", desc: "Нейтральная", tags: ["текст"] },
+  "phi2": { id: "Phi-2-q4f16_1-MLC", name: "Phi-2 (2.7B)", size: "1.5 GB", ram: "~3 GB", speed: "4–7", category: "⚖️ Оптимум", desc: "Логика", tags: ["математика"] },
+  "qwen_math15": { id: "Qwen2.5-Math-1.5B-Instruct-q4f16_1-MLC", name: "Qwen2.5 Math 1.5B 🧮", size: "1 GB", ram: "~2 GB", speed: "8–12", category: "🧮 Математика", desc: "Уравнения", tags: ["математика", "физика"] },
+  "deepseek_r1": { id: "DeepSeek-R1-Distill-Qwen-1.5B-q4f16_1-MLC", name: "DeepSeek R1 1.5B 🧠", size: "1 GB", ram: "~2 GB", speed: "6–10", category: "🧮 Математика", desc: "Chain-of-thought", tags: ["математика"] },
+  "qwen_coder15": { id: "Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC", name: "Qwen2.5 Coder 1.5B 💻", size: "1 GB", ram: "~2 GB", speed: "8–12", category: "💻 Код", desc: "Программирование", tags: ["код"] },
+  "gemma2b": { id: "gemma-2-2b-it-q4f16_1-MLC", name: "Gemma 2 2B", size: "1.5 GB", ram: "~3 GB", speed: "4–7", category: "🧠 Умные", desc: "Google", tags: ["текст"] },
+  "llama3b": { id: "Llama-3.2-3B-Instruct-q4f16_1-MLC", name: "Llama 3.2 3B", size: "2 GB", ram: "~3.5 GB", speed: "3–5", category: "🧠 Умные", desc: "Умнее", tags: ["текст"] },
+  "qwen3b": { id: "Qwen2.5-3B-Instruct-q4f16_1-MLC", name: "Qwen2.5 3B", size: "2 GB", ram: "~3.5 GB", speed: "3–5", category: "🧠 Умные", desc: "Больше знаний", tags: ["текст"] },
+  "phi35": { id: "Phi-3.5-mini-instruct-q4f16_1-MLC", name: "Phi-3.5 Mini", size: "2.2 GB", ram: "~4 GB", speed: "2–4", category: "🧠 Умные", desc: "Логика", tags: ["математика"] },
+  "phi35v": { id: "Phi-3.5-vision-instruct-q4f16_1-MLC", name: "Phi-3.5 Vision 👁️", size: "3.5 GB", ram: "~5.5 GB", speed: "0.3–1", category: "👁️ Vision", desc: "Картинки", tags: ["vision"] },
 };
 
 // ============================================================
-// === ПРЕСЕТЫ ПРЕДМЕТОВ ===
+// === ПРЕСЕТЫ ===
 // ============================================================
 const PRESETS = {
-  math: { icon: '🧮', name: 'Математика', sub: 'Уравнения, алгебра',
-    system: 'Ты учитель математики. Решай пошагово, используй LaTeX. Проверяй ответ.',
-    model: 'qwen_math15' },
-  physics: { icon: '⚛️', name: 'Физика', sub: 'Задачи, формулы',
-    system: 'Ты учитель физики. Указывай единицы, проверяй размерность. LaTeX.',
-    model: 'qwen_math15' },
-  chemistry: { icon: '🧪', name: 'Химия', sub: 'Реакции',
-    system: 'Ты учитель химии. Балансируй уравнения, объясняй механизмы.',
-    model: 'qwen15' },
-  biology: { icon: '🧬', name: 'Биология', sub: 'Клетки, гены',
-    system: 'Ты учитель биологии. Объясняй ясно, с примерами.',
-    model: 'qwen15' },
-  history: { icon: '📜', name: 'История', sub: 'Даты, события',
-    system: 'Ты учитель истории. Причины, события, последствия. Даты и персоналии.',
-    model: 'qwen15' },
-  lang: { icon: '🌐', name: 'Языки', sub: 'Перевод, грамматика',
-    system: 'Ты преподаватель языков. Переводи точно, объясняй грамматику.',
-    model: 'qwen15' },
-  code: { icon: '💻', name: 'Программирование', sub: 'Python, JS',
-    system: 'Ты программист. Чистый код с комментариями. Указывай сложность.',
-    model: 'qwen_coder15' },
-  teacher: { icon: '👨‍🏫', name: 'Учитель', sub: 'Наводящие вопросы',
-    system: 'Ты учитель-наставник. НЕ давай готовый ответ. Задавай наводящие вопросы.',
-    model: 'qwen15' },
-  examiner: { icon: '📝', name: 'Экзамен', sub: 'Тесты, вопросы',
-    system: 'Ты экзаменатор. Задавай вопросы, оценивай, объясняй ошибки.',
-    model: 'qwen15' },
-  summary: { icon: '📄', name: 'Конспект', sub: 'Сжатие',
-    system: 'Ты конспектируешь. Структура: заголовки, тезисы, формулы.',
-    model: 'qwen15' },
+  math: { icon: '🧮', name: 'Математика', sub: 'Уравнения', system: 'Ты учитель математики. Решай пошагово, LaTeX.', model: 'qwen_math15' },
+  physics: { icon: '⚛️', name: 'Физика', sub: 'Задачи', system: 'Ты учитель физики. Единицы, размерность, LaTeX.', model: 'qwen_math15' },
+  chemistry: { icon: '🧪', name: 'Химия', sub: 'Реакции', system: 'Ты учитель химии. Балансируй уравнения.', model: 'qwen15' },
+  biology: { icon: '🧬', name: 'Биология', sub: 'Клетки', system: 'Ты учитель биологии. Объясняй ясно.', model: 'qwen15' },
+  history: { icon: '📜', name: 'История', sub: 'Даты', system: 'Ты учитель истории. Причины, события.', model: 'qwen15' },
+  lang: { icon: '🌐', name: 'Языки', sub: 'Перевод', system: 'Ты преподаватель языков. Точно переводи.', model: 'qwen15' },
+  code: { icon: '💻', name: 'Код', sub: 'Python', system: 'Ты программист. Чистый код с комментариями.', model: 'qwen_coder15' },
+  teacher: { icon: '👨‍🏫', name: 'Учитель', sub: 'Наводящие', system: 'Ты учитель. НЕ давай ответ. Задавай вопросы.', model: 'qwen15' },
+  examiner: { icon: '📝', name: 'Экзамен', sub: 'Тесты', system: 'Ты экзаменатор. Оценивай, объясняй ошибки.', model: 'qwen15' },
+  summary: { icon: '📄', name: 'Конспект', sub: 'Сжатие', system: 'Конспектируй: заголовки, тезисы, формулы.', model: 'qwen15' },
 };
 
 // ============================================================
@@ -1080,7 +822,6 @@ let chats = [];
 let abortController = null;
 let isLoading = false;
 let isGenerating = false;
-let pendingImage = null;
 let lastOCRText = '';
 let lastRequestTime = 0;
 let benchRunning = false;
@@ -1089,20 +830,12 @@ let benchResults = [];
 let recognition = null;
 let isRecording = false;
 let autoScroll = true;
-let lastBotMessage = null;
 let lastUserPrompt = null;
 
-let stats = {
-  requests: 0, totalTokens: 0, totalTime: 0, ttfts: [],
-  ocrCount: 0, ocrTime: 0, autoSwitches: 0,
-};
+let stats = { requests: 0, totalTokens: 0, totalTime: 0, ttfts: [], ocrCount: 0, ocrTime: 0, autoSwitches: 0 };
 let sessionStats = { tokens: 0, start: 0, swaps: 0, files: 0, ocrChars: 0 };
 
-let pomodoro = {
-  workMin: 25, breakMin: 5,
-  timeLeft: 25 * 60, mode: 'work',
-  running: false, interval: null,
-};
+let pomodoro = { workMin: 25, breakMin: 5, timeLeft: 25 * 60, mode: 'work', running: false, interval: null };
 
 const $ = id => document.getElementById(id);
 const chatEl = $('chat');
@@ -1118,31 +851,23 @@ const statsEl = $('stats');
 // === НАСТРОЙКИ ===
 // ============================================================
 const DEFAULT_SETTINGS = {
-  temperature: 0.6,
-  max_tokens: 500,
-  context_window_size: 1024,
-  prefill_chunk_size: 256,
-  top_p: 0.9,
-  kvCacheDtype: "q4f16_1",
-  ocrLang: "rus+eng",
-  preprocess: 1,
-  autoMode: 1,
-  tts: 0,
-  theme: "dark",
+  temperature: 0.6, max_tokens: 500, context_window_size: 1024,
+  prefill_chunk_size: 256, top_p: 0.9, kvCacheDtype: "q4f16_1",
+  ocrLang: "rus+eng", preprocess: 1, autoMode: 1, tts: 0, theme: "dark",
 };
 
 let SETTINGS = loadSettings();
 
 function loadSettings() {
   try {
-    const raw = localStorage.getItem('ai-settings-v6');
+    const raw = localStorage.getItem('ai-settings-v7');
     if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
   } catch (e) {}
   return { ...DEFAULT_SETTINGS };
 }
 
 function saveSettings() {
-  try { localStorage.setItem('ai-settings-v6', JSON.stringify(SETTINGS)); } catch (e) {}
+  try { localStorage.setItem('ai-settings-v7', JSON.stringify(SETTINGS)); } catch (e) {}
 }
 
 function applySettings() {
@@ -1174,23 +899,16 @@ function applyTheme(theme) {
 // ============================================================
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;',
-    '"': '&quot;', "'": '&#39;'
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   })[c]);
 }
-
-function fmtNum(n, d) {
-  if (!isFinite(n)) return '—';
-  return Number(n).toFixed(d === undefined ? 1 : d);
-}
-
+function fmtNum(n, d) { if (!isFinite(n)) return '—'; return Number(n).toFixed(d === undefined ? 1 : d); }
 function fmtBytes(b) {
   if (b < 1024) return b + ' B';
   if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
   if (b < 1073741824) return (b / 1048576).toFixed(1) + ' MB';
   return (b / 1073741824).toFixed(2) + ' GB';
 }
-
 function nowSec() { return performance.now() / 1000; }
 
 function addMessage(cls, text, opts) {
@@ -1210,13 +928,9 @@ function addAutoCard(text) {
   div.innerHTML = text;
   chatEl.appendChild(div);
   chatEl.scrollTop = chatEl.scrollHeight;
-  return div;
 }
 
-function showStatus(text, cls) {
-  statusEl.textContent = text;
-  statusEl.className = cls || '';
-}
+function showStatus(text, cls) { statusEl.textContent = text; statusEl.className = cls || ''; }
 
 function showStats(text) {
   statsEl.innerHTML = text;
@@ -1226,7 +940,6 @@ function showStats(text) {
 }
 
 function clearChat() { chatEl.innerHTML = ''; }
-
 function closeModal(id) { $(id).classList.remove('show'); }
 function openModal(id) { $(id).classList.add('show'); }
 window.closeModal = closeModal;
@@ -1237,125 +950,31 @@ function autoResizeInput() {
 }
 
 function getSystemPrompt() {
-  if (currentPreset !== 'default' && PRESETS[currentPreset]) {
-    return PRESETS[currentPreset].system;
-  }
+  if (currentPreset !== 'default' && PRESETS[currentPreset]) return PRESETS[currentPreset].system;
   const info = MODELS[currentModelKey];
   if (info && info.tags && info.tags.includes('математика')) {
-    return 'Ты учитель математики. Решай пошагово, используй LaTeX. ' +
-      'Языки: русский, татарский, английский.';
+    return 'Ты учитель математики. Решай пошагово, используй LaTeX. Языки: русский, татарский, английский.';
   }
-  if (info && info.tags && info.tags.includes('код')) {
-    return 'Ты программист. Пиши чистый код с комментариями.';
-  }
-  return 'Ты помощник для учёбы. Отвечай ясно, по делу. ' +
-    'Языки: русский, татарский, английский. Для математики — пошагово.';
+  if (info && info.tags && info.tags.includes('код')) return 'Ты программист. Пиши чистый код.';
+  return 'Ты помощник для учёбы. Языки: русский, татарский, английский. Для математики — пошагово.';
 }
 
 function updateAutoBtn() {
   const btn = $('btn-auto');
-  if (autoMode) {
-    btn.classList.add('on');
-    btn.textContent = '🎯 Авто ✓';
-  } else {
-    btn.classList.remove('on');
-    btn.textContent = '🎯 Авто';
-  }
-}
-
-// ============================================================
-// === MARKDOWN + KATEX ===
-// ============================================================
-async function renderMarkdown(text) {
-  try {
-    const md = await loadMarked();
-    const kx = await loadKatex();
-
-    const formulas = [];
-    let processed = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, formula) => {
-      formulas.push({ type: 'block', formula });
-      return `\n\nFORMULA_BLOCK_${formulas.length - 1}\n\n`;
-    });
-    processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, formula) => {
-      formulas.push({ type: 'inline', formula });
-      return `FORMULA_INLINE_${formulas.length - 1}`;
-    });
-
-    let html = md.parse(processed);
-
-    html = html.replace(/FORMULA_BLOCK_(\d+)/g, (_, i) => {
-      const f = formulas[parseInt(i)];
-      try {
-        return kx.renderToString(f.formula, {
-          displayMode: true, throwOnError: false,
-        });
-      } catch (e) {
-        return '<code>' + escapeHtml(f.formula) + '</code>';
-      }
-    });
-    html = html.replace(/FORMULA_INLINE_(\d+)/g, (_, i) => {
-      const f = formulas[parseInt(i)];
-      try {
-        return kx.renderToString(f.formula, {
-          displayMode: false, throwOnError: false,
-        });
-      } catch (e) {
-        return '<code>' + escapeHtml(f.formula) + '</code>';
-      }
-    });
-
-    return html;
-  } catch (e) {
-    console.warn('Markdown render error:', e);
-    return escapeHtml(text);
-  }
+  if (autoMode) { btn.classList.add('on'); btn.textContent = '🎯 Авто ✓'; }
+  else { btn.classList.remove('on'); btn.textContent = '🎯 Авто'; }
 }
 
 // ============================================================
 // === АВТО-ОПРЕДЕЛЕНИЕ МОДЕЛИ ===
 // ============================================================
 const AUTO_RULES = [
-  { priority: 100,
-    patterns: [
-      /\b\d+\s*[+\-*/×÷]\s*\d+/,
-      /\b[xyza]\s*[\^²³]/,
-      /[√∑∫π∞±≤≥≠]/,
-      /\b(уравнени|реши|вычисли|дискриминант|производн|интеграл|матриц|тригонометр|синус|косинус|тангенс)/i,
-      /\b(sin|cos|tan|log|ln|lim|sqrt)/i,
-      /\b\d+x\s*[+\-=]/,
-      /[²³¹⁰]/,
-      /\b(solve|equation|derivative|integral)/i,
-    ],
-    model: "qwen_math15", reason: "математика" },
-  { priority: 95,
-    patterns: [
-      /\b(докажи|доказать|доказательство)/i,
-      /\b(теорема|парадокс)/i,
-    ],
-    model: "deepseek_r1", reason: "логика" },
-  { priority: 90,
-    patterns: [
-      /\b(код|программ|функци|класс|python|javascript|java|c\+\+|алгоритм|скрипт)/i,
-      /\b(function|class|def |import |const |let |var )/,
-      /\b(sql|html|css|api|json|regex)\b/i,
-    ],
-    model: "qwen_coder15", reason: "программирование" },
-  { priority: 70,
-    patterns: [
-      /\b(переведи|перевод|translate|как сказать|как будет по)/i,
-    ],
-    model: "qwen15", reason: "перевод" },
-  { priority: 60,
-    patterns: [
-      /\b(конспект|кратко|сократи|суммируй|выдели главное|тезисы)/i,
-    ],
-    model: "qwen15", reason: "конспект" },
-  { priority: 40,
-    patterns: [
-      /^(привет|хай|hello|hi|как дела|что ты умеешь|кто ты)/i,
-      /^.{0,30}$/,
-    ],
-    model: "qwen05", reason: "простой вопрос" },
+  { priority: 100, patterns: [/\b\d+\s*[+\-*/×÷]\s*\d+/, /\b[xyza]\s*[\^²³]/, /[√∑∫π∞±≤≥≠]/, /\b(уравнени|реши|вычисли|дискриминант|производн|интеграл|матриц|тригонометр)/i, /\b(sin|cos|tan|log|ln|lim)/i, /[²³¹⁰]/], model: "qwen_math15", reason: "математика" },
+  { priority: 95, patterns: [/\b(докажи|доказательство|теорема)/i], model: "deepseek_r1", reason: "логика" },
+  { priority: 90, patterns: [/\b(код|программ|функци|python|javascript|алгоритм)/i, /\b(function|class|def )/], model: "qwen_coder15", reason: "код" },
+  { priority: 70, patterns: [/\b(переведи|перевод|translate)/i], model: "qwen15", reason: "перевод" },
+  { priority: 60, patterns: [/\b(конспект|кратко|сократи|суммируй)/i], model: "qwen15", reason: "конспект" },
+  { priority: 40, patterns: [/^(привет|хай|hello|hi)/i, /^.{0,30}$/], model: "qwen05", reason: "простой" },
 ];
 
 function detectBestModel(text) {
@@ -1364,10 +983,7 @@ function detectBestModel(text) {
   const matched = [];
   for (const rule of AUTO_RULES) {
     for (const p of rule.patterns) {
-      if (p.test(t)) {
-        matched.push({ priority: rule.priority, model: rule.model, reason: rule.reason });
-        break;
-      }
+      if (p.test(t)) { matched.push({ priority: rule.priority, model: rule.model, reason: rule.reason }); break; }
     }
   }
   if (matched.length === 0) return null;
@@ -1381,40 +997,27 @@ function pickByRam(preferred) {
   const ram = navigator.deviceMemory || 4;
   const info = MODELS[preferred];
   if (!info) return preferred;
-  const requiredGb = parseFloat(info.ram.replace('~', '').replace(' GB', '').replace(' MB', ''));
+  const r = parseFloat(info.ram.replace('~', '').replace(' GB', '').replace(' MB', ''));
   const isMb = info.ram.includes('MB');
-  const requiredRamGb = isMb ? requiredGb / 1024 : requiredGb;
+  const ramGb = isMb ? r / 1024 : r;
   if (ram >= 8) return preferred;
-  if (ram >= 6 && requiredRamGb > 4) return 'qwen15';
-  if (ram >= 4 && requiredRamGb > 2) return 'qwen05';
-  if (ram < 4 && requiredRamGb > 1) return 'qwen05';
+  if (ram >= 6 && ramGb > 4) return 'qwen15';
+  if (ram >= 4 && ramGb > 2) return 'qwen05';
   return preferred;
 }
 
 // ============================================================
-// === ПАРСЕР ФОРМУЛ ===
+// === ФОРМУЛЫ ===
 // ============================================================
 function detectFormulas(text) {
   const formulas = [];
   const lines = text.split('\n');
-  const patterns = [
-    /[=<>≤≥≠±]/,
-    /\b\d+\s*[+\-*/×÷]\s*\d+/,
-    /\^/,
-    /[√∑∏∫π∞]/,
-    /[a-zA-Z]\s*[²³¹⁰]/,
-    /[a-zA-Z]\s*=\s*/,
-    /\b(sin|cos|tan|log|ln|lim|sqrt)\b/,
-    /\d+[xXyYzZ]\s*[+\-]/,
-  ];
+  const patterns = [/[=<>≤≥≠±]/, /\b\d+\s*[+\-*/×÷]\s*\d+/, /\^/, /[√∑∏∫π∞]/, /[a-zA-Z]\s*[²³¹⁰]/, /[a-zA-Z]\s*=\s*/, /\b(sin|cos|tan|log|ln)\b/, /\d+[xXyYzZ]\s*[+\-]/];
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (line.length < 3) continue;
     for (const p of patterns) {
-      if (p.test(line)) {
-        formulas.push({ line: i, text: line, latex: textToLatex(line) });
-        break;
-      }
+      if (p.test(line)) { formulas.push({ line: i, text: line, latex: textToLatex(line) }); break; }
     }
   }
   return formulas;
@@ -1423,9 +1026,7 @@ function detectFormulas(text) {
 function textToLatex(text) {
   let s = text;
   s = s.replace(/\^(\d+)/g, '^{$1}');
-  s = s.replace(/\^([a-zA-Z])/g, '^{$1}');
   s = s.replace(/×/g, ' \\times ');
-  s = s.replace(/·/g, ' \\cdot ');
   s = s.replace(/÷/g, ' \\div ');
   s = s.replace(/≠/g, ' \\neq ');
   s = s.replace(/≤/g, ' \\leq ');
@@ -1437,7 +1038,6 @@ function textToLatex(text) {
   s = s.replace(/∞/g, '\\infty ');
   s = s.replace(/∑/g, '\\sum ');
   s = s.replace(/∫/g, '\\int ');
-  s = s.replace(/\b(sin|cos|tan|log|ln|exp|max|min)\b/g, '\\$1');
   s = s.replace(/(\d+)\s*\/\s*(\d+)/g, '\\frac{$1}{$2}');
   return s;
 }
@@ -1453,59 +1053,49 @@ function preprocessImage(dataUrl, level) {
       const maxDim = 1800;
       let w = img.width, h = img.height;
       if (Math.max(w, h) > maxDim) {
-        const scale = maxDim / Math.max(w, h);
-        w = Math.round(w * scale);
-        h = Math.round(h * scale);
+        const s = maxDim / Math.max(w, h);
+        w = Math.round(w * s); h = Math.round(h * s);
       }
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
       ctx.drawImage(img, 0, 0, w, h);
 
       if (level > 0) {
-        const imgData = ctx.getImageData(0, 0, w, h);
-        const d = imgData.data;
-
+        const d = ctx.getImageData(0, 0, w, h).data;
         if (level >= 1) {
-          const factor = 1.4;
+          const f = 1.4;
           for (let i = 0; i < d.length; i += 4) {
-            d[i] = Math.min(255, Math.max(0, (d[i] - 128) * factor + 128));
-            d[i+1] = Math.min(255, Math.max(0, (d[i+1] - 128) * factor + 128));
-            d[i+2] = Math.min(255, Math.max(0, (d[i+2] - 128) * factor + 128));
+            d[i] = Math.min(255, Math.max(0, (d[i] - 128) * f + 128));
+            d[i+1] = Math.min(255, Math.max(0, (d[i+1] - 128) * f + 128));
+            d[i+2] = Math.min(255, Math.max(0, (d[i+2] - 128) * f + 128));
           }
         }
         if (level === 2 || level === 4 || level === 6) {
           let sum = 0;
-          for (let i = 0; i < d.length; i += 4) {
-            sum += 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
-          }
-          const avg = sum / (d.length / 4);
-          const threshold = avg * 0.9;
+          for (let i = 0; i < d.length; i += 4) sum += 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+          const th = (sum / (d.length / 4)) * 0.9;
           for (let i = 0; i < d.length; i += 4) {
             const g = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
-            const v = g > threshold ? 255 : 0;
+            const v = g > th ? 255 : 0;
             d[i] = d[i+1] = d[i+2] = v;
           }
         }
         if (level === 3 || level === 4 || level === 6) {
           const copy = new Uint8ClampedArray(d);
-          for (let y = 1; y < h - 1; y++) {
-            for (let x = 1; x < w - 1; x++) {
-              const idx = (y * w + x) * 4;
-              const val = 5 * copy[idx] - copy[idx - 4] - copy[idx + 4]
-                - copy[idx - w * 4] - copy[idx + w * 4];
-              const c = Math.max(0, Math.min(255, val));
-              d[idx] = d[idx+1] = d[idx+2] = c;
-            }
+          for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+            const i = (y * w + x) * 4;
+            const v = 5 * copy[i] - copy[i-4] - copy[i+4] - copy[i - w*4] - copy[i + w*4];
+            d[i] = d[i+1] = d[i+2] = Math.max(0, Math.min(255, v));
           }
         }
         if (level === 5 || level === 6) {
           for (let i = 0; i < d.length; i += 4) {
             const g = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
-            if (g > 180) { d[i] = d[i+1] = d[i+2] = 255; }
-            else if (g < 100) { d[i] = d[i+1] = d[i+2] = 0; }
+            if (g > 180) d[i] = d[i+1] = d[i+2] = 255;
+            else if (g < 100) d[i] = d[i+1] = d[i+2] = 0;
           }
         }
-        ctx.putImageData(imgData, 0, 0);
+        ctx.putImageData(new ImageData(d, w, h), 0, 0);
       }
       resolve(canvas.toDataURL('image/jpeg', 0.9));
     };
@@ -1515,76 +1105,64 @@ function preprocessImage(dataUrl, level) {
 }
 
 // ============================================================
-// === INDEXEDDB ===
+// === INDEXEDDB (ЧАТЫ) ===
 // ============================================================
-const DB_NAME = 'ai-db-v6';
+const DB_NAME = 'ai-db-v7';
 const DB_VERSION = 1;
 
 function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = e => {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open(DB_NAME, DB_VERSION);
+    r.onupgradeneeded = e => {
       const db = e.target.result;
-      if (!db.objectStoreNames.contains('chats')) {
-        db.createObjectStore('chats', { keyPath: 'id' });
-      }
+      if (!db.objectStoreNames.contains('chats')) db.createObjectStore('chats', { keyPath: 'id' });
     };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
   });
 }
 
-async function dbSet(store, value) {
+async function dbSet(v) {
   const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, 'readwrite');
-    const req = tx.objectStore(store).put(value);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
+  return new Promise((res, rej) => {
+    const tx = db.transaction('chats', 'readwrite');
+    const r = tx.objectStore('chats').put(v);
+    r.onsuccess = () => res();
+    r.onerror = () => rej(r.error);
   });
 }
 
-async function dbDel(store, key) {
+async function dbDel(k) {
   const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, 'readwrite');
-    const req = tx.objectStore(store).delete(key);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
+  return new Promise((res, rej) => {
+    const tx = db.transaction('chats', 'readwrite');
+    const r = tx.objectStore('chats').delete(k);
+    r.onsuccess = () => res();
+    r.onerror = () => rej(r.error);
   });
 }
 
-async function dbAll(store) {
+async function dbAll() {
   const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, 'readonly');
-    const req = tx.objectStore(store).getAll();
-    req.onsuccess = () => resolve(req.result || []);
-    req.onerror = () => reject(req.error);
+  return new Promise((res, rej) => {
+    const tx = db.transaction('chats', 'readonly');
+    const r = tx.objectStore('chats').getAll();
+    r.onsuccess = () => res(r.result || []);
+    r.onerror = () => rej(r.error);
   });
 }
 
-// ============================================================
-// === ЧАТЫ ===
-// ============================================================
-async function loadChats() {
-  chats = await dbAll('chats');
-  chats.sort((a, b) => b.updated - a.updated);
-}
+async function loadChats() { chats = await dbAll(); chats.sort((a, b) => b.updated - a.updated); }
 
 async function saveCurrentChat() {
-  const userMsgs = messages.filter(m => m.role === 'user');
-  if (userMsgs.length === 0) return;
+  const u = messages.filter(m => m.role === 'user');
+  if (u.length === 0) return;
   if (!currentChatId) currentChatId = 'chat_' + Date.now();
-  const first = userMsgs[0].content;
-  const title = typeof first === 'string' ? first.slice(0, 60) : 'Чат';
-  await dbSet('chats', {
-    id: currentChatId,
-    title,
-    model: currentModelKey,
-    preset: currentPreset,
-    messages: messages.filter(m => m.role !== 'system'),
-    updated: Date.now(),
+  const first = u[0].content;
+  await dbSet({
+    id: currentChatId, title: (typeof first === 'string' ? first.slice(0, 60) : 'Чат'),
+    model: currentModelKey, preset: currentPreset,
+    messages: messages.filter(m => m.role !== 'system'), updated: Date.now(),
   });
   await loadChats();
 }
@@ -1594,32 +1172,26 @@ function newChat() {
   messages = [{ role: 'system', content: getSystemPrompt() }];
   currentChatId = null;
   lastOCRText = '';
-  lastBotMessage = null;
   lastUserPrompt = null;
   clearChat();
-  addMessage('sys', 'Новый чат · ' + MODELS[currentModelKey].name +
-    (currentPreset !== 'default' ? ' · ' + PRESETS[currentPreset].name : ''));
+  addMessage('sys', 'Новый чат · ' + MODELS[currentModelKey].name);
   closeModal('modal-chats');
 }
 window.newChat = newChat;
 
 async function openChat(id) {
   if (messages.filter(m => m.role !== 'system').length > 0) await saveCurrentChat();
-  const chat = chats.find(c => c.id === id);
-  if (!chat) return;
-  messages = [{ role: 'system', content: getSystemPrompt() }, ...chat.messages];
+  const c = chats.find(x => x.id === id);
+  if (!c) return;
+  messages = [{ role: 'system', content: getSystemPrompt() }, ...c.messages];
   currentChatId = id;
   clearChat();
-  addMessage('sys', 'Чат · ' + new Date(chat.updated).toLocaleString() +
-    ' · ' + (MODELS[chat.model] ? MODELS[chat.model].name : chat.model));
-  for (const m of chat.messages) {
-    if (m.role === 'user' || m.role === 'assistant') {
-      if (m.role === 'assistant') {
-        const html = await renderMarkdown(m.content);
-        addMessage('bot', html, { html: true });
-      } else {
-        addMessage('user', m.content);
-      }
+  addMessage('sys', 'Чат · ' + new Date(c.updated).toLocaleString());
+  for (const m of c.messages) {
+    if (m.role === 'user') addMessage('user', m.content);
+    else if (m.role === 'assistant') {
+      const h = await renderMarkdown(m.content);
+      addMessage('bot', h, { html: true });
     }
   }
   closeModal('modal-chats');
@@ -1628,8 +1200,8 @@ window.openChat = openChat;
 
 async function deleteChat(id, ev) {
   ev.stopPropagation();
-  if (!confirm('Удалить этот чат?')) return;
-  await dbDel('chats', id);
+  if (!confirm('Удалить?')) return;
+  await dbDel(id);
   if (currentChatId === id) newChat();
   await loadChats();
   renderChatList();
@@ -1638,21 +1210,13 @@ window.deleteChat = deleteChat;
 
 function renderChatList(filter) {
   const list = $('chat-list');
-  let filtered = chats;
+  let f = chats;
   if (filter) {
-    const f = filter.toLowerCase();
-    filtered = chats.filter(c =>
-      c.title.toLowerCase().includes(f) ||
-      (c.messages || []).some(m =>
-        typeof m.content === 'string' && m.content.toLowerCase().includes(f)
-      )
-    );
+    const q = filter.toLowerCase();
+    f = chats.filter(c => c.title.toLowerCase().includes(q) || (c.messages || []).some(m => typeof m.content === 'string' && m.content.toLowerCase().includes(q)));
   }
-  if (filtered.length === 0) {
-    list.innerHTML = '<p style="color:var(--text2);">Нет чатов.</p>';
-    return;
-  }
-  list.innerHTML = filtered.slice(0, 100).map(c => `
+  if (f.length === 0) { list.innerHTML = '<p style="color:var(--text2);">Нет чатов.</p>'; return; }
+  list.innerHTML = f.slice(0, 100).map(c => `
     <div class="chat-item" onclick="openChat('${c.id}')">
       <div class="title">${escapeHtml(c.title)}</div>
       <div class="del" onclick="deleteChat('${c.id}', event)">🗑</div>
@@ -1661,11 +1225,9 @@ function renderChatList(filter) {
 }
 
 function exportChats() {
-  const blob = new Blob([JSON.stringify(chats, null, 2)], { type: 'application/json' });
+  const b = new Blob([JSON.stringify(chats, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'chats-' + Date.now() + '.json';
-  a.click();
+  a.href = URL.createObjectURL(b); a.download = 'chats-' + Date.now() + '.json'; a.click();
 }
 window.exportChats = exportChats;
 
@@ -1673,34 +1235,28 @@ function exportChatsMarkdown() {
   let md = '# Чаты\n\n';
   for (const c of chats) {
     md += `## ${c.title}\n\n`;
-    md += `_Модель: ${c.model} · ${new Date(c.updated).toLocaleString()}_\n\n`;
     for (const m of c.messages || []) {
       if (m.role === 'user') md += `**Вы:** ${m.content}\n\n`;
       else if (m.role === 'assistant') md += `${m.content}\n\n---\n\n`;
     }
-    md += '\n\n';
   }
-  const blob = new Blob([md], { type: 'text/markdown' });
+  const b = new Blob([md], { type: 'text/markdown' });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'chats-' + Date.now() + '.md';
-  a.click();
+  a.href = URL.createObjectURL(b); a.download = 'chats-' + Date.now() + '.md'; a.click();
 }
 window.exportChatsMarkdown = exportChatsMarkdown;
 
 function importChats() {
   const inp = document.createElement('input');
-  inp.type = 'file';
-  inp.accept = 'application/json';
+  inp.type = 'file'; inp.accept = 'application/json';
   inp.onchange = async e => {
-    const file = e.target.files[0];
-    const text = await file.text();
+    const f = e.target.files[0];
+    const t = await f.text();
     try {
-      const imported = JSON.parse(text);
-      for (const c of imported) await dbSet('chats', c);
-      await loadChats();
-      renderChatList();
-      alert('Импортировано: ' + imported.length);
+      const imp = JSON.parse(t);
+      for (const c of imp) await dbSet(c);
+      await loadChats(); renderChatList();
+      alert('Импортировано: ' + imp.length);
     } catch (err) { alert('Ошибка: ' + err.message); }
   };
   inp.click();
@@ -1719,24 +1275,23 @@ async function getCachedModels() {
     const dbs = await indexedDB.databases();
     for (const db of dbs) {
       if (db.name && db.name.toLowerCase().includes('webllm')) {
-        const models = await new Promise((resolve) => {
-          const req = indexedDB.open(db.name);
-          req.onsuccess = () => {
-            const db = req.result;
-            const stores = Array.from(db.objectStoreNames);
-            if (stores.length === 0) { resolve([]); db.close(); return; }
-            const tx = db.transaction(stores, 'readonly');
-            const store = tx.objectStore(stores[0]);
-            const keysReq = store.getAllKeys();
-            keysReq.onsuccess = () => { resolve(keysReq.result || []); db.close(); };
-            keysReq.onerror = () => { resolve([]); db.close(); };
+        const models = await new Promise((res) => {
+          const r = indexedDB.open(db.name);
+          r.onsuccess = () => {
+            const db = r.result;
+            const s = Array.from(db.objectStoreNames);
+            if (s.length === 0) { res([]); db.close(); return; }
+            const tx = db.transaction(s, 'readonly');
+            const k = tx.objectStore(s[0]).getAllKeys();
+            k.onsuccess = () => { res(k.result || []); db.close(); };
+            k.onerror = () => { res([]); db.close(); };
           };
-          req.onerror = () => resolve([]);
+          r.onerror = () => res([]);
         });
         for (const key of models) {
-          const keyStr = String(key);
+          const ks = String(key);
           Object.entries(MODELS).forEach(([k, m]) => {
-            if (keyStr.includes(m.id) || keyStr.includes(k)) cached.add(k);
+            if (ks.includes(m.id) || ks.includes(k)) cached.add(k);
           });
         }
       }
@@ -1750,45 +1305,25 @@ async function updateStorageInfo() {
   try {
     if (navigator.storage && navigator.storage.estimate) {
       const est = await navigator.storage.estimate();
-      const quota = est.quota || 0;
-      const usage = est.usage || 0;
-      const pct = quota > 0 ? (usage / quota * 100) : 0;
+      const q = est.quota || 0, u = est.usage || 0;
+      const p = q > 0 ? (u / q * 100) : 0;
       const cached = await getCachedModels();
       el.innerHTML = `
         <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-          <span>💾 Использовано: <b>${fmtBytes(usage)}</b></span>
-          <span>из <b>${fmtBytes(quota)}</b></span>
+          <span>💾 ${fmtBytes(u)}</span><span>из ${fmtBytes(q)}</span>
         </div>
-        <div class="storage-bar">
-          <div class="storage-bar-fill" style="width:${pct.toFixed(1)}%"></div>
-        </div>
-        <div style="margin-top:6px;font-size:10px;">
-          📦 Кэшировано: <b>${cached.size}</b> моделей
-        </div>
+        <div class="storage-bar"><div class="storage-bar-fill" style="width:${p.toFixed(1)}%"></div></div>
+        <div style="margin-top:6px;font-size:10px;">📦 Кэшировано: <b>${cached.size}</b> моделей</div>
       `;
-    } else {
-      el.innerHTML = '<span style="color:var(--text2);">Storage API недоступно</span>';
-    }
-  } catch (e) {
-    el.innerHTML = '<span style="color:var(--error);">Ошибка: ' + e.message + '</span>';
-  }
+    } else el.innerHTML = '<span style="color:var(--text2);">Storage API недоступно</span>';
+  } catch (e) { el.innerHTML = '<span style="color:var(--error);">' + e.message + '</span>'; }
 }
 
 async function clearModelCache() {
-  if (!confirm('Удалить все кэшированные модели?')) return;
+  if (!confirm('Удалить кэш моделей?')) return;
   try {
     const dbs = await indexedDB.databases();
-    for (const db of dbs) {
-      if (db.name && db.name.toLowerCase().includes('webllm')) {
-        indexedDB.deleteDatabase(db.name);
-      }
-    }
-    if ('caches' in window) {
-      const names = await caches.keys();
-      for (const n of names) {
-        if (n.toLowerCase().includes('webllm')) await caches.delete(n);
-      }
-    }
+    for (const db of dbs) if (db.name && db.name.toLowerCase().includes('webllm')) indexedDB.deleteDatabase(db.name);
     alert('Кэш очищен. Перезагрузи.');
     location.reload();
   } catch (e) { alert('Ошибка: ' + e.message); }
@@ -1800,78 +1335,61 @@ window.clearModelCache = clearModelCache;
 // ============================================================
 async function renderModelList() {
   const cached = await getCachedModels();
-  const categories = {};
-  Object.entries(MODELS).forEach(([key, m]) => {
-    const cat = m.category || '📦';
-    if (!categories[cat]) categories[cat] = [];
-    categories[cat].push([key, m]);
+  const cats = {};
+  Object.entries(MODELS).forEach(([k, m]) => {
+    const c = m.category || '📦';
+    if (!cats[c]) cats[c] = [];
+    cats[c].push([k, m]);
   });
-
-  const html = Object.entries(categories).map(([cat, models]) => `
-    <div class="category-label">${cat}</div>
-    ${models.map(([key, m]) => {
-      const isCached = cached.has(key);
-      const isSelected = key === currentModelKey;
-      return `
-        <div class="model-opt ${isSelected ? 'selected' : ''} ${isCached ? 'cached' : ''}"
-             onclick="switchModel('${key}')">
-          ${isCached ? '<div class="cached-badge">💾</div>' : ''}
-          <div class="name">${escapeHtml(m.name)}</div>
-          <div class="meta">
-            <span>💾 ${m.size}</span>
-            <span>🧠 ${m.ram}</span>
-            <span>⚡ ~${m.speed} т/с</span>
-          </div>
-          <div class="meta" style="margin-top:3px;">${escapeHtml(m.desc)}</div>
-        </div>
-      `;
+  $('model-list').innerHTML = Object.entries(cats).map(([c, ms]) => `
+    <div class="category-label">${c}</div>
+    ${ms.map(([k, m]) => {
+      const isC = cached.has(k);
+      const isS = k === currentModelKey;
+      return `<div class="model-opt ${isS?'selected':''} ${isC?'cached':''}" onclick="switchModel('${k}')">
+        ${isC?'<div class="cached-badge">💾</div>':''}
+        <div class="name">${escapeHtml(m.name)}</div>
+        <div class="meta"><span>💾 ${m.size}</span><span>🧠 ${m.ram}</span><span>⚡ ~${m.speed} т/с</span></div>
+        <div class="meta" style="margin-top:3px;">${escapeHtml(m.desc)}</div>
+      </div>`;
     }).join('')}
   `).join('');
-
-  $('model-list').innerHTML = html;
 }
 
 function autoSelectBest() {
   const ram = navigator.deviceMemory || 4;
-  let pick = 'qwen15';
-  if (ram >= 8) pick = 'qwen15';
-  else if (ram >= 6) pick = 'qwen15';
-  else if (ram >= 4) pick = 'llama1b';
-  else pick = 'smol360';
-  if (confirm(`RAM: ${ram} GB. Рекомендую ${MODELS[pick].name}. Использовать?`)) {
-    if (currentModelKey !== pick) switchModel(pick);
-  }
+  let p = 'qwen15';
+  if (ram >= 8) p = 'qwen15';
+  else if (ram >= 6) p = 'qwen15';
+  else if (ram >= 4) p = 'llama1b';
+  else p = 'smol360';
+  if (confirm(`RAM: ${ram} GB. ${MODELS[p].name}?`)) if (currentModelKey !== p) switchModel(p);
 }
 window.autoSelectBest = autoSelectBest;
 
 // ============================================================
-// === ПЕРЕКЛЮЧЕНИЕ МОДЕЛЕЙ ===
+// === ПЕРЕКЛЮЧЕНИЕ ===
 // ============================================================
 async function switchModel(key, reason) {
-  if (isLoading) { alert('Подожди загрузки.'); return; }
-  if (isGenerating) { alert('Дождись ответа.'); return; }
+  if (isLoading) { alert('Подожди.'); return; }
+  if (isGenerating) { alert('Дождись.'); return; }
   if (key === currentModelKey && engine) {
     if (reason) addAutoCard(`<b>🎯 ${reason}</b> — уже ${MODELS[key].name}`);
     closeModal('modal-models');
     return;
   }
-  if (!MODELS[key]) { addMessage('error', 'Модель не найдена: ' + key); return; }
-
+  if (!MODELS[key]) { addMessage('error', 'Модель не найдена'); return; }
   if (messages.filter(m => m.role !== 'system').length > 0) await saveCurrentChat();
   if (engine) { try { await engine.unload(); } catch (e) {} engine = null; }
-
   currentModelKey = key;
   localStorage.setItem('ai-model', key);
   sessionStats.swaps++;
   stats.autoSwitches++;
-
   messages = [{ role: 'system', content: getSystemPrompt() }];
   currentChatId = null;
   clearChat();
   closeModal('modal-models');
-
   if (reason) addAutoCard(`<b>🎯 ${reason}</b><br>Модель: <b>${MODELS[key].name}</b>`);
-
   await initEngine();
 }
 window.switchModel = switchModel;
@@ -1882,261 +1400,170 @@ window.switchModel = switchModel;
 async function initEngine() {
   if (engine) return;
   if (isLoading) return;
-
   const info = MODELS[currentModelKey];
   if (!info) { addMessage('error', 'Модель не найдена'); return; }
   isLoading = true;
-
   showStatus('Загрузка ' + info.name + '...', 'loading');
   progressEl.classList.add('show');
   progressBar.style.width = '0%';
-
   const cached = await getCachedModels();
-  const wasCached = cached.has(currentModelKey);
+  const was = cached.has(currentModelKey);
   addMessage('sys', `Загрузка: ${info.name} (${info.size})`);
-
-  if (!wasCached) {
-    addMessage('warn', '⚠️ Первая загрузка идёт с сервера. Дождись 100%.');
-  } else {
-    addMessage('stat', '💾 Из кэша — мгновенно');
-  }
-
+  if (!was) addMessage('warn', '⚠️ Первая загрузка. Дождись 100%.');
+  else addMessage('stat', '💾 Из кэша');
   const t0 = nowSec();
-  let lastPct = -1;
-
+  let last = -1;
   try {
     engine = await webllm.CreateMLCEngine(info.id, {
       initProgressCallback: r => {
-        const pct = Math.round(r.progress * 100);
-        progressBar.style.width = pct + '%';
-        showStatus(`${info.name}: ${pct}%`, 'loading');
-        if (pct >= lastPct + 20) {
-          addMessage('sys', `Загрузка ${pct}%...`);
-          lastPct = pct;
-        }
+        const p = Math.round(r.progress * 100);
+        progressBar.style.width = p + '%';
+        showStatus(`${info.name}: ${p}%`, 'loading');
+        if (p >= last + 20) { addMessage('sys', `Загрузка ${p}%...`); last = p; }
       },
       context_window_size: SETTINGS.context_window_size,
       prefill_chunk_size: SETTINGS.prefill_chunk_size,
       kvCacheDtype: SETTINGS.kvCacheDtype,
     });
-
     const dt = nowSec() - t0;
     showStatus(info.name + ' ✅', 'ready');
     progressBar.style.width = '100%';
     setTimeout(() => progressEl.classList.remove('show'), 400);
     addMessage('stat', `✅ Загружено за ${fmtNum(dt)}с`);
-
     try {
-      addMessage('sys', 'Прогрев GPU...');
-      await engine.chat.completions.create({
-        messages: [{ role: 'user', content: 'ok' }],
-        max_tokens: 1, temperature: 0,
-      });
-      addMessage('stat', '🔥 Warmup завершён');
+      addMessage('sys', 'Прогрев...');
+      await engine.chat.completions.create({ messages: [{ role: 'user', content: 'ok' }], max_tokens: 1, temperature: 0 });
+      addMessage('stat', '🔥 Warmup ок');
     } catch (e) {}
-
     messages = [{ role: 'system', content: getSystemPrompt() }];
     inputEl.disabled = false;
     sendBtn.disabled = false;
     inputEl.focus();
   } catch (e) {
-    showStatus('Ошибка: ' + e.message.slice(0, 40), 'error');
-    addMessage('error', 'Ошибка загрузки: ' + e.message);
+    showStatus('Ошибка', 'error');
+    addMessage('error', 'Ошибка: ' + e.message);
     engine = null;
   }
   isLoading = false;
 }
 
-// ============================================================
-// === ТЕРМАЛЬНЫЙ СОВЕТНИК ===
-// ============================================================
 function checkThermal() {
   const since = nowSec() - lastRequestTime;
-  if (lastRequestTime > 0 && since < 3) {
-    addMessage('warn', `⚠️ Прошло ${fmtNum(since, 1)}с. Дай паузу.`);
-    return false;
-  }
+  if (lastRequestTime > 0 && since < 3) { addMessage('warn', `⚠️ Прошло ${fmtNum(since, 1)}с. Пауза.`); return false; }
   return true;
 }
 
 // ============================================================
 // === OCR-КАРТОЧКА ===
 // ============================================================
-function renderOCRCard(opts) {
-  const {
-    imageData, filename, ocrText, formulas,
-    ocrTime, confidence, isFile, fileType
-  } = opts;
-
+function renderOCRCard(o) {
   const card = document.createElement('div');
   card.className = 'ocr-card';
-
-  const badge = isFile ? 'file' : (formulas.length > 0 ? 'math' : '');
-  const badgeText = isFile ? (fileType || 'FILE') :
-    (formulas.length > 0 ? `${formulas.length} формул` : 'OCR');
-
-  let html = `
+  const badge = o.isFile ? 'file' : (o.formulas.length > 0 ? 'math' : '');
+  const badgeText = o.isFile ? (o.fileType || 'FILE') : (o.formulas.length > 0 ? `${o.formulas.length} формул` : 'OCR');
+  let h = `
     <div class="ocr-head">
-      <div class="ocr-title">${escapeHtml(filename || 'Снимок')}</div>
+      <div class="ocr-title">${escapeHtml(o.filename || 'Снимок')}</div>
       <div class="ocr-badge ${badge}">${badgeText}</div>
-    </div>
-  `;
-
-  if (imageData) {
-    html += `<div class="img-wrap"><img src="${imageData}" alt="обработка"></div>`;
-  }
-
-  html += `
+    </div>`;
+  if (o.imageData) h += `<div class="img-wrap"><img src="${o.imageData}"></div>`;
+  h += `
     <div class="ocr-tabs">
       <div class="ocr-tab active" data-tab="text">📝 Текст</div>
-      ${formulas.length > 0 ? `<div class="ocr-tab" data-tab="formulas">🧮 Формулы (${formulas.length})</div>` : ''}
-      ${formulas.length > 0 ? `<div class="ocr-tab" data-tab="latex">∑ LaTeX</div>` : ''}
+      ${o.formulas.length > 0 ? `<div class="ocr-tab" data-tab="formulas">🧮 Формулы (${o.formulas.length})</div>` : ''}
+      ${o.formulas.length > 0 ? `<div class="ocr-tab" data-tab="latex">∑ LaTeX</div>` : ''}
     </div>
-    <div class="ocr-content" data-content="text">${escapeHtml(ocrText || '(пусто)')}</div>
-  `;
-
-  if (formulas.length > 0) {
-    html += `<div class="ocr-content hidden" data-content="formulas">`;
-    for (const f of formulas) {
-      html += `<div class="formula-line">${escapeHtml(f.text)}</div>`;
-    }
-    html += `</div>`;
-
-    html += `<div class="ocr-content hidden" data-content="latex">`;
-    for (const f of formulas) {
-      html += `$$${escapeHtml(f.latex)}$$\n\n`;
-    }
-    html += `</div>`;
+    <div class="ocr-content" data-content="text">${escapeHtml(o.ocrText || '(пусто)')}</div>`;
+  if (o.formulas.length > 0) {
+    h += `<div class="ocr-content hidden" data-content="formulas">`;
+    for (const f of o.formulas) h += `<div class="formula-line">${escapeHtml(f.text)}</div>`;
+    h += `</div>`;
+    h += `<div class="ocr-content hidden" data-content="latex">`;
+    for (const f of o.formulas) h += `$$${escapeHtml(f.latex)}$$\n\n`;
+    h += `</div>`;
   }
-
-  html += `
-    <div class="ocr-actions">
+  h += `<div class="ocr-actions">
       <button class="ocr-btn-copy">📋 Копировать</button>
-      ${formulas.length > 0 ? `<button class="ocr-btn-latex">∑ LaTeX</button>` : ''}
+      ${o.formulas.length > 0 ? `<button class="ocr-btn-latex">∑ LaTeX</button>` : ''}
       <button class="ocr-btn-ask">🤖 Спросить ИИ</button>
-    </div>
-  `;
-
-  if (ocrTime !== undefined) {
-    html += `<div style="font-size:10px;color:var(--text2);margin-top:6px;">
-      ⏱ ${fmtNum(ocrTime, 2)}с · уверенность ${fmtNum(confidence, 0)}%
     </div>`;
-  }
-
-  card.innerHTML = html;
+  if (o.ocrTime !== undefined) h += `<div style="font-size:10px;color:var(--text2);margin-top:6px;">⏱ ${fmtNum(o.ocrTime, 2)}с · ${fmtNum(o.confidence, 0)}%</div>`;
+  card.innerHTML = h;
   chatEl.appendChild(card);
   chatEl.scrollTop = chatEl.scrollHeight;
-
   const tabs = card.querySelectorAll('.ocr-tab');
   const contents = card.querySelectorAll('.ocr-content');
-  tabs.forEach(tab => {
-    tab.onclick = () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      contents.forEach(c => {
-        c.classList.toggle('hidden', c.dataset.content !== tab.dataset.tab);
-      });
-    };
+  tabs.forEach(t => t.onclick = () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    contents.forEach(c => c.classList.toggle('hidden', c.dataset.content !== t.dataset.tab));
   });
-
-  const btnCopy = card.querySelector('.ocr-btn-copy');
-  if (btnCopy) btnCopy.onclick = () => {
-    navigator.clipboard.writeText(ocrText || '');
-    btnCopy.textContent = '✅';
-    setTimeout(() => btnCopy.textContent = '📋 Копировать', 1500);
+  card.querySelector('.ocr-btn-copy').onclick = function() {
+    navigator.clipboard.writeText(o.ocrText || '');
+    this.textContent = '✅'; setTimeout(() => this.textContent = '📋 Копировать', 1500);
   };
-
-  const btnLatex = card.querySelector('.ocr-btn-latex');
-  if (btnLatex) btnLatex.onclick = () => {
-    const latex = formulas.map(f => f.latex).join('\n\n');
-    navigator.clipboard.writeText(latex);
-    btnLatex.textContent = '✅';
-    setTimeout(() => btnLatex.textContent = '∑ LaTeX', 1500);
+  const bl = card.querySelector('.ocr-btn-latex');
+  if (bl) bl.onclick = function() {
+    const l = o.formulas.map(f => f.latex).join('\n\n');
+    navigator.clipboard.writeText(l);
+    this.textContent = '✅'; setTimeout(() => this.textContent = '∑ LaTeX', 1500);
   };
-
-  const btnAsk = card.querySelector('.ocr-btn-ask');
-  if (btnAsk) btnAsk.onclick = () => {
+  card.querySelector('.ocr-btn-ask').onclick = () => {
     inputEl.value = 'Проанализируй и реши:';
-    inputEl.focus();
-    autoResizeInput();
+    inputEl.focus(); autoResizeInput();
   };
-
   return card;
 }
 
 // ============================================================
-// === ОБРАБОТКА ИЗОБРАЖЕНИЯ ===
+// === OCR-ПРОЦЕСС ===
 // ============================================================
 async function processImage(imageData, filename) {
-  if (!engine) { addMessage('warn', 'Модель загружается.'); return; }
+  if (!engine) { addMessage('warn', 'Модель грузится.'); return; }
   addMessage('user', `📷 ${filename || 'Изображение'}`);
-
   const card = document.createElement('div');
   card.className = 'ocr-card';
-  card.innerHTML = `
-    <div class="ocr-head">
-      <div class="ocr-title">${escapeHtml(filename || 'Снимок')}</div>
-      <div class="ocr-badge"><span class="spinner"></span>OCR</div>
-    </div>
-    <div class="img-wrap"><img src="${imageData}" alt="исходник"></div>
-    <div class="ocr-progress"><div class="ocr-progress-bar"></div></div>
-  `;
-  chatEl.appendChild(card);
-  chatEl.scrollTop = chatEl.scrollHeight;
-
-  const progressBarEl = card.querySelector('.ocr-progress-bar');
+  card.innerHTML = `<div class="ocr-head">
+    <div class="ocr-title">${escapeHtml(filename || 'Снимок')}</div>
+    <div class="ocr-badge"><span class="spinner"></span>OCR</div>
+  </div>
+  <div class="img-wrap"><img src="${imageData}"></div>
+  <div class="ocr-progress"><div class="ocr-progress-bar"></div></div>`;
+  chatEl.appendChild(card); chatEl.scrollTop = chatEl.scrollHeight;
+  const pb = card.querySelector('.ocr-progress-bar');
 
   try {
     showStatus('Предобработка...', 'loading');
     const processed = await preprocessImage(imageData, SETTINGS.preprocess);
-
     showStatus('OCR...', 'loading');
     const t0 = nowSec();
-    const result = await runOCR(processed, SETTINGS.ocrLang, pct => {
-      progressBarEl.style.width = Math.round(pct * 100) + '%';
-      showStatus(`OCR: ${Math.round(pct * 100)}%`, 'loading');
+    const result = await runOCR(processed, SETTINGS.ocrLang, p => {
+      pb.style.width = Math.round(p * 100) + '%';
+      showStatus(`OCR: ${Math.round(p * 100)}%`, 'loading');
     });
-    const ocrTime = nowSec() - t0;
-
+    const dt = nowSec() - t0;
     const formulas = detectFormulas(result.text);
     lastOCRText = result.text;
     sessionStats.ocrChars += result.text.length;
     stats.ocrCount++;
-    stats.ocrTime += ocrTime;
-
+    stats.ocrTime += dt;
     card.remove();
-    renderOCRCard({
-      imageData: processed,
-      filename: filename || 'Снимок',
-      ocrText: result.text,
-      formulas,
-      ocrTime,
-      confidence: result.confidence,
-    });
-
-    addMessage('stat',
-      `OCR: ${fmtNum(ocrTime, 2)}с · ${result.text.length} симв · ${formulas.length} формул`);
-
+    renderOCRCard({ imageData: processed, filename, ocrText: result.text, formulas, ocrTime: dt, confidence: result.confidence });
+    addMessage('stat', `OCR: ${fmtNum(dt, 2)}с · ${result.text.length} симв · ${formulas.length} формул`);
     showStatus('Готов ✅', 'ready');
-
     if (autoMode && result.text) {
-      const detected = detectBestModel(result.text);
-      if (detected && detected.model !== currentModelKey) {
-        const ramSafe = pickByRam(detected.model);
-        if (ramSafe !== currentModelKey) {
-          await switchModel(ramSafe, 'по OCR: ' + detected.reason);
-        }
+      const d = detectBestModel(result.text);
+      if (d && d.model !== currentModelKey) {
+        const r = pickByRam(d.model);
+        if (r !== currentModelKey) await switchModel(r, 'по OCR: ' + d.reason);
       }
     }
-
     if (result.text) {
-      const prompt = formulas.length > 0
-        ? `Распознанный текст:\n\n${result.text}\n\nНайдено формул: ${formulas.length}.\nПроанализируй и реши пошагово.`
-        : `Распознанный текст:\n\n${result.text}\n\nПроанализируй и ответь.`;
-      await askLLM(prompt);
-    } else {
-      addMessage('warn', '⚠️ Текст не распознан.');
-    }
+      const p = formulas.length > 0
+        ? `Распознанный текст:\n\n${result.text}\n\nФормул: ${formulas.length}.\nПроанализируй и реши.`
+        : `Распознанный текст:\n\n${result.text}\n\nПроанализируй.`;
+      await askLLM(p);
+    } else addMessage('warn', '⚠️ Текст не распознан.');
   } catch (e) {
     console.error(e);
     addMessage('error', 'Ошибка OCR: ' + e.message);
@@ -2152,70 +1579,27 @@ async function processFile(file) {
   const type = file.type || '';
   const ext = name.toLowerCase().split('.').pop();
   sessionStats.files++;
-
   if (type.startsWith('image/') || ['jpg','jpeg','png','webp','bmp','gif'].includes(ext)) {
-    const dataUrl = await readFileAsDataURL(file);
-    await processImage(dataUrl, name);
-    return;
+    const d = await readFileAsDataURL(file);
+    await processImage(d, name); return;
   }
   if (type === 'application/pdf' || ext === 'pdf') { await processPDF(file, name); return; }
   if (type.indexOf('word') >= 0 || ext === 'docx') { await processDocx(file, name); return; }
-  if (type.startsWith('text/') || ['txt','md','markdown','csv','json','log'].includes(ext)) {
-    await processText(file, name);
-    return;
-  }
+  if (type.startsWith('text/') || ['txt','md','markdown','csv','json','log'].includes(ext)) { await processText(file, name); return; }
   addMessage('error', `Формат .${ext} не поддержан.`);
 }
 
-function readFileAsDataURL(file) {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = e => resolve(e.target.result);
-    r.onerror = () => reject(new Error('read error'));
-    r.readAsDataURL(file);
-  });
-}
-
-function readFileAsText(file) {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = e => resolve(e.target.result);
-    r.onerror = () => reject(new Error('read error'));
-    r.readAsText(file);
-  });
-}
-
-function readFileAsArrayBuffer(file) {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = e => resolve(e.target.result);
-    r.onerror = () => reject(new Error('read error'));
-    r.readAsArrayBuffer(file);
-  });
-}
+function readFileAsDataURL(f) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('err')); r.readAsDataURL(f); }); }
+function readFileAsText(f) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('err')); r.readAsText(f); }); }
+function readFileAsArrayBuffer(f) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('err')); r.readAsArrayBuffer(f); }); }
 
 async function processText(file, name) {
   addMessage('user', `📄 ${name}`);
   try {
     const text = await readFileAsText(file);
-    lastOCRText = text;
-    sessionStats.ocrChars += text.length;
-
-    renderOCRCard({
-      imageData: null, filename: name, ocrText: text,
-      formulas: detectFormulas(text), ocrTime: 0, confidence: 100,
-      isFile: true, fileType: 'TXT',
-    });
-
+    lastOCRText = text; sessionStats.ocrChars += text.length;
+    renderOCRCard({ imageData: null, filename: name, ocrText: text, formulas: detectFormulas(text), ocrTime: 0, confidence: 100, isFile: true, fileType: 'TXT' });
     addMessage('stat', `📄 ${text.length} символов`);
-
-    if (autoMode) {
-      const detected = detectBestModel(text);
-      if (detected && detected.model !== currentModelKey) {
-        const ramSafe = pickByRam(detected.model);
-        if (ramSafe !== currentModelKey) await switchModel(ramSafe, 'по файлу: ' + detected.reason);
-      }
-    }
     await askLLM(`Файл ${name}:\n\n${text.slice(0, 5000)}\n\nПроанализируй.`);
   } catch (e) { addMessage('error', 'Ошибка: ' + e.message); }
 }
@@ -2227,119 +1611,68 @@ async function processDocx(file, name) {
     const ab = await readFileAsArrayBuffer(file);
     const result = await M.extractRawText({ arrayBuffer: ab });
     const text = result.value;
-    lastOCRText = text;
-    sessionStats.ocrChars += text.length;
-
-    renderOCRCard({
-      imageData: null, filename: name, ocrText: text,
-      formulas: detectFormulas(text), ocrTime: 0, confidence: 100,
-      isFile: true, fileType: 'DOCX',
-    });
-
-    addMessage('stat', `📝 DOCX · ${text.length} символов`);
+    lastOCRText = text; sessionStats.ocrChars += text.length;
+    renderOCRCard({ imageData: null, filename: name, ocrText: text, formulas: detectFormulas(text), ocrTime: 0, confidence: 100, isFile: true, fileType: 'DOCX' });
+    addMessage('stat', `📝 ${text.length} символов`);
     await askLLM(`Документ ${name}:\n\n${text.slice(0, 5000)}\n\nПроанализируй.`);
-  } catch (e) { addMessage('error', 'Ошибка DOCX: ' + e.message); }
+  } catch (e) { addMessage('error', 'Ошибка: ' + e.message); }
 }
 
 async function processPDF(file, name) {
   addMessage('user', `📕 ${name}`);
-  showStatus('Чтение PDF...', 'loading');
+  showStatus('PDF...', 'loading');
   try {
     const pdfjs = await loadPdfJs();
     const ab = await readFileAsArrayBuffer(file);
     const pdf = await pdfjs.getDocument({ data: ab }).promise;
-    const nPages = Math.min(pdf.numPages, 15);
-
-    let fullText = '';
-    const firstImages = [];
-
-    for (let i = 1; i <= nPages; i++) {
-      showStatus(`PDF: ${i}/${nPages}`, 'loading');
-      const page = await pdf.getPage(i);
-      const tc = await page.getTextContent();
-      const pageText = tc.items.map(it => it.str).join(' ');
-      fullText += `\n\n[Стр ${i}]\n${pageText}`;
-
-      if (pageText.trim().length < 50 && i <= 3) {
-        const vp = page.getViewport({ scale: 1.5 });
-        const canvas = document.createElement('canvas');
-        canvas.width = vp.width; canvas.height = vp.height;
-        const ctx = canvas.getContext('2d');
-        await page.render({ canvasContext: ctx, viewport: vp }).promise;
-        firstImages.push(canvas.toDataURL('image/jpeg', 0.85));
+    const n = Math.min(pdf.numPages, 15);
+    let txt = '';
+    const imgs = [];
+    for (let i = 1; i <= n; i++) {
+      showStatus(`PDF ${i}/${n}`, 'loading');
+      const p = await pdf.getPage(i);
+      const tc = await p.getTextContent();
+      const pt = tc.items.map(x => x.str).join(' ');
+      txt += `\n\n[Стр ${i}]\n${pt}`;
+      if (pt.trim().length < 50 && i <= 3) {
+        const vp = p.getViewport({ scale: 1.5 });
+        const c = document.createElement('canvas');
+        c.width = vp.width; c.height = vp.height;
+        await p.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+        imgs.push(c.toDataURL('image/jpeg', 0.85));
       }
     }
-
-    lastOCRText = fullText;
-
-    if (fullText.trim().length < 100 && firstImages.length > 0) {
-      showStatus('OCR сканированного PDF...', 'loading');
-      const processed = await preprocessImage(firstImages[0], 1);
+    lastOCRText = txt;
+    if (txt.trim().length < 100 && imgs.length > 0) {
+      showStatus('OCR скана...', 'loading');
+      const pr = await preprocessImage(imgs[0], 1);
       const t0 = nowSec();
-      const ocr = await runOCR(processed, SETTINGS.ocrLang, pct => {
-        showStatus(`OCR: ${Math.round(pct * 100)}%`, 'loading');
-      });
+      const ocr = await runOCR(pr, SETTINGS.ocrLang, p => showStatus(`OCR: ${Math.round(p*100)}%`, 'loading'));
       const dt = nowSec() - t0;
-
-      renderOCRCard({
-        imageData: processed, filename: name + ' (scan)',
-        ocrText: ocr.text, formulas: detectFormulas(ocr.text),
-        ocrTime: dt, confidence: ocr.confidence,
-        isFile: true, fileType: 'PDF-scan',
-      });
-
+      renderOCRCard({ imageData: pr, filename: name + ' (scan)', ocrText: ocr.text, formulas: detectFormulas(ocr.text), ocrTime: dt, confidence: ocr.confidence, isFile: true, fileType: 'PDF-scan' });
       lastOCRText = ocr.text;
-      addMessage('stat', `📕 PDF-scan · OCR ${fmtNum(dt, 1)}с`);
-
-      if (autoMode) {
-        const detected = detectBestModel(ocr.text);
-        if (detected && detected.model !== currentModelKey) {
-          const ramSafe = pickByRam(detected.model);
-          if (ramSafe !== currentModelKey) await switchModel(ramSafe, 'по PDF: ' + detected.reason);
-        }
-      }
+      addMessage('stat', `📕 PDF-scan OCR ${fmtNum(dt, 1)}с`);
       await askLLM(`Скан PDF ${name}:\n\n${ocr.text}\n\nПроанализируй.`);
     } else {
-      const formulas = detectFormulas(fullText);
-      sessionStats.ocrChars += fullText.length;
-
-      renderOCRCard({
-        imageData: firstImages[0] || null, filename: name,
-        ocrText: fullText.slice(0, 8000), formulas,
-        ocrTime: 0, confidence: 100,
-        isFile: true, fileType: 'PDF',
-      });
-
+      renderOCRCard({ imageData: imgs[0] || null, filename: name, ocrText: txt.slice(0, 8000), formulas: detectFormulas(txt), ocrTime: 0, confidence: 100, isFile: true, fileType: 'PDF' });
       addMessage('stat', `📕 PDF · ${pdf.numPages} стр`);
-
-      if (autoMode) {
-        const detected = detectBestModel(fullText);
-        if (detected && detected.model !== currentModelKey) {
-          const ramSafe = pickByRam(detected.model);
-          if (ramSafe !== currentModelKey) await switchModel(ramSafe, 'по PDF: ' + detected.reason);
-        }
-      }
-      await askLLM(`PDF ${name}:\n\n${fullText.slice(0, 5000)}\n\nПроанализируй.`);
+      await askLLM(`PDF ${name}:\n\n${txt.slice(0, 5000)}\n\nПроанализируй.`);
     }
     showStatus('Готов ✅', 'ready');
-  } catch (e) {
-    console.error(e);
-    addMessage('error', 'Ошибка PDF: ' + e.message);
-  }
+  } catch (e) { console.error(e); addMessage('error', 'Ошибка PDF: ' + e.message); }
 }
 
 // ============================================================
 // === КОМАНДЫ ===
 // ============================================================
 function parseCommand(text) {
-  const cmdMatch = text.match(/^\/([a-z]+)\s*(.*)/i);
-  if (!cmdMatch) return null;
-  const cmd = cmdMatch[1].toLowerCase();
-  const rest = cmdMatch[2] || '';
-  if (cmd === 'teacher') return { system: 'Ты учитель-наставник. НЕ давай готовый ответ. Задавай наводящие вопросы.', prompt: rest, label: '👨‍🏫 Режим учителя' };
-  if (cmd === 'check') return { system: 'Проверь моё решение. Найди ошибки. Не давай ответ сразу.', prompt: rest, label: '🔎 Проверка решения' };
-  if (cmd === 'explain') return { system: 'Объясни максимально подробно, с примерами.', prompt: rest, label: '🔬 Подробный режим' };
-  if (cmd === 'short') return { system: 'Отвечай кратко, только суть.', prompt: rest, label: '⚡ Краткий режим' };
+  const m = text.match(/^\/([a-z]+)\s*(.*)/i);
+  if (!m) return null;
+  const c = m[1].toLowerCase(), r = m[2] || '';
+  if (c === 'teacher') return { system: 'Ты учитель. НЕ давай ответ. Задавай вопросы.', prompt: r, label: '👨‍🏫 Учитель' };
+  if (c === 'check') return { system: 'Проверь решение, найди ошибки.', prompt: r, label: '🔎 Проверка' };
+  if (c === 'explain') return { system: 'Объясни подробно с примерами.', prompt: r, label: '🔬 Подробно' };
+  if (c === 'short') return { system: 'Отвечай кратко.', prompt: r, label: '⚡ Кратко' };
   return null;
 }
 
@@ -2347,105 +1680,59 @@ function parseCommand(text) {
 // === ЗАПРОС К LLM ===
 // ============================================================
 async function askLLM(prompt, overrideSystem) {
-  if (!engine || isGenerating) { addMessage('warn', 'Модель занята.'); return; }
-  if (messages.length > 14) {
-    messages.splice(1, messages.length - 11);
-    addMessage('sys', '[история обрезана]');
-  }
-
+  if (!engine || isGenerating) { addMessage('warn', 'Занято.'); return; }
+  if (messages.length > 14) { messages.splice(1, messages.length - 11); addMessage('sys', '[история обрезана]'); }
   let sys = getSystemPrompt();
   if (overrideSystem) sys = overrideSystem;
   if (messages[0] && messages[0].role === 'system') messages[0].content = sys;
-
   messages.push({ role: 'user', content: prompt });
   lastUserPrompt = prompt;
-
   inputEl.disabled = true;
   sendBtn.disabled = true;
   stopBtn.classList.add('show');
   isGenerating = true;
-
   const botDiv = addMessage('bot', '');
   botDiv.innerHTML = '<span class="skeleton"></span>';
-
-  let fullText = '';
-  let tokens = 0;
+  let full = '', tokens = 0;
   const t0 = nowSec();
   let tFirst = null;
   abortController = new AbortController();
-
   try {
     const chunks = await engine.chat.completions.create({
-      messages,
-      temperature: SETTINGS.temperature,
-      top_p: SETTINGS.top_p,
-      max_tokens: SETTINGS.max_tokens,
-      stream: true,
+      messages, temperature: SETTINGS.temperature, top_p: SETTINGS.top_p,
+      max_tokens: SETTINGS.max_tokens, stream: true,
     });
-
-    for await (const chunk of chunks) {
+    for await (const c of chunks) {
       if (abortController && abortController.signal.aborted) break;
-      const delta = chunk.choices[0] && chunk.choices[0].delta &&
-        chunk.choices[0].delta.content || '';
-      if (delta && tFirst === null) tFirst = nowSec();
-      fullText += delta;
-      tokens++;
-      botDiv.textContent = fullText;
+      const d = c.choices[0] && c.choices[0].delta && c.choices[0].delta.content || '';
+      if (d && tFirst === null) tFirst = nowSec();
+      full += d; tokens++;
+      botDiv.textContent = full;
       if (autoScroll) chatEl.scrollTop = chatEl.scrollHeight;
     }
-
     const total = nowSec() - t0;
     const ttft = tFirst ? (tFirst - t0) : 0;
     const tps = tokens / Math.max(total, 0.001);
-
-    stats.requests++;
-    stats.totalTokens += tokens;
-    stats.totalTime += total;
-    stats.ttfts.push(ttft);
+    stats.requests++; stats.totalTokens += tokens; stats.totalTime += total; stats.ttfts.push(ttft);
     sessionStats.tokens += tokens;
-
     try {
-      const html = await renderMarkdown(fullText);
-      botDiv.innerHTML = html;
-    } catch (e) {
-      botDiv.textContent = fullText;
-    }
-
-    const actions = document.createElement('div');
-    actions.className = 'msg-actions';
-    actions.innerHTML = `
-      <button onclick="copyMsg(this)">📋 Копировать</button>
-      <button onclick="speakMsg(this)">🔊 Озвучить</button>
-      <button onclick="regenMsg(this)">🔄 Заново</button>
-    `;
-    botDiv.appendChild(actions);
-    lastBotMessage = fullText;
-
-    let verdict = '';
-    if (tps < 3) verdict = ' ❌';
-    else if (tps < 6) verdict = ' ⚠️';
-    else if (tps < 10) verdict = ' ✅';
-    else verdict = ' 🚀';
-
-    addMessage('stat',
-      `${tokens} ток · ${fmtNum(tps)} т/с · TTFT ${fmtNum(ttft, 2)}с${verdict}`);
-
-    showStats(`<b>${fmtNum(tps)}</b> т/с · TTFT ${fmtNum(ttft, 2)}с · ${tokens} ток`);
-
-    messages.push({ role: 'assistant', content: fullText });
+      const h = await renderMarkdown(full);
+      botDiv.innerHTML = h;
+    } catch (e) { botDiv.textContent = full; }
+    const ac = document.createElement('div');
+    ac.className = 'msg-actions';
+    ac.innerHTML = `<button onclick="copyMsg(this)">📋</button><button onclick="speakMsg(this)">🔊</button><button onclick="regenMsg(this)">🔄</button>`;
+    botDiv.appendChild(ac);
+    let v = tps < 3 ? ' ❌' : tps < 6 ? ' ⚠️' : tps < 10 ? ' ✅' : ' 🚀';
+    addMessage('stat', `${tokens} ток · ${fmtNum(tps)} т/с · TTFT ${fmtNum(ttft, 2)}с${v}`);
+    showStats(`<b>${fmtNum(tps)}</b> т/с · ${tokens} ток`);
+    messages.push({ role: 'assistant', content: full });
     await saveCurrentChat();
-
-    if (SETTINGS.tts === 1 && 'speechSynthesis' in window) {
-      speakText(fullText);
-    }
+    if (SETTINGS.tts === 1 && 'speechSynthesis' in window) speakText(full);
   } catch (e) {
-    if (e.name === 'AbortError' || (abortController && abortController.signal.aborted)) {
-      botDiv.textContent = fullText + '\n\n[прервано]';
-    } else {
-      botDiv.textContent = 'Ошибка: ' + e.message;
-    }
+    if (e.name === 'AbortError') botDiv.textContent = full + '\n\n[прервано]';
+    else botDiv.textContent = 'Ошибка: ' + e.message;
   }
-
   abortController = null;
   isGenerating = false;
   inputEl.disabled = false;
@@ -2461,91 +1748,72 @@ async function send() {
   if (!engine || isLoading || isGenerating) return;
   const text = inputEl.value.trim();
   if (!text) return;
-
   checkThermal();
   lastRequestTime = nowSec();
-
   inputEl.value = '';
   autoResizeInput();
-
   const cmd = parseCommand(text);
   if (cmd) {
     addMessage('user', text);
     addMessage('sys', cmd.label);
-    let prompt = cmd.prompt || 'Продолжай';
-    await askLLM(prompt, cmd.system);
+    await askLLM(cmd.prompt || 'Продолжай', cmd.system);
     return;
   }
-
   if (autoMode) {
-    const detected = detectBestModel(text);
-    if (detected) {
-      const ramSafe = pickByRam(detected.model);
-      if (ramSafe !== currentModelKey) {
+    const d = detectBestModel(text);
+    if (d) {
+      const r = pickByRam(d.model);
+      if (r !== currentModelKey) {
         addMessage('user', text);
-        await switchModel(ramSafe, detected.reason);
-        let prompt = text;
-        if (lastOCRText && text.length < 200) {
-          prompt = `Ранее распознано:\n${lastOCRText.slice(0, 3000)}\n\nЗапрос: ${text}`;
-        }
-        await askLLM(prompt);
+        await switchModel(r, d.reason);
+        let p = text;
+        if (lastOCRText && text.length < 200) p = `Ранее:\n${lastOCRText.slice(0, 3000)}\n\nЗапрос: ${text}`;
+        await askLLM(p);
         return;
       }
     }
   }
-
   addMessage('user', text);
-
-  let prompt = text;
-  if (lastOCRText && text.length < 200) {
-    prompt = `Ранее распознанный текст:\n${lastOCRText.slice(0, 3000)}\n\nЗапрос: ${text}`;
-  }
-
-  await askLLM(prompt);
+  let p = text;
+  if (lastOCRText && text.length < 200) p = `Ранее:\n${lastOCRText.slice(0, 3000)}\n\nЗапрос: ${text}`;
+  await askLLM(p);
 }
 
-function stopGeneration() {
-  if (abortController) abortController.abort();
-}
+function stopGeneration() { if (abortController) abortController.abort(); }
 
 // ============================================================
-// === ДЕЙСТВИЯ С СООБЩЕНИЯМИ ===
+// === ДЕЙСТВИЯ ===
 // ============================================================
 function copyMsg(btn) {
   const msg = btn.closest('.msg');
-  const text = msg.textContent.replace(/📋 Копировать|🔊 Озвучить|🔄 Заново/g, '').trim();
-  navigator.clipboard.writeText(text);
-  btn.textContent = '✅ Скопировано';
-  setTimeout(() => btn.textContent = '📋 Копировать', 1500);
+  const t = msg.textContent.replace(/📋|🔊|🔄/g, '').trim();
+  navigator.clipboard.writeText(t);
+  btn.textContent = '✅';
+  setTimeout(() => btn.textContent = '📋', 1500);
 }
 window.copyMsg = copyMsg;
 
 function speakMsg(btn) {
   const msg = btn.closest('.msg');
-  const text = msg.textContent.replace(/📋 Копировать|🔊 Озвучить|🔄 Заново/g, '').trim();
-  speakText(text);
+  const t = msg.textContent.replace(/📋|🔊|🔄/g, '').trim();
+  speakText(t);
 }
 window.speakMsg = speakMsg;
 
 function speakText(text) {
   if (!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(text.slice(0, 3000));
-  utt.lang = 'ru-RU';
-  utt.rate = 1.0;
-  utt.pitch = 1.0;
-  speechSynthesis.speak(utt);
+  const u = new SpeechSynthesisUtterance(text.slice(0, 3000));
+  u.lang = 'ru-RU';
+  speechSynthesis.speak(u);
 }
-window.speakText = speakText;
 
 async function regenMsg(btn) {
-  if (isGenerating) { alert('Подожди.'); return; }
-  if (!lastUserPrompt) { alert('Нет последнего вопроса.'); return; }
-  const msg = btn.closest('.msg');
-  if (msg) msg.remove();
-  if (messages.length >= 2) {
-    messages.splice(-2, 2);
-  }
+  if (isGenerating) return;
+  if (!lastUserPrompt) return;
+  const m = btn.closest('.msg');
+  if (m) m.remove();
+  if (messages.length >= 2) messages.splice(-2, 2);
   await askLLM(lastUserPrompt);
 }
 window.regenMsg = regenMsg;
@@ -2553,89 +1821,60 @@ window.regenMsg = regenMsg;
 // ============================================================
 // === ГОЛОС ===
 // ============================================================
-function initSpeechRecognition() {
+function initSR() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) return null;
   const r = new SR();
   r.continuous = false;
   r.interimResults = true;
   r.lang = 'ru-RU';
-  r.onresult = (e) => {
-    let interim = '';
-    let final = '';
+  r.onresult = e => {
+    let f = '', i2 = '';
     for (let i = e.resultIndex; i < e.results.length; i++) {
       const t = e.results[i][0].transcript;
-      if (e.results[i].isFinal) final += t;
-      else interim += t;
+      if (e.results[i].isFinal) f += t; else i2 += t;
     }
-    inputEl.value = final || interim;
+    inputEl.value = f || i2;
     autoResizeInput();
   };
-  r.onend = () => {
-    isRecording = false;
-    $('btn-mic').classList.remove('rec');
-  };
-  r.onerror = (e) => {
-    console.warn('Speech error:', e.error);
-    isRecording = false;
-    $('btn-mic').classList.remove('rec');
-  };
+  r.onend = () => { isRecording = false; $('btn-mic').classList.remove('rec'); };
+  r.onerror = e => { console.warn(e.error); isRecording = false; $('btn-mic').classList.remove('rec'); };
   return r;
 }
 
 function toggleMic() {
   if (!recognition) {
-    recognition = initSpeechRecognition();
-    if (!recognition) {
-      alert('Голосовой ввод не поддерживается.');
-      return;
-    }
+    recognition = initSR();
+    if (!recognition) { alert('Не поддерживается.'); return; }
   }
-  if (isRecording) {
-    recognition.stop();
-    isRecording = false;
-    $('btn-mic').classList.remove('rec');
-  } else {
-    try {
-      recognition.start();
-      isRecording = true;
-      $('btn-mic').classList.add('rec');
-    } catch (e) {
-      alert('Ошибка микрофона: ' + e.message);
-    }
-  }
+  if (isRecording) { recognition.stop(); isRecording = false; $('btn-mic').classList.remove('rec'); }
+  else { try { recognition.start(); isRecording = true; $('btn-mic').classList.add('rec'); } catch (e) { alert('Ошибка: ' + e.message); } }
 }
 
 // ============================================================
 // === СТАТИСТИКА ===
 // ============================================================
 function renderStats() {
-  const avgTps = stats.totalTime > 0 ? stats.totalTokens / stats.totalTime : 0;
-  const avgTtft = stats.ttfts.length > 0
-    ? stats.ttfts.reduce((a, b) => a + b, 0) / stats.ttfts.length : 0;
-  const mem = performance.memory
-    ? (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + ' MB'
-    : 'недоступно';
-
+  const avg = stats.totalTime > 0 ? stats.totalTokens / stats.totalTime : 0;
+  const avgT = stats.ttfts.length > 0 ? stats.ttfts.reduce((a, b) => a + b, 0) / stats.ttfts.length : 0;
+  const mem = performance.memory ? (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + ' MB' : '?';
   $('stats-content').innerHTML = `
     <p><b>Модель:</b> ${escapeHtml(MODELS[currentModelKey].name)}</p>
-    <p><b>Авто-режим:</b> ${autoMode ? '✅' : '❌'}</p>
-    <p><b>Предмет:</b> ${currentPreset !== 'default' ? PRESETS[currentPreset].name : 'общий'}</p>
+    <p><b>Авто:</b> ${autoMode ? '✅' : '❌'}</p>
     <p><b>Запросов:</b> ${stats.requests}</p>
     <p><b>Токенов:</b> ${stats.totalTokens}</p>
-    <p><b>Средняя скорость:</b> ${fmtNum(avgTps, 2)} т/с</p>
-    <p><b>Средний TTFT:</b> ${fmtNum(avgTtft, 2)} с</p>
+    <p><b>Средняя:</b> ${fmtNum(avg, 2)} т/с</p>
+    <p><b>TTFT:</b> ${fmtNum(avgT, 2)} с</p>
     <p><b>JS heap:</b> ${mem}</p>
     <hr style="border:none;border-top:1px solid var(--bg3);margin:8px 0;">
-    <p><b>OCR-запросов:</b> ${stats.ocrCount}</p>
-    <p><b>OCR-времени:</b> ${fmtNum(stats.ocrTime, 1)} с</p>
+    <p><b>OCR:</b> ${stats.ocrCount}</p>
+    <p><b>OCR-время:</b> ${fmtNum(stats.ocrTime, 1)} с</p>
     <p><b>Символов:</b> ${sessionStats.ocrChars}</p>
     <p><b>Файлов:</b> ${sessionStats.files}</p>
-    <p><b>Авто-переключений:</b> ${stats.autoSwitches}</p>
+    <p><b>Авто-смен:</b> ${stats.autoSwitches}</p>
     <p><b>Сессия:</b> ${Math.floor(nowSec() - sessionStats.start)}с</p>
   `;
 }
-
 function resetStats() {
   stats = { requests: 0, totalTokens: 0, totalTime: 0, ttfts: [], ocrCount: 0, ocrTime: 0, autoSwitches: 0 };
   sessionStats = { tokens: 0, start: nowSec(), swaps: 0, files: 0, ocrChars: 0 };
@@ -2649,166 +1888,92 @@ window.resetStats = resetStats;
 async function runBenchmark() {
   if (benchRunning) return;
   if (isGenerating || isLoading) { alert('Подожди.'); return; }
-
   benchRunning = true;
   benchShouldStop = false;
   benchResults = [];
-  const content = $('bench-content');
-  content.innerHTML = '<p>Подготовка...</p>';
+  const c = $('bench-content');
+  c.innerHTML = '<p>Подготовка...</p>';
   $('btn-bench-run').style.display = 'none';
   $('btn-bench-stop').style.display = 'block';
-
-  const benchModels = ['smol360', 'qwen05', 'qwen3_06', 'llama1b', 'qwen15', 'smol17', 'qwen_math15', 'deepseek_r1', 'qwen_coder15', 'gemma2b', 'qwen3b', 'phi35'].filter(k => MODELS[k]);
-  const originalModel = currentModelKey;
-
-  for (const key of benchModels) {
+  const bm = ['smol360', 'qwen05', 'qwen3_06', 'llama1b', 'qwen15', 'smol17', 'qwen_math15', 'deepseek_r1', 'qwen_coder15', 'gemma2b', 'qwen3b', 'phi35'].filter(k => MODELS[k]);
+  const orig = currentModelKey;
+  for (const k of bm) {
     if (benchShouldStop) break;
-    content.innerHTML = `<p><span class="spinner"></span> Тестирую <b>${escapeHtml(MODELS[key].name)}</b> (${benchResults.length + 1}/${benchModels.length})</p>${renderBenchTable()}`;
-
-    const r = { key, name: MODELS[key].name, loadTime: null, ttft: null, tps: null, tokens: 0, error: null };
-
+    c.innerHTML = `<p><span class="spinner"></span>${escapeHtml(MODELS[k].name)} (${benchResults.length + 1}/${bm.length})</p>${renderBenchTable()}`;
+    const r = { key: k, name: MODELS[k].name, loadTime: null, ttft: null, tps: null, tokens: 0, error: null };
     try {
       if (engine) { try { await engine.unload(); } catch (e) {} engine = null; }
-      currentModelKey = key;
+      currentModelKey = k;
       const tL = nowSec();
-      engine = await webllm.CreateMLCEngine(MODELS[key].id, {
-        initProgressCallback: () => {},
-        context_window_size: SETTINGS.context_window_size,
-        prefill_chunk_size: SETTINGS.prefill_chunk_size,
-        kvCacheDtype: SETTINGS.kvCacheDtype,
-      });
+      engine = await webllm.CreateMLCEngine(MODELS[k].id, { initProgressCallback: () => {}, context_window_size: SETTINGS.context_window_size, prefill_chunk_size: SETTINGS.prefill_chunk_size, kvCacheDtype: SETTINGS.kvCacheDtype });
       r.loadTime = nowSec() - tL;
-
-      const testMsgs = [
-        { role: 'system', content: 'Ты помощник.' },
-        { role: 'user', content: 'Реши: 2x + 5 = 15.' }
-      ];
-
       const t0 = nowSec();
       let tF = null, tok = 0;
-      const chunks = await engine.chat.completions.create({
-        messages: testMsgs, temperature: 0.3, max_tokens: 60, stream: true
-      });
-      for await (const ch of chunks) {
+      const ch = await engine.chat.completions.create({ messages: [{ role: 'system', content: 'Ты помощник.' }, { role: 'user', content: 'Реши: 2x + 5 = 15.' }], temperature: 0.3, max_tokens: 60, stream: true });
+      for await (const x of ch) {
         if (benchShouldStop) break;
-        const d = ch.choices[0] && ch.choices[0].delta && ch.choices[0].delta.content || '';
+        const d = x.choices[0] && x.choices[0].delta && x.choices[0].delta.content || '';
         if (d && tF === null) tF = nowSec();
         tok++;
       }
-      const total = nowSec() - t0;
+      const tot = nowSec() - t0;
       r.ttft = tF ? (tF - t0) : null;
       r.tokens = tok;
-      r.tps = tok / Math.max(total, 0.001);
+      r.tps = tok / Math.max(tot, 0.001);
     } catch (e) { r.error = e.message; }
     benchResults.push(r);
   }
-
   if (engine) { try { await engine.unload(); } catch (e) {} engine = null; }
-  currentModelKey = originalModel;
-  localStorage.setItem('ai-model', originalModel);
+  currentModelKey = orig;
+  localStorage.setItem('ai-model', orig);
   benchRunning = false;
-  content.innerHTML = renderBenchTable(true);
+  c.innerHTML = renderBenchTable(true);
   $('btn-bench-run').style.display = 'block';
   $('btn-bench-stop').style.display = 'none';
-  addMessage('stat', '🏁 Бенчмарк завершён.');
 }
 
 function renderBenchTable(final) {
   if (benchResults.length === 0) return '';
   const rows = benchResults.map(r => {
-    if (r.error) return `<tr><td>${escapeHtml(r.name)}</td><td colspan="4" class="bad">❌ ${escapeHtml(r.error.slice(0, 40))}</td></tr>`;
-    const tps = r.tps || 0;
-    const cls = tps > 8 ? 'good' : tps > 4 ? 'med' : 'bad';
-    return `<tr><td>${escapeHtml(r.name)}</td><td>${r.loadTime !== null ? fmtNum(r.loadTime, 1) + 'с' : '—'}</td><td>${r.ttft !== null ? fmtNum(r.ttft, 2) + 'с' : '—'}</td><td class="${cls}">${fmtNum(tps, 2)} т/с</td><td>${r.tokens} ток</td></tr>`;
+    if (r.error) return `<tr><td>${escapeHtml(r.name)}</td><td colspan="4" class="bad">❌</td></tr>`;
+    const t = r.tps || 0;
+    const cls = t > 8 ? 'good' : t > 4 ? 'med' : 'bad';
+    return `<tr><td>${escapeHtml(r.name)}</td><td>${r.loadTime !== null ? fmtNum(r.loadTime, 1) + 'с' : '—'}</td><td>${r.ttft !== null ? fmtNum(r.ttft, 2) + 'с' : '—'}</td><td class="${cls}">${fmtNum(t, 2)} т/с</td><td>${r.tokens}</td></tr>`;
   }).join('');
-  return `<table class="bench-table"><thead><tr><th>Модель</th><th>Загрузка</th><th>TTFT</th><th>т/с</th><th>Токенов</th></tr></thead><tbody>${rows}</tbody></table>${final ? '<p style="margin-top:10px;font-size:11px;">🟢 >8 — отлично, 🟡 4–8 — норм, 🔴 <4 — медленно.</p>' : ''}`;
+  return `<table class="bench-table"><thead><tr><th>Модель</th><th>Загрузка</th><th>TTFT</th><th>т/с</th><th>Токенов</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
-
-function stopBenchmark() {
-  benchShouldStop = true;
-  addMessage('warn', 'Бенчмарк остановлен.');
-}
+function stopBenchmark() { benchShouldStop = true; addMessage('warn', 'Остановлено.'); }
 
 // ============================================================
 // === ДИАГНОСТИКА ===
 // ============================================================
 async function runDiagnostics() {
-  const out = [];
-  const push = (l, v, c) => out.push(`<div class="diag-line"><b>${l}:</b> <span class="${c||''}">${v}</span></div>`);
-
+  const o = [];
+  const p = (l, v, c) => o.push(`<div class="diag-line"><b>${l}:</b> <span class="${c||''}">${v}</span></div>`);
   const ua = navigator.userAgent.match(/Chrome\/(\d+)/);
-  push('Chrome', ua ? ua[1] : '?');
-  push('navigator.gpu', navigator.gpu ? '✅' : '❌', navigator.gpu ? 'ok' : 'bad');
-
+  p('Chrome', ua ? ua[1] : '?');
+  p('Tesseract', typeof window.Tesseract !== 'undefined' ? '✅ загружен' : '❌ нет', typeof window.Tesseract !== 'undefined' ? 'ok' : 'bad');
+  if (typeof window.Tesseract !== 'undefined') {
+    p('createWorker', typeof window.Tesseract.createWorker === 'function' ? '✅' : '❌');
+  }
+  p('navigator.gpu', navigator.gpu ? '✅' : '❌', navigator.gpu ? 'ok' : 'bad');
   if (navigator.gpu) {
     try {
-      const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
-      if (adapter) {
-        push('Adapter', '✅', 'ok');
-        const f = adapter.features;
-        push('shader-f16', f.has('shader-f16') ? '✅' : '❌', f.has('shader-f16') ? 'ok' : 'bad');
-        push('subgroups', f.has('subgroups') ? '✅' : '❌', f.has('subgroups') ? 'ok' : 'bad');
-        push('maxBufferSize', (adapter.limits.maxBufferSize / 1073741824).toFixed(2) + ' GB');
-
-        try {
-          const device = await adapter.requestDevice();
-          const N = 1048576;
-          const buf = device.createBuffer({ size: N * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST });
-          const code = `@group(0) @binding(0) var<storage, read_write> data: array<f32>;
-@compute @workgroup_size(64)
-fn main(@builtin(global_invocation_id) gid: vec3<u32>) {
-  let i = gid.x;
-  if (i < arrayLength(&data)) { data[i] = f32(i) * 2.0; }
-}`;
-          const module = device.createShaderModule({ code });
-          const pipeline = device.createComputePipeline({ layout: 'auto', compute: { module } });
-          const bind = device.createBindGroup({ layout: pipeline.getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: buf } }] });
-          const t0 = performance.now();
-          const cmd = device.createCommandEncoder();
-          const pass = cmd.beginComputePass();
-          pass.setPipeline(pipeline);
-          pass.setBindGroup(0, bind);
-          pass.dispatchWorkgroups(Math.ceil(N / 64));
-          pass.end();
-          device.queue.submit([cmd.finish()]);
-          await device.queue.onSubmittedWorkDone();
-          const dt = performance.now() - t0;
-          push('Compute test', dt.toFixed(0) + ' ms', dt < 100 ? 'ok' : dt < 500 ? 'warn-txt' : 'bad');
-          push('GFLOPS', ((N * 2) / 1e9 / (dt / 1000)).toFixed(2));
-        } catch (e) { push('Compute', '❌ ' + e.message.slice(0, 40), 'bad'); }
-      } else push('Adapter', '❌ null', 'bad');
-    } catch (e) { push('requestAdapter', '❌ ' + e.message, 'bad'); }
+      const a = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
+      if (a) {
+        p('Adapter', '✅', 'ok');
+        p('shader-f16', a.features.has('shader-f16') ? '✅' : '❌');
+      } else p('Adapter', '❌ null', 'bad');
+    } catch (e) { p('Adapter', '❌ ' + e.message, 'bad'); }
   }
-
   if (performance.memory) {
-    push('JS heap limit', (performance.memory.jsHeapSizeLimit / 1048576).toFixed(0) + ' MB');
-    push('JS heap used', (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + ' MB');
+    p('JS heap used', (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + ' MB');
   }
-  push('Device memory', navigator.deviceMemory ? navigator.deviceMemory + ' GB' : '?');
-  push('Hardware concurrency', navigator.hardwareConcurrency || '?');
-
-  if (navigator.storage && navigator.storage.estimate) {
-    try {
-      const est = await navigator.storage.estimate();
-      push('Storage quota', fmtBytes(est.quota || 0));
-      push('Storage used', fmtBytes(est.usage || 0));
-    } catch (e) {}
-  }
-
-  push('SpeechRecognition', ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) ? '✅' : '❌');
-  push('SpeechSynthesis', ('speechSynthesis' in window) ? '✅' : '❌');
-  push('Service Worker', ('serviceWorker' in navigator) ? '✅' : '❌');
-
-  const hasF16 = out.some(l => l.includes('shader-f16') && l.includes('✅'));
-  const hasAd = out.some(l => l.includes('Adapter') && l.includes('✅'));
-  out.push(`<div style="margin-top:14px;padding:10px;border-radius:8px;font-size:12px;
-    background:${hasAd && hasF16 ? 'rgba(63,185,80,.13)' : 'rgba(248,81,73,.13)'};
-    border:1px solid ${hasAd && hasF16 ? 'rgba(63,185,80,.27)' : 'rgba(248,81,73,.4)'};
-    color:${hasAd && hasF16 ? 'var(--ok)' : 'var(--error)'};">
-    ${hasAd && hasF16 ? '✅ WebGPU работает.' : '❌ Проблемы с WebGPU.'}
-  </div>`);
-
-  $('diag-content').innerHTML = out.join('');
+  p('Device memory', navigator.deviceMemory ? navigator.deviceMemory + ' GB' : '?');
+  p('Storage', navigator.storage ? '✅' : '❌');
+  p('SpeechRecognition', ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) ? '✅' : '❌');
+  p('SpeechSynthesis', 'speechSynthesis' in window ? '✅' : '❌');
+  $('diag-content').innerHTML = o.join('');
 }
 
 // ============================================================
@@ -2818,250 +1983,82 @@ let cameraStream = null;
 
 async function openCamera() {
   try {
-    cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
-    });
-    const video = $('camera-preview');
-    video.srcObject = cameraStream;
-    video.classList.add('show');
+    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } });
+    const v = $('camera-preview');
+    v.srcObject = cameraStream;
+    v.classList.add('show');
     openModal('modal-camera');
-  } catch (e) {
-    alert('Камера: ' + e.message + '\n\nНужен HTTPS.');
-  }
+  } catch (e) { alert('Камера: ' + e.message); }
 }
 
 function closeCamera() {
-  if (cameraStream) {
-    cameraStream.getTracks().forEach(t => t.stop());
-    cameraStream = null;
-  }
+  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
   $('camera-preview').classList.remove('show');
   closeModal('modal-camera');
 }
 
 async function snapPhoto() {
-  const video = $('camera-preview');
-  const canvas = $('camera-canvas');
-  if (!video.videoWidth) { alert('Камера не готова.'); return; }
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0);
-  const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  const v = $('camera-preview');
+  const c = $('camera-canvas');
+  if (!v.videoWidth) { alert('Не готова.'); return; }
+  c.width = v.videoWidth; c.height = v.videoHeight;
+  c.getContext('2d').drawImage(v, 0, 0);
+  const d = c.toDataURL('image/jpeg', 0.92);
   closeCamera();
-  await processImage(dataUrl, 'Снимок ' + new Date().toLocaleTimeString());
+  await processImage(d, 'Снимок ' + new Date().toLocaleTimeString());
 }
 
-// ============================================================
-// === ФАЙЛЫ ===
-// ============================================================
 async function onFileSelected(e) {
-  const files = e.target.files;
-  if (!files || files.length === 0) return;
-  for (let i = 0; i < files.length; i++) {
-    await processFile(files[i]);
-  }
+  const fs = e.target.files;
+  if (!fs || fs.length === 0) return;
+  for (let i = 0; i < fs.length; i++) await processFile(fs[i]);
   e.target.value = '';
 }
-
-document.addEventListener('dragover', e => { e.preventDefault(); document.body.classList.add('drop-active'); });
-document.addEventListener('dragleave', e => { if (e.target === document.body) document.body.classList.remove('drop-active'); });
-document.addEventListener('drop', async e => {
-  e.preventDefault();
-  document.body.classList.remove('drop-active');
-  const files = e.dataTransfer.files;
-  if (!files || files.length === 0) return;
-  for (let i = 0; i < files.length; i++) await processFile(files[i]);
-});
-
-document.addEventListener('paste', async e => {
-  const items = e.clipboardData && e.clipboardData.items;
-  if (!items) return;
-  for (const item of items) {
-    if (item.type.indexOf('image') === 0) {
-      const file = item.getAsFile();
-      if (file) {
-        const dataUrl = await readFileAsDataURL(file);
-        await processImage(dataUrl, 'Из буфера');
-        e.preventDefault();
-        return;
-      }
-    }
-  }
-});
 
 // ============================================================
 // === POMODORO ===
 // ============================================================
-function updatePomodoroUI() {
+function updatePomo() {
   const m = Math.floor(pomodoro.timeLeft / 60);
   const s = pomodoro.timeLeft % 60;
   $('pomodoro-time').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   $('pomodoro-label').textContent = pomodoro.mode === 'work' ? '🍅 Работа' : '☕ Перерыв';
-  $('pomodoro-toggle').textContent = pomodoro.running ? '⏸ Пауза' : '▶ Старт';
+  $('pomodoro-toggle').textContent = pomodoro.running ? '⏸' : '▶';
 }
 
-function togglePomodoro() {
+function togglePomo() {
   pomodoro.running = !pomodoro.running;
   if (pomodoro.running && !pomodoro.interval) {
     pomodoro.interval = setInterval(() => {
       if (!pomodoro.running) return;
       pomodoro.timeLeft--;
       if (pomodoro.timeLeft <= 0) {
-        if (pomodoro.mode === 'work') {
-          pomodoro.mode = 'break';
-          pomodoro.timeLeft = pomodoro.breakMin * 60;
-          if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('🍅 Работа завершена!', { body: 'Отдохни 5 минут.' });
-          }
-          speakText('Работа завершена. Отдохни.');
-        } else {
-          pomodoro.mode = 'work';
-          pomodoro.timeLeft = pomodoro.workMin * 60;
-          if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('☕ Перерыв завершён!', { body: 'Продолжаем.' });
-          }
-          speakText('Перерыв завершён.');
-        }
+        if (pomodoro.mode === 'work') { pomodoro.mode = 'break'; pomodoro.timeLeft = pomodoro.breakMin * 60; speakText('Работа завершена. Отдохни.'); }
+        else { pomodoro.mode = 'work'; pomodoro.timeLeft = pomodoro.workMin * 60; speakText('Перерыв завершён.'); }
       }
-      updatePomodoroUI();
+      updatePomo();
     }, 1000);
   }
-  updatePomodoroUI();
-}
-
-function resetPomodoro() {
-  pomodoro.running = false;
-  pomodoro.mode = 'work';
-  pomodoro.timeLeft = pomodoro.workMin * 60;
-  updatePomodoroUI();
+  updatePomo();
 }
 
 // ============================================================
-// === LORA ===
-// ============================================================
-function downloadNotebook() {
-  const notebook = {
-    cells: [
-      { cell_type: "markdown", metadata: {}, source: ["# QLoRA дообучение Qwen2.5\n", "Загрузи свой датасет JSON и запусти все ячейки."]},
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: ["!pip install -q transformers==4.45.0 peft==0.13.0 trl==0.11.0 bitsandbytes==0.44.0 accelerate==1.0.0 datasets==3.0.0 llama-cpp-python"]},
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
-        "import torch\n",
-        "from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig\n",
-        "from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training\n",
-        "MODEL_NAME = 'Qwen/Qwen2.5-1.5B-Instruct'\n",
-        "bnb = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type='nf4',\n",
-        "    bnb_4bit_compute_dtype=torch.float16, bnb_4bit_use_double_quant=True)\n",
-        "tok = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)\n",
-        "if tok.pad_token is None: tok.pad_token = tok.eos_token\n",
-        "model = AutoModelForCausalLM.from_pretrained(MODEL_NAME,\n",
-        "    quantization_config=bnb, device_map='auto', trust_remote_code=True)\n",
-        "model = prepare_model_for_kbit_training(model)\n",
-        "lora = LoraConfig(r=16, lora_alpha=32,\n",
-        "    target_modules=['q_proj','k_proj','v_proj','o_proj','gate_proj','up_proj','down_proj'],\n",
-        "    lora_dropout=0.05, bias='none', task_type='CAUSAL_LM')\n",
-        "model = get_peft_model(model, lora)\n",
-        "model.print_trainable_parameters()"
-      ]},
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
-        "data = [\n",
-        "    {'question': 'Реши x²+5x+6=0', 'answer': 'D=1, x₁=-2, x₂=-3'},\n",
-        "]\n",
-        "SYSTEM = 'Ты помощник для учёбы.'\n",
-        "def fmt(ex):\n",
-        "    return {'text': f'<|im_start|>system\\n{SYSTEM}<|im_end|>\\n<|im_start|>user\\n{ex[\"question\"]}<|im_end|>\\n<|im_start|>assistant\\n{ex[\"answer\"]}<|im_end|>'}\n",
-        "from datasets import Dataset\n",
-        "ds = Dataset.from_list(data).map(fmt)\n",
-        "split = ds.train_test_split(test_size=0.1, seed=42)"
-      ]},
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
-        "from transformers import TrainingArguments\n",
-        "from trl import SFTTrainer\n",
-        "args = TrainingArguments(output_dir='./qwen-lora', num_train_epochs=3,\n",
-        "    per_device_train_batch_size=2, gradient_accumulation_steps=4,\n",
-        "    gradient_checkpointing=True, learning_rate=2e-4,\n",
-        "    lr_scheduler_type='cosine', warmup_ratio=0.05,\n",
-        "    logging_steps=10, save_strategy='epoch', eval_strategy='epoch',\n",
-        "    save_total_limit=2, fp16=True, optim='paged_adamw_8bit',\n",
-        "    report_to='none', max_grad_norm=0.3)\n",
-        "trainer = SFTTrainer(model=model, tokenizer=tok, train_dataset=split['train'],\n",
-        "    eval_dataset=split['test'], args=args, dataset_text_field='text',\n",
-        "    max_seq_length=1024, packing=False)\n",
-        "trainer.train()\n",
-        "trainer.save_model('./qwen-lora')\n",
-        "tok.save_pretrained('./qwen-lora')"
-      ]},
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
-        "from peft import PeftModel\n",
-        "base = AutoModelForCausalLM.from_pretrained(MODEL_NAME,\n",
-        "    torch_dtype=torch.float16, device_map='auto', trust_remote_code=True)\n",
-        "merged = PeftModel.from_pretrained(base, './qwen-lora').merge_and_unload()\n",
-        "merged.save_pretrained('./qwen-merged')\n",
-        "tok.save_pretrained('./qwen-merged')"
-      ]},
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
-        "!git clone --depth 1 https://github.com/ggerganov/llama.cpp\n",
-        "!cd llama.cpp && pip install -r requirements.txt\n",
-        "!python llama.cpp/convert_hf_to_gguf.py ./qwen-merged --outfile qwen-f16.gguf --outtype f16\n",
-        "!cd llama.cpp && make quantize -j4\n",
-        "!./llama.cpp/quantize qwen-f16.gguf qwen-tuned-Q4_K_M.gguf Q4_K_M"
-      ]},
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
-        "from google.colab import files\n",
-        "files.download('qwen-tuned-Q4_K_M.gguf')"
-      ]}
-    ],
-    metadata: { kernelspec: { display_name: "Python 3", name: "python3" }, language_info: { name: "python" } },
-    nbformat: 4, nbformat_minor: 5,
-  };
-  const blob = new Blob([JSON.stringify(notebook, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'train.ipynb';
-  a.click();
-  addMessage('stat', '📥 train.ipynb скачан');
-}
-window.downloadNotebook = downloadNotebook;
-
-function downloadDatasetTemplate() {
-  const template = [
-    { question: "Реши x²+5x+6=0", answer: "D=1, x₁=-2, x₂=-3" },
-    { question: "Найди производную f(x)=x³+2x²", answer: "f'(x)=3x²+4x" },
-    { question: "Теорема Пифагора?", answer: "a² + b² = c²" },
-  ];
-  const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'dataset-template.json';
-  a.click();
-  addMessage('stat', '📥 Шаблон скачан');
-}
-window.downloadDatasetTemplate = downloadDatasetTemplate;
-
-// ============================================================
-// === ПРЕДМЕТЫ ===
+// === ПРЕСЕТЫ ===
 // ============================================================
 function renderPresets() {
-  const grid = $('preset-grid');
-  grid.innerHTML = Object.entries(PRESETS).map(([key, p]) => `
-    <div class="preset-btn" onclick="applyPreset('${key}')">
-      <span class="icon">${p.icon}</span><b>${p.name}</b>
-      <div class="sub">${p.sub}</div>
-    </div>
-  `).join('');
+  $('preset-grid').innerHTML = Object.entries(PRESETS).map(([k, p]) =>
+    `<div class="preset-btn" onclick="applyPreset('${k}')"><span class="icon">${p.icon}</span><b>${p.name}</b><div class="sub">${p.sub}</div></div>`
+  ).join('');
 }
 
-function applyPreset(key) {
-  if (!PRESETS[key]) return;
-  currentPreset = key;
-  localStorage.setItem('ai-preset', key);
-  messages[0] = { role: 'system', content: PRESETS[key].system };
-  addMessage('sys', `${PRESETS[key].icon} Предмет: ${PRESETS[key].name}`);
+function applyPreset(k) {
+  if (!PRESETS[k]) return;
+  currentPreset = k;
+  localStorage.setItem('ai-preset', k);
+  messages[0] = { role: 'system', content: PRESETS[k].system };
+  addMessage('sys', `${PRESETS[k].icon} Предмет: ${PRESETS[k].name}`);
   closeModal('modal-presets');
-
-  const targetModel = PRESETS[key].model || 'qwen15';
-  if (targetModel !== currentModelKey && autoMode) {
-    switchModel(targetModel, 'под предмет ' + PRESETS[key].name);
-  }
+  if (PRESETS[k].model && PRESETS[k].model !== currentModelKey && autoMode) switchModel(PRESETS[k].model, 'предмет ' + PRESETS[k].name);
 }
 window.applyPreset = applyPreset;
 
@@ -3073,43 +2070,23 @@ $('btn-auto').onclick = () => {
   SETTINGS.autoMode = autoMode ? 1 : 0;
   saveSettings();
   updateAutoBtn();
-  addMessage('sys', autoMode ? '🎯 Авто включён' : '🎯 Авто выключен');
+  addMessage('sys', autoMode ? '🎯 Авто вкл' : '🎯 Авто выкл');
 };
 
-$('btn-models').onclick = async () => {
-  openModal('modal-models');
-  await updateStorageInfo();
-  await renderModelList();
-};
-
-$('btn-chats').onclick = async () => {
-  if (messages.filter(m => m.role !== 'system').length > 0) await saveCurrentChat();
-  await loadChats();
-  renderChatList();
-  openModal('modal-chats');
-};
-
+$('btn-models').onclick = async () => { openModal('modal-models'); await updateStorageInfo(); await renderModelList(); };
+$('btn-chats').onclick = async () => { if (messages.filter(m => m.role !== 'system').length > 0) await saveCurrentChat(); await loadChats(); renderChatList(); openModal('modal-chats'); };
 $('btn-new').onclick = newChat;
 $('btn-stats').onclick = () => { renderStats(); openModal('modal-stats'); };
 $('btn-bench').onclick = () => openModal('modal-bench');
 $('btn-bench-run').onclick = runBenchmark;
 $('btn-bench-stop').onclick = stopBenchmark;
-$('btn-lora').onclick = () => openModal('modal-lora');
 $('btn-presets').onclick = () => { renderPresets(); openModal('modal-presets'); };
-
-$('btn-theme').onclick = () => {
-  SETTINGS.theme = SETTINGS.theme === 'dark' ? 'light' : 'dark';
-  saveSettings();
-  applyTheme(SETTINGS.theme);
-};
-
+$('btn-theme').onclick = () => { SETTINGS.theme = SETTINGS.theme === 'dark' ? 'light' : 'dark'; saveSettings(); applyTheme(SETTINGS.theme); };
 $('btn-diag').onclick = async () => {
   $('diag-content').innerHTML = '<div class="diag-line"><span class="spinner"></span>Запуск...</div>';
   openModal('modal-diag');
-  try { await runDiagnostics(); }
-  catch (e) { $('diag-content').innerHTML = '<div style="color:var(--error);">' + e.message + '</div>'; }
+  try { await runDiagnostics(); } catch (e) { $('diag-content').innerHTML = '<div style="color:var(--error);">' + e.message + '</div>'; }
 };
-
 $('btn-settings').onclick = () => {
   $('s-temp').value = SETTINGS.temperature;
   $('s-maxtok').value = SETTINGS.max_tokens;
@@ -3126,12 +2103,10 @@ $('btn-settings').onclick = () => {
   $('v-topp').textContent = SETTINGS.top_p.toFixed(2);
   openModal('modal-settings');
 };
-
 $('s-temp').oninput = e => $('v-temp').textContent = parseFloat(e.target.value).toFixed(2);
 $('s-maxtok').oninput = e => $('v-maxtok').textContent = e.target.value;
 $('s-ctx').oninput = e => $('v-ctx').textContent = e.target.value;
 $('s-topp').oninput = e => $('v-topp').textContent = parseFloat(e.target.value).toFixed(2);
-
 $('btn-camera').onclick = openCamera;
 $('btn-file').onclick = () => $('file-input').click();
 $('btn-mic').onclick = toggleMic;
@@ -3139,86 +2114,28 @@ $('file-input').onchange = onFileSelected;
 $('btn-snap').onclick = snapPhoto;
 $('btn-close-camera').onclick = closeCamera;
 $('stop').onclick = stopGeneration;
-
 $('chat-search').oninput = e => renderChatList(e.target.value);
-
-$('btn-pomodoro').onclick = () => {
-  $('pomodoro-panel').classList.toggle('show');
-  updatePomodoroUI();
-};
-$('pomodoro-toggle').onclick = togglePomodoro;
-$('pomodoro-reset').onclick = resetPomodoro;
+$('btn-pomodoro').onclick = () => { $('pomodoro-panel').classList.toggle('show'); updatePomo(); };
+$('pomodoro-toggle').onclick = togglePomo;
+$('pomodoro-reset').onclick = () => { pomodoro.running = false; pomodoro.mode = 'work'; pomodoro.timeLeft = pomodoro.workMin * 60; updatePomo(); };
 $('pomodoro-close').onclick = () => $('pomodoro-panel').classList.remove('show');
 
 sendBtn.onclick = send;
-inputEl.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
-});
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
 inputEl.addEventListener('input', autoResizeInput);
-inputEl.addEventListener('input', () => {
-  localStorage.setItem('ai-draft', inputEl.value);
-});
+inputEl.addEventListener('input', () => localStorage.setItem('ai-draft', inputEl.value));
 
-document.querySelectorAll('.quick-btn').forEach(btn => {
-  btn.onclick = () => {
-    inputEl.value = btn.dataset.p;
-    inputEl.focus();
-    autoResizeInput();
-  };
+document.querySelectorAll('.quick-btn').forEach(b => {
+  b.onclick = () => { inputEl.value = b.dataset.p; inputEl.focus(); autoResizeInput(); };
 });
 
 document.querySelectorAll('.modal').forEach(m => {
-  m.addEventListener('click', e => {
-    if (e.target === m) m.classList.remove('show');
-  });
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
 });
 
 chatEl.addEventListener('scroll', () => {
-  const atBottom = chatEl.scrollHeight - chatEl.scrollTop - chatEl.clientHeight < 50;
-  autoScroll = atBottom;
+  autoScroll = chatEl.scrollHeight - chatEl.scrollTop - chatEl.clientHeight < 50;
 });
-
-// ============================================================
-// === PWA ===
-// ============================================================
-async function initPWA() {
-  const manifestEl = document.getElementById('pwa-manifest');
-  if (manifestEl) {
-    const manifestBlob = new Blob([manifestEl.textContent], { type: 'application/manifest+json' });
-    const manifestUrl = URL.createObjectURL(manifestBlob);
-    const link = document.createElement('link');
-    link.rel = 'manifest';
-    link.href = manifestUrl;
-    document.head.appendChild(link);
-  }
-
-  if ('serviceWorker' in navigator) {
-    const swCode = `
-      const CACHE = 'ai-cache-v2';
-      self.addEventListener('install', e => self.skipWaiting());
-      self.addEventListener('activate', e => e.waitUntil(clients.claim()));
-      self.addEventListener('fetch', e => {
-        e.respondWith(
-          caches.match(e.request).then(r => r || fetch(e.request).then(resp => {
-            if (resp.ok && e.request.method === 'GET') {
-              const clone = resp.clone();
-              caches.open(CACHE).then(c => c.put(e.request, clone));
-            }
-            return resp;
-          }).catch(() => caches.match(e.request)))
-        );
-      });
-    `;
-    const swBlob = new Blob([swCode], { type: 'application/javascript' });
-    const swUrl = URL.createObjectURL(swBlob);
-    try {
-      await navigator.serviceWorker.register(swUrl);
-      console.log('SW registered');
-    } catch (e) {
-      console.warn('SW failed:', e);
-    }
-  }
-}
 
 // ============================================================
 // === СТАРТ ===
@@ -3227,11 +2144,8 @@ async function initPWA() {
   sessionStats.start = nowSec();
   updateAutoBtn();
   applyTheme(SETTINGS.theme);
-
-  const draft = localStorage.getItem('ai-draft');
-  if (draft) { inputEl.value = draft; autoResizeInput(); }
-
-  initPWA();
+  const d = localStorage.getItem('ai-draft');
+  if (d) { inputEl.value = d; autoResizeInput(); }
 
   if (!navigator.gpu) {
     showStatus('WebGPU НЕТ', 'error');
@@ -3239,25 +2153,20 @@ async function initPWA() {
     return;
   }
 
-  showStatus('Проверка GPU...', 'loading');
+  showStatus('Проверка...', 'loading');
   try {
-    const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
-    if (!adapter) {
-      showStatus('GPU недоступен', 'error');
-      addMessage('error', 'requestAdapter() вернул null.');
-      return;
-    }
-    const f16 = adapter.features.has('shader-f16');
-    addMessage('sys', `✅ GPU. shader-f16: ${f16 ? '✅' : '❌'}. Авто: ${autoMode ? '✅' : '❌'}`);
-  } catch (e) {
-    showStatus('Ошибка GPU', 'error');
-    return;
-  }
+    const a = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
+    if (!a) { showStatus('GPU недоступен', 'error'); return; }
+  } catch (e) { showStatus('Ошибка GPU', 'error'); return; }
+
+  const tCheck = typeof window.Tesseract !== 'undefined' && typeof window.Tesseract.createWorker === 'function';
+  addMessage('sys', `✅ GPU. Tesseract: ${tCheck ? '✅' : '❌'}. Авто: ${autoMode ? '✅' : '❌'}`);
 
   await loadChats();
   await initEngine();
 })();
 
+// Экспорты
 window.switchModel = switchModel;
 window.openChat = openChat;
 window.deleteChat = deleteChat;
@@ -3271,8 +2180,6 @@ window.resetStats = resetStats;
 window.applySettings = applySettings;
 window.autoSelectBest = autoSelectBest;
 window.clearModelCache = clearModelCache;
-window.downloadNotebook = downloadNotebook;
-window.downloadDatasetTemplate = downloadDatasetTemplate;
 window.applyPreset = applyPreset;
 window.copyMsg = copyMsg;
 window.speakMsg = speakMsg;
