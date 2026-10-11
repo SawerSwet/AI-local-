@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#0d1117">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Умный ИИ">
-<title>🧠 Умный учебный ИИ</title>
+<title>🧠 Умный ИИ</title>
 
-<!-- Tesseract.js через script тег (не import) — работает всегда -->
+<!-- Tesseract через script — работает всегда -->
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 
 <style>
@@ -17,7 +17,7 @@
     --border: #30363d; --text: #e6edf3; --text2: #7d8590;
     --accent: #1f6feb; --accent2: #238636;
     --warn: #d29922; --error: #f85149; --ok: #3fb950;
-    --math: #a371f7; --file: #58a6ff; --lora: #f778ba;
+    --math: #a371f7; --file: #58a6ff;
     --auto: #39d353;
   }
   [data-theme="light"] {
@@ -25,7 +25,7 @@
     --border: #d0d7de; --text: #1f2328; --text2: #656d76;
     --accent: #0969da; --accent2: #1a7f37;
     --warn: #9a6700; --error: #cf222e; --ok: #1a7f37;
-    --math: #8250df; --file: #0969da; --lora: #bf3989;
+    --math: #8250df; --file: #0969da;
     --auto: #1a7f37;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -36,15 +36,16 @@
   }
   body { display: flex; flex-direction: column; }
 
+  /* ===== HEADER ===== */
   header {
-    padding: 8px 12px; background: var(--bg2);
+    padding: 10px 12px; background: var(--bg2);
     border-bottom: 1px solid var(--border);
     display: flex; justify-content: space-between; align-items: center;
     gap: 8px; flex-shrink: 0;
   }
-  header h1 { font-size: 13px; margin: 0; white-space: nowrap; }
+  header h1 { font-size: 14px; margin: 0; font-weight: 700; }
   #status {
-    font-size: 10px; color: var(--text2); flex: 1;
+    font-size: 11px; color: var(--text2); flex: 1;
     text-align: right; overflow: hidden; text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -52,21 +53,26 @@
   #status.loading { color: var(--warn); }
   #status.error { color: var(--error); }
 
+  /* ===== TOOLBAR ===== */
   #toolbar {
     display: flex; gap: 6px; padding: 6px 8px;
     background: var(--bg2); border-bottom: 1px solid var(--border);
-    flex-shrink: 0; overflow-x: auto;
+    flex-shrink: 0; overflow-x: auto; -webkit-overflow-scrolling: touch;
   }
   #toolbar::-webkit-scrollbar { display: none; }
   .tb-btn {
-    padding: 6px 11px; border-radius: 14px; border: 1px solid var(--border);
-    background: var(--bg3); color: var(--text); font-size: 12px;
-    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    padding: 8px 12px; border-radius: 16px;
+    border: 1px solid var(--border); background: var(--bg3);
+    color: var(--text); font-size: 13px; cursor: pointer;
+    white-space: nowrap; flex-shrink: 0; font-weight: 500;
+    min-height: 36px;
   }
+  .tb-btn:active { transform: scale(0.96); }
   .tb-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
-  .tb-btn.auto { background: var(--auto); border-color: var(--auto); color: black; font-weight: 600; }
-  .tb-btn.pomodoro { background: var(--warn); border-color: var(--warn); color: black; }
+  .tb-btn.auto-on { background: var(--auto); border-color: var(--auto); color: black; font-weight: 700; }
+  .tb-btn.danger { background: var(--error); border-color: var(--error); color: white; }
 
+  /* ===== QUICK BAR ===== */
   .quick-bar {
     display: flex; gap: 5px; padding: 6px 8px;
     background: var(--bg3); border-bottom: 1px solid var(--border);
@@ -74,32 +80,35 @@
   }
   .quick-bar::-webkit-scrollbar { display: none; }
   .quick-btn {
-    padding: 5px 10px; border-radius: 12px;
+    padding: 6px 12px; border-radius: 14px;
     border: 1px solid var(--border); background: var(--bg2);
-    color: var(--text); font-size: 11px; cursor: pointer;
+    color: var(--text); font-size: 12px; cursor: pointer;
     white-space: nowrap; flex-shrink: 0;
   }
+  .quick-btn:active { background: var(--accent); color: white; }
 
+  /* ===== CHAT ===== */
   #chat {
-    flex: 1; overflow-y: auto; padding: 10px;
-    display: flex; flex-direction: column; gap: 10px;
+    flex: 1; overflow-y: auto; padding: 12px;
+    display: flex; flex-direction: column; gap: 12px;
     -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
   .msg {
-    max-width: 92%; padding: 9px 13px; border-radius: 14px;
-    line-height: 1.55; word-wrap: break-word; font-size: 14px;
+    max-width: 92%; padding: 10px 14px; border-radius: 16px;
+    line-height: 1.55; word-wrap: break-word; font-size: 15px;
   }
   .msg img { max-width: 100%; border-radius: 8px; margin-top: 6px; display: block; }
   .msg p { margin: 6px 0; }
   .msg p:first-child { margin-top: 0; }
   .msg p:last-child { margin-bottom: 0; }
-  .msg h1, .msg h2, .msg h3 { margin: 10px 0 6px; font-size: 15px; }
+  .msg h1, .msg h2, .msg h3 { margin: 10px 0 6px; font-size: 16px; }
   .msg ul, .msg ol { margin: 6px 0; padding-left: 22px; }
   .msg li { margin: 3px 0; }
   .msg code {
     background: rgba(110,118,129,0.25);
-    padding: 1px 5px; border-radius: 4px;
-    font-family: 'SF Mono', Consolas, monospace; font-size: 12.5px;
+    padding: 2px 6px; border-radius: 4px;
+    font-family: 'SF Mono', Consolas, monospace; font-size: 13px;
   }
   .msg pre {
     background: rgba(110,118,129,0.18);
@@ -112,142 +121,157 @@
     border-left: 3px solid var(--accent);
     padding-left: 10px; margin: 6px 0; color: var(--text2);
   }
-  .msg table { border-collapse: collapse; margin: 8px 0; font-size: 12px; width: 100%; }
-  .msg th, .msg td { border: 1px solid var(--border); padding: 4px 8px; text-align: left; }
+  .msg table { border-collapse: collapse; margin: 8px 0; font-size: 13px; width: 100%; }
+  .msg th, .msg td { border: 1px solid var(--border); padding: 5px 8px; text-align: left; }
   .msg th { background: var(--bg3); }
   .msg .katex { font-size: 1em !important; }
-  .msg .katex-display { margin: 8px 0; overflow-x: auto; overflow-y: hidden; }
 
   .user { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 4px; }
   .bot { align-self: flex-start; background: var(--bg3); border-bottom-left-radius: 4px; }
-  .sys { align-self: center; font-size: 10px; color: var(--text2); text-align: center; max-width: 95%; white-space: pre-wrap; }
-  .stat { align-self: center; font-size: 10px; color: var(--ok);
-    background: rgba(63,185,80,0.13); padding: 4px 10px;
-    border-radius: 6px; border: 1px solid rgba(63,185,80,0.27); }
-  .warn { align-self: center; font-size: 11px; color: var(--warn);
-    background: rgba(210,153,34,0.13); padding: 8px 12px;
-    border-radius: 8px; border: 1px solid rgba(210,153,34,0.4);
-    max-width: 95%; text-align: center; }
-  .error { align-self: center; font-size: 11px; color: var(--error);
-    background: rgba(248,81,73,0.13); padding: 8px 12px;
-    border-radius: 8px; border: 1px solid rgba(248,81,73,0.4);
-    max-width: 95%; text-align: center; }
-
-  .msg-actions { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; opacity: 0.6; }
-  .msg:hover .msg-actions, .msg-actions:active { opacity: 1; }
-  .msg-actions button {
-    padding: 3px 8px; border-radius: 6px;
-    border: 1px solid var(--border); background: rgba(0,0,0,0.15);
-    color: var(--text2); font-size: 10px; cursor: pointer;
+  .sys { align-self: center; font-size: 11px; color: var(--text2); text-align: center; max-width: 95%; white-space: pre-wrap; padding: 4px 12px; }
+  .stat {
+    align-self: center; font-size: 11px; color: var(--ok);
+    background: rgba(63,185,80,0.13); padding: 5px 12px;
+    border-radius: 8px; border: 1px solid rgba(63,185,80,0.27);
+  }
+  .warn {
+    align-self: center; font-size: 12px; color: var(--warn);
+    background: rgba(210,153,34,0.13); padding: 9px 14px;
+    border-radius: 10px; border: 1px solid rgba(210,153,34,0.4);
+    max-width: 95%; text-align: center;
+  }
+  .error {
+    align-self: center; font-size: 12px; color: var(--error);
+    background: rgba(248,81,73,0.13); padding: 9px 14px;
+    border-radius: 10px; border: 1px solid rgba(248,81,73,0.4);
+    max-width: 95%; text-align: center;
   }
 
+  .msg-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .msg-actions button {
+    padding: 5px 10px; border-radius: 8px;
+    border: 1px solid var(--border); background: rgba(0,0,0,0.2);
+    color: var(--text2); font-size: 12px; cursor: pointer;
+  }
+  .msg-actions button:active { background: var(--border); color: var(--text); }
+
+  /* ===== OCR CARD ===== */
   .ocr-card {
     align-self: stretch; max-width: 100%;
     background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 12px; padding: 10px; margin: 4px 0;
+    border-radius: 14px; padding: 12px; margin: 4px 0;
   }
-  .ocr-card .ocr-head {
-    display: flex; justify-content: space-between;
-    align-items: center; margin-bottom: 8px; gap: 8px;
-  }
-  .ocr-card .ocr-title {
-    font-size: 12px; color: var(--text2); font-weight: 600;
+  .ocr-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; }
+  .ocr-title {
+    font-size: 13px; color: var(--text2); font-weight: 600;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
   }
-  .ocr-card .ocr-badge {
-    font-size: 10px; padding: 2px 7px; border-radius: 6px;
-    background: var(--accent); color: white; flex-shrink: 0;
+  .ocr-badge {
+    font-size: 11px; padding: 3px 9px; border-radius: 8px;
+    background: var(--accent); color: white; flex-shrink: 0; font-weight: 600;
   }
-  .ocr-card .ocr-badge.math { background: var(--math); }
-  .ocr-card .ocr-badge.file { background: var(--file); }
-  .ocr-card .img-wrap {
-    position: relative; margin-bottom: 8px;
-    border-radius: 8px; overflow: hidden; background: #000;
+  .ocr-badge.math { background: var(--math); }
+  .ocr-badge.file { background: var(--file); }
+  .ocr-badge.warn { background: var(--warn); color: black; }
+  .img-wrap { position: relative; margin-bottom: 10px; border-radius: 10px; overflow: hidden; background: #000; }
+  .img-wrap img { width: 100%; display: block; }
+  .ocr-tabs {
+    display: flex; gap: 4px; margin-bottom: 10px;
+    border-bottom: 1px solid var(--border); padding-bottom: 8px; overflow-x: auto;
   }
-  .ocr-card .img-wrap img { width: 100%; display: block; }
-  .ocr-card .ocr-tabs {
-    display: flex; gap: 4px; margin-bottom: 8px;
-    border-bottom: 1px solid var(--border); padding-bottom: 6px; overflow-x: auto;
-  }
-  .ocr-card .ocr-tabs::-webkit-scrollbar { display: none; }
-  .ocr-card .ocr-tab {
-    padding: 4px 10px; border-radius: 8px; font-size: 11px;
+  .ocr-tabs::-webkit-scrollbar { display: none; }
+  .ocr-tab {
+    padding: 6px 12px; border-radius: 10px; font-size: 12px;
     cursor: pointer; white-space: nowrap; flex-shrink: 0;
     color: var(--text2); border: 1px solid transparent;
   }
-  .ocr-card .ocr-tab.active { background: var(--bg3); color: var(--text); border-color: var(--border); }
-  .ocr-card .ocr-content {
-    font-size: 12px; line-height: 1.5; background: var(--bg);
-    border-radius: 8px; padding: 8px 10px; max-height: 300px;
+  .ocr-tab.active { background: var(--bg3); color: var(--text); border-color: var(--border); }
+  .ocr-content {
+    font-size: 13px; line-height: 1.5; background: var(--bg);
+    border-radius: 8px; padding: 10px 12px; max-height: 300px;
     overflow-y: auto; font-family: 'SF Mono', Consolas, monospace;
     white-space: pre-wrap; word-wrap: break-word; color: var(--text);
   }
-  .ocr-card .ocr-content.hidden { display: none; }
-  .ocr-card .ocr-content.formula-line {
+  .ocr-content.hidden { display: none; }
+  .ocr-content .formula-line {
     background: rgba(163,113,247,0.08);
     border-left: 3px solid var(--math);
-    padding: 4px 8px; margin: 3px 0;
+    padding: 5px 10px; margin: 4px 0;
     border-radius: 4px; color: #d2a8ff;
-    font-family: 'Times New Roman', serif; font-size: 13px;
+    font-family: 'Times New Roman', serif; font-size: 14px;
   }
-  .ocr-card .ocr-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-  .ocr-card .ocr-actions button {
-    padding: 5px 10px; border-radius: 8px;
+  .ocr-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .ocr-actions button {
+    padding: 7px 12px; border-radius: 10px;
     border: 1px solid var(--border); background: var(--bg3);
-    color: var(--text); font-size: 11px; cursor: pointer;
+    color: var(--text); font-size: 12px; cursor: pointer;
+  }
+  .ocr-actions button:active { transform: scale(0.97); }
+
+  .ocr-progress { height: 4px; background: var(--bg); border-radius: 2px; overflow: hidden; margin: 8px 0; }
+  .ocr-progress-bar {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--ok));
+    width: 0%; transition: width 0.2s;
   }
 
+  /* ===== AUTO CARD ===== */
   .auto-card {
     align-self: center; background: rgba(57,211,83,0.1);
-    border: 1px solid rgba(57,211,83,0.4); border-radius: 10px;
-    padding: 8px 12px; font-size: 11px; color: var(--auto);
+    border: 1px solid rgba(57,211,83,0.4); border-radius: 12px;
+    padding: 10px 14px; font-size: 13px; color: var(--auto);
     max-width: 95%; text-align: center;
   }
   .auto-card b { color: var(--text); }
 
+  /* ===== STATS OVERLAY ===== */
   #stats {
-    position: fixed; bottom: 80px; right: 8px;
-    background: rgba(22,27,34,0.95); padding: 6px 10px;
-    border-radius: 8px; font-size: 10px; color: var(--text2);
+    position: fixed; bottom: 84px; right: 10px;
+    background: rgba(22,27,34,0.96); padding: 8px 12px;
+    border-radius: 10px; font-size: 11px; color: var(--text2);
     border: 1px solid var(--border); pointer-events: none;
-    opacity: 0; transition: opacity 0.3s; max-width: 60%; z-index: 50;
+    opacity: 0; transition: opacity 0.3s; max-width: 65%; z-index: 50;
   }
   #stats.show { opacity: 1; }
   #stats b { color: var(--ok); }
 
+  /* ===== POMODORO ===== */
   #pomodoro-panel {
-    position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
-    background: rgba(22,27,34,0.98); padding: 10px 16px;
-    border-radius: 12px; border: 1px solid var(--warn);
-    display: none; z-index: 60; font-size: 13px; color: var(--text);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5); text-align: center;
+    position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+    background: rgba(22,27,34,0.98); padding: 12px 20px;
+    border-radius: 14px; border: 2px solid var(--warn);
+    display: none; z-index: 60; font-size: 14px; color: var(--text);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6); text-align: center;
   }
   #pomodoro-panel.show { display: block; }
-  #pomodoro-time { font-size: 24px; font-weight: 700; color: var(--warn); font-family: monospace; margin: 6px 0; }
+  #pomodoro-time { font-size: 28px; font-weight: 700; color: var(--warn); font-family: monospace; margin: 8px 0; }
   #pomodoro-panel button {
-    padding: 4px 10px; border-radius: 6px;
+    padding: 6px 12px; border-radius: 8px;
     border: 1px solid var(--border);
     background: var(--bg3); color: var(--text);
-    font-size: 11px; cursor: pointer; margin: 2px;
+    font-size: 13px; cursor: pointer; margin: 3px;
   }
 
+  /* ===== INPUT AREA ===== */
   #input-area {
-    display: flex; gap: 6px; padding: 8px;
+    display: flex; gap: 8px; padding: 10px;
     background: var(--bg2); border-top: 1px solid var(--border);
     align-items: flex-end; flex-shrink: 0;
   }
   #input {
-    flex: 1; padding: 10px 14px; border-radius: 20px;
+    flex: 1; padding: 12px 16px; border-radius: 22px;
     border: 1px solid var(--border); background: var(--bg);
-    color: var(--text); font-size: 14px; outline: none;
-    resize: none; max-height: 100px; min-width: 0; font-family: inherit;
+    color: var(--text); font-size: 15px; outline: none;
+    resize: none; max-height: 120px; min-width: 0;
+    font-family: inherit; line-height: 1.4;
   }
   #input:focus { border-color: var(--accent); }
   .icon-btn {
-    padding: 10px; border-radius: 20px; border: none;
-    background: var(--bg3); color: var(--text); font-size: 16px;
-    cursor: pointer; width: 42px; height: 42px; flex-shrink: 0;
+    padding: 10px; border-radius: 22px; border: none;
+    background: var(--bg3); color: var(--text); font-size: 18px;
+    cursor: pointer; width: 44px; height: 44px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
   }
+  .icon-btn:active { transform: scale(0.94); }
   .icon-btn.file { background: var(--file); color: white; }
   .icon-btn.mic.rec { background: var(--error); animation: pulse 1s infinite; }
   @keyframes pulse {
@@ -256,19 +280,20 @@
     100% { box-shadow: 0 0 0 0 rgba(248,81,73,0); }
   }
   #send {
-    padding: 10px 16px; border-radius: 20px; border: none;
+    padding: 10px 20px; border-radius: 22px; border: none;
     background: var(--accent2); color: white; font-weight: 600;
-    font-size: 14px; cursor: pointer; height: 42px; flex-shrink: 0;
+    font-size: 15px; cursor: pointer; height: 44px; flex-shrink: 0;
   }
   #send:disabled { background: var(--border); }
   #stop {
-    padding: 10px 14px; border-radius: 20px; border: none;
+    padding: 10px 16px; border-radius: 22px; border: none;
     background: #da3633; color: white; font-weight: 600;
-    font-size: 14px; height: 42px; cursor: pointer;
+    font-size: 15px; height: 44px; cursor: pointer;
     display: none; flex-shrink: 0;
   }
   #stop.show { display: block; }
 
+  /* ===== PROGRESS ===== */
   #progress {
     position: fixed; top: 0; left: 0; right: 0;
     height: 3px; background: var(--border); z-index: 100; display: none;
@@ -279,125 +304,165 @@
     width: 0%; transition: width 0.3s;
   }
 
+  /* ===== MODALS ===== */
   .modal {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.92);
     display: none; z-index: 200; padding: 16px; overflow-y: auto;
   }
-  .modal.show { display: flex; justify-content: center; padding-top: 40px; }
+  .modal.show { display: flex; justify-content: center; padding-top: 30px; padding-bottom: 30px; }
   .modal-content {
-    background: var(--bg2); border-radius: 16px; padding: 16px;
-    max-width: 620px; width: 100%; max-height: 85vh; overflow-y: auto;
-    border: 1px solid var(--border);
+    background: var(--bg2); border-radius: 18px; padding: 18px;
+    max-width: 640px; width: 100%; max-height: calc(100vh - 60px);
+    overflow-y: auto; border: 1px solid var(--border);
   }
-  .modal-content h2 { font-size: 16px; margin: 0 0 12px; }
-  .modal-content p { font-size: 12px; color: var(--text2); margin: 5px 0; }
+  .modal-content h2 { font-size: 18px; margin: 0 0 14px; }
+  .modal-content p { font-size: 13px; color: var(--text2); margin: 6px 0; }
   .modal-content p b { color: var(--text); }
 
+  /* ===== MODEL LIST ===== */
   .model-opt {
-    padding: 10px; border-radius: 10px; border: 1px solid var(--border);
-    background: var(--bg3); margin-bottom: 6px; cursor: pointer; position: relative;
+    padding: 12px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--bg3); margin-bottom: 8px; cursor: pointer;
+    position: relative; transition: transform 0.1s;
   }
+  .model-opt:active { transform: scale(0.98); }
   .model-opt.selected { border-color: var(--accent); background: rgba(31,111,235,0.13); }
   .model-opt.cached { border-color: var(--ok); }
-  .model-opt .name { font-weight: 600; font-size: 13px; margin-bottom: 3px; padding-right: 60px; }
-  .model-opt .meta { font-size: 10px; color: var(--text2); display: flex; gap: 8px; flex-wrap: wrap; }
-  .model-opt .cached-badge {
-    position: absolute; top: 8px; right: 8px;
-    font-size: 9px; padding: 2px 6px; border-radius: 4px;
-    background: var(--ok); color: black; font-weight: 600;
+  .model-opt .name { font-weight: 600; font-size: 14px; margin-bottom: 5px; padding-right: 70px; }
+  .model-opt .meta {
+    font-size: 11px; color: var(--text2);
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 3px;
   }
+  .model-opt .desc { font-size: 11px; color: var(--text2); margin-top: 4px; }
+  .model-opt .cached-badge {
+    position: absolute; top: 10px; right: 10px;
+    font-size: 10px; padding: 3px 8px; border-radius: 6px;
+    background: var(--ok); color: black; font-weight: 700;
+  }
+  .model-opt .lang-badge {
+    display: inline-block; font-size: 10px; padding: 2px 7px;
+    border-radius: 5px; background: var(--accent); color: white;
+    margin-right: 4px; margin-top: 3px;
+  }
+  .model-opt .lang-badge.rus { background: #3fb950; color: black; }
+  .model-opt .lang-badge.math { background: var(--math); }
+  .model-opt .lang-badge.code { background: #58a6ff; }
+  .model-opt .lang-badge.multi { background: #f778ba; color: black; }
 
   .category-label {
-    font-size: 11px; color: var(--text2); margin: 12px 0 6px;
-    padding: 4px 8px; background: var(--bg); border-radius: 6px;
-    display: inline-block;
+    font-size: 13px; color: var(--text2); margin: 14px 0 8px;
+    padding: 6px 10px; background: var(--bg); border-radius: 8px;
+    display: inline-block; font-weight: 600;
   }
 
+  /* ===== STORAGE ===== */
   .storage-info {
-    background: var(--bg); border-radius: 8px; padding: 10px;
-    margin-bottom: 12px; font-size: 11px; color: var(--text2);
+    background: var(--bg); border-radius: 10px; padding: 12px;
+    margin-bottom: 14px; font-size: 12px; color: var(--text2);
   }
   .storage-info b { color: var(--text); }
-  .storage-bar { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; margin: 6px 0; }
-  .storage-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--ok)); width: 0%; transition: width 0.3s; }
+  .storage-bar { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; margin: 8px 0; }
+  .storage-bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--ok));
+    width: 0%; transition: width 0.3s;
+  }
 
+  /* ===== CHAT LIST ===== */
   .chat-item {
-    padding: 10px; border-radius: 10px; background: var(--bg3);
-    margin-bottom: 6px; cursor: pointer; font-size: 13px;
-    display: flex; justify-content: space-between; align-items: center; gap: 6px;
+    padding: 12px; border-radius: 12px; background: var(--bg3);
+    margin-bottom: 8px; cursor: pointer; font-size: 14px;
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
   }
+  .chat-item:active { transform: scale(0.98); }
   .chat-item .title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .chat-item .del { color: var(--error); font-size: 16px; padding: 4px 8px; }
+  .chat-item .del { color: var(--error); font-size: 18px; padding: 4px 10px; }
 
+  /* ===== BUTTONS ===== */
   .btn-primary {
-    width: 100%; padding: 11px; border-radius: 10px;
+    width: 100%; padding: 13px; border-radius: 12px;
     border: none; background: var(--accent); color: white;
-    font-weight: 600; font-size: 13px; cursor: pointer; margin-top: 6px;
+    font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 8px;
   }
+  .btn-primary:active { transform: scale(0.98); }
   .btn-secondary {
-    width: 100%; padding: 9px; border-radius: 10px;
+    width: 100%; padding: 11px; border-radius: 12px;
     border: 1px solid var(--border); background: transparent;
-    color: var(--text); font-weight: 500; font-size: 12px;
-    cursor: pointer; margin-top: 5px;
+    color: var(--text); font-weight: 500; font-size: 13px;
+    cursor: pointer; margin-top: 6px;
   }
   .btn-danger {
-    width: 100%; padding: 9px; border-radius: 10px;
+    width: 100%; padding: 11px; border-radius: 12px;
     border: 1px solid #da3633; background: transparent;
-    color: var(--error); font-weight: 500; font-size: 12px;
-    cursor: pointer; margin-top: 5px;
+    color: var(--error); font-weight: 500; font-size: 13px;
+    cursor: pointer; margin-top: 6px;
   }
 
+  /* ===== SETTINGS ===== */
   .settings-row {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 8px 0; border-bottom: 1px solid var(--bg3);
-    font-size: 12px; gap: 8px;
+    padding: 10px 0; border-bottom: 1px solid var(--bg3);
+    font-size: 13px; gap: 10px;
   }
   .settings-row label { color: var(--text2); flex-shrink: 0; }
   .settings-row input[type="range"] { flex: 1; min-width: 0; }
-  .settings-row .val { font-family: monospace; color: var(--accent); min-width: 50px; text-align: right; }
+  .settings-row .val {
+    font-family: monospace; color: var(--accent);
+    min-width: 55px; text-align: right; font-weight: 600;
+  }
   .settings-row select {
-    padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border);
-    background: var(--bg3); color: var(--text); font-size: 12px;
+    padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg3); color: var(--text); font-size: 13px;
   }
 
-  .diag-line { font-size: 11px; padding: 3px 0; border-bottom: 1px solid var(--bg3); }
+  /* ===== DIAG ===== */
+  .diag-line { font-size: 12px; padding: 5px 0; border-bottom: 1px solid var(--bg3); }
   .diag-line b { color: var(--text2); font-weight: 500; }
   .ok { color: var(--ok); } .bad { color: var(--error); } .warn-txt { color: var(--warn); }
 
   .spinner {
-    display: inline-block; width: 12px; height: 12px;
+    display: inline-block; width: 14px; height: 14px;
     border: 2px solid var(--border); border-top-color: var(--accent);
     border-radius: 50%; animation: spin 0.8s linear infinite;
-    vertical-align: middle; margin-right: 6px;
+    vertical-align: middle; margin-right: 8px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .bench-table { width: 100%; font-size: 11px; border-collapse: collapse; margin-top: 10px; }
-  .bench-table th { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--border); color: var(--text2); font-weight: 500; }
-  .bench-table td { padding: 6px 4px; border-bottom: 1px solid var(--bg3); }
+  /* ===== BENCH ===== */
+  .bench-table { width: 100%; font-size: 12px; border-collapse: collapse; margin-top: 12px; }
+  .bench-table th {
+    text-align: left; padding: 8px 5px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2); font-weight: 500;
+  }
+  .bench-table td { padding: 8px 5px; border-bottom: 1px solid var(--bg3); }
   .bench-table .good { color: var(--ok); }
   .bench-table .med { color: var(--warn); }
   .bench-table .bad { color: var(--error); }
 
-  #camera-preview { width: 100%; border-radius: 12px; margin-bottom: 10px; display: none; background: #000; }
+  /* ===== CAMERA ===== */
+  #camera-preview {
+    width: 100%; border-radius: 14px; margin-bottom: 12px;
+    display: none; background: #000;
+  }
   #camera-preview.show { display: block; }
 
-  .ocr-progress { height: 3px; background: var(--bg); border-radius: 2px; overflow: hidden; margin: 6px 0; }
-  .ocr-progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--ok)); width: 0%; transition: width 0.2s; }
-
-  .preset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 10px 0; }
+  /* ===== PRESETS ===== */
+  .preset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
   .preset-btn {
-    padding: 10px; border-radius: 10px;
+    padding: 12px; border-radius: 12px;
     border: 1px solid var(--border); background: var(--bg3);
-    color: var(--text); font-size: 12px; cursor: pointer; text-align: left;
+    color: var(--text); font-size: 13px; cursor: pointer; text-align: left;
   }
-  .preset-btn .icon { font-size: 18px; margin-right: 6px; }
-  .preset-btn .sub { font-size: 10px; color: var(--text2); margin-top: 2px; }
+  .preset-btn:active { transform: scale(0.97); }
+  .preset-btn .icon { font-size: 22px; margin-right: 8px; }
+  .preset-btn .sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
 
+  /* ===== SKELETON ===== */
   .skeleton {
-    display: inline-block; width: 8px; height: 14px;
-    background: var(--accent); border-radius: 2px;
-    animation: blink 0.8s infinite; vertical-align: middle; margin-left: 2px;
+    display: inline-block; width: 10px; height: 16px;
+    background: var(--accent); border-radius: 3px;
+    animation: blink 0.8s infinite;
+    vertical-align: middle; margin-left: 3px;
   }
   @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
@@ -422,36 +487,29 @@
 </header>
 
 <div id="toolbar">
-  <button class="tb-btn auto" id="btn-auto">🎯 Авто ✓</button>
-  <button class="tb-btn" id="btn-models">🧠</button>
-  <button class="tb-btn" id="btn-chats">💬</button>
+  <button class="tb-btn auto-on" id="btn-auto">🎯 Авто ✓</button>
+  <button class="tb-btn" id="btn-models">🧠 Модели</button>
+  <button class="tb-btn" id="btn-chats">💬 Чаты</button>
   <button class="tb-btn" id="btn-new">➕</button>
-  <button class="tb-btn" id="btn-stats">📊</button>
-  <button class="tb-btn" id="btn-bench">⚡</button>
-  <button class="tb-btn" id="btn-diag">🔍</button>
   <button class="tb-btn" id="btn-presets">📚</button>
-  <button class="tb-btn pomodoro" id="btn-pomodoro">🍅</button>
-  <button class="tb-btn" id="btn-theme">🌙</button>
   <button class="tb-btn" id="btn-settings">⚙️</button>
+  <button class="tb-btn" id="btn-more">⋯</button>
 </div>
 
 <div class="quick-bar">
   <button class="quick-btn" data-p="Реши уравнение: ">🧮 Уравнение</button>
   <button class="quick-btn" data-p="Объясни тему: ">📖 Объясни</button>
-  <button class="quick-btn" data-p="Переведи на английский: ">🌐 Перевод</button>
-  <button class="quick-btn" data-p="Составь план конспекта: ">📝 Конспект</button>
-  <button class="quick-btn" data-p="Придумай 5 вопросов: ">❓ Вопросы</button>
-  <button class="quick-btn" data-p="Реши пошагово: ">🎯 Пошагово</button>
+  <button class="quick-btn" data-p="Переведи на русский: ">🌐 Перевод</button>
+  <button class="quick-btn" data-p="Составь конспект: ">📝 Конспект</button>
+  <button class="quick-btn" data-p="Придумай 5 вопросов по теме: ">❓ Вопросы</button>
   <button class="quick-btn" data-p="/teacher Помоги, не давай ответ">👨‍🏫 Учитель</button>
-  <button class="quick-btn" data-p="/check Проверь моё решение">🔎 Проверка</button>
-  <button class="quick-btn" data-p="/short Кратко">⚡ Кратко</button>
 </div>
 
 <div id="chat">
   <div class="msg sys">
     <b>🧠 Умный учебный ИИ</b><br>
-    Tesseract через script · 100+ языков · математика<br>
-    🎯 Авто-выбор модели · 📷 OCR · 🎤 Голос · 🔊 Озвучка
+    Модели отвечают на <b>русском</b>, <b>английском</b>, <b>татарском</b><br>
+    📷 Камера · 🎤 Голос · 🔊 Озвучка · ⚡ Офлайн
   </div>
 </div>
 
@@ -476,12 +534,15 @@
   <button id="send" disabled>➤</button>
 </div>
 
+<!-- Модалки -->
 <div class="modal" id="modal-models">
   <div class="modal-content">
     <h2>🧠 Модели</h2>
     <div id="storage-info" class="storage-info"><span class="spinner"></span>Проверка...</div>
+    <p style="font-size:12px;">Каждая модель показывает:<br>
+    <b>языки</b> · размер · RAM · скорость</p>
     <div id="model-list"></div>
-    <button class="btn-secondary" onclick="autoSelectBest()">🎯 По RAM</button>
+    <button class="btn-secondary" onclick="autoSelectBest()">🎯 Подобрать под RAM</button>
     <button class="btn-secondary" onclick="clearModelCache()">🗑 Очистить кэш</button>
     <button class="btn-secondary" onclick="closeModal('modal-models')">Закрыть</button>
   </div>
@@ -491,13 +552,11 @@
   <div class="modal-content">
     <h2>💬 Чаты</h2>
     <input type="text" id="chat-search" placeholder="🔍 Поиск..."
-      style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;margin-bottom:10px;">
+      style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;margin-bottom:12px;">
     <div id="chat-list"></div>
-    <button class="btn-primary" onclick="newChat()">➕ Новый</button>
-    <button class="btn-secondary" onclick="exportChats()">📤 JSON</button>
-    <button class="btn-secondary" onclick="exportChatsMarkdown()">📄 Markdown</button>
-    <button class="btn-secondary" onclick="importChats()">📥 Импорт</button>
-    <button class="btn-secondary" onclick="printChat()">🖨 Печать</button>
+    <button class="btn-primary" onclick="newChat()">➕ Новый чат</button>
+    <button class="btn-secondary" onclick="exportChats()">📤 Экспорт JSON</button>
+    <button class="btn-secondary" onclick="importChats()">📥 Импорт JSON</button>
     <button class="btn-secondary" onclick="closeModal('modal-chats')">Закрыть</button>
   </div>
 </div>
@@ -529,9 +588,24 @@
   </div>
 </div>
 
+<div class="modal" id="modal-more">
+  <div class="modal-content">
+    <h2>⋯ Дополнительно</h2>
+    <button class="btn-secondary" onclick="openModal('modal-stats')">📊 Статистика</button>
+    <button class="btn-secondary" onclick="openModal('modal-bench')">⚡ Бенчмарк</button>
+    <button class="btn-secondary" onclick="openModal('modal-diag')">🔍 Диагностика</button>
+    <button class="btn-secondary" onclick="openModal('modal-lora')">✨ LoRA обучение</button>
+    <button class="btn-secondary" id="btn-theme">🌙 Тема</button>
+    <button class="btn-secondary" onclick="showPomodoro()">🍅 Pomodoro</button>
+    <button class="btn-secondary" onclick="printChat()">🖨 Печать / PDF</button>
+    <button class="btn-secondary" onclick="closeModal('modal-more')">Закрыть</button>
+  </div>
+</div>
+
 <div class="modal" id="modal-presets">
   <div class="modal-content">
     <h2>📚 Предметы</h2>
+    <p>Установит специальный промпт для предмета.</p>
     <div class="preset-grid" id="preset-grid"></div>
     <button class="btn-secondary" onclick="closeModal('modal-presets')">Закрыть</button>
   </div>
@@ -542,13 +616,13 @@
     <h2>⚙️ Настройки</h2>
     <div class="settings-row">
       <label>Температура</label>
-      <input type="range" id="s-temp" min="0" max="1.5" step="0.05" value="0.6">
-      <span class="val" id="v-temp">0.60</span>
+      <input type="range" id="s-temp" min="0" max="1.5" step="0.05" value="0.3">
+      <span class="val" id="v-temp">0.30</span>
     </div>
     <div class="settings-row">
       <label>Max токенов</label>
-      <input type="range" id="s-maxtok" min="100" max="2000" step="50" value="500">
-      <span class="val" id="v-maxtok">500</span>
+      <input type="range" id="s-maxtok" min="100" max="2000" step="50" value="400">
+      <span class="val" id="v-maxtok">400</span>
     </div>
     <div class="settings-row">
       <label>Контекст</label>
@@ -556,9 +630,13 @@
       <span class="val" id="v-ctx">1024</span>
     </div>
     <div class="settings-row">
-      <label>Top-P</label>
-      <input type="range" id="s-topp" min="0.1" max="1" step="0.05" value="0.9">
-      <span class="val" id="v-topp">0.90</span>
+      <label>Язык ответа</label>
+      <select id="s-lang">
+        <option value="rus" selected>Русский</option>
+        <option value="eng">English</option>
+        <option value="tat">Татарский</option>
+        <option value="auto">Авто</option>
+      </select>
     </div>
     <div class="settings-row">
       <label>Язык OCR</label>
@@ -570,30 +648,22 @@
         <option value="deu">Deutsch</option>
         <option value="fra">Français</option>
         <option value="spa">Español</option>
-        <option value="ita">Italiano</option>
-        <option value="por">Português</option>
         <option value="ukr">Українська</option>
-        <option value="bel">Беларуская</option>
         <option value="kaz">Қазақша</option>
-        <option value="uzb">O'zbek</option>
         <option value="tur">Türkçe</option>
-        <option value="ara">العربية</option>
         <option value="chi_sim">中文简体</option>
-        <option value="chi_tra">中文繁體</option>
         <option value="jpn">日本語</option>
-        <option value="kor">한국어</option>
-        <option value="hin">हिन्दी</option>
-        <option value="equ">🧮 Math (только цифры и символы)</option>
+        <option value="equ">Math (цифры)</option>
       </select>
     </div>
     <div class="settings-row">
       <label>Обработка фото</label>
       <select id="s-preprocess">
         <option value="0">0 — Без</option>
-        <option value="1" selected>1 — Контраст</option>
+        <option value="1">1 — Контраст</option>
         <option value="2">2 — Ч/Б</option>
         <option value="3">3 — Резкость</option>
-        <option value="4">4 — Ч/Б + резкость</option>
+        <option value="4" selected>4 — Ч/Б + резкость</option>
         <option value="5">5 — Тени</option>
         <option value="6">6 — Максимум</option>
       </select>
@@ -608,19 +678,24 @@
     <div class="settings-row">
       <label>Озвучка</label>
       <select id="s-tts">
-        <option value="0">Выкл</option>
+        <option value="0" selected>Выкл</option>
         <option value="1">Авто</option>
-      </select>
-    </div>
-    <div class="settings-row">
-      <label>Тема</label>
-      <select id="s-theme">
-        <option value="dark">Тёмная</option>
-        <option value="light">Светлая</option>
       </select>
     </div>
     <button class="btn-primary" onclick="applySettings()">Применить</button>
     <button class="btn-secondary" onclick="closeModal('modal-settings')">Закрыть</button>
+  </div>
+</div>
+
+<div class="modal" id="modal-lora">
+  <div class="modal-content">
+    <h2>✨ LoRA обучение</h2>
+    <p>LoRA — патч поверх базовой модели. Обучается в Google Colab.</p>
+    <p style="color:var(--warn);font-size:12px;">
+    ⚠️ На телефоне только запуск. Обучение — на ПК/Colab.</p>
+    <button class="btn-primary" onclick="downloadNotebook()">📥 train.ipynb</button>
+    <button class="btn-secondary" onclick="downloadDatasetTemplate()">📥 Шаблон датасета</button>
+    <button class="btn-secondary" onclick="closeModal('modal-lora')">Закрыть</button>
   </div>
 </div>
 
@@ -629,8 +704,11 @@
     <h2>📷 Снимок</h2>
     <video id="camera-preview" autoplay playsinline></video>
     <canvas id="camera-canvas" style="display:none"></canvas>
-    <button class="btn-primary" id="btn-snap">📸 Снять</button>
+    <button class="btn-primary" id="btn-snap">📸 Снять и распознать</button>
     <button class="btn-secondary" id="btn-close-camera">Отмена</button>
+    <p style="font-size:12px; margin-top:10px;">
+      💡 Держи ровно, освещение яркое. Для формул — крупно.
+    </p>
   </div>
 </div>
 
@@ -638,43 +716,70 @@
 import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
 // ============================================================
-// === OCR — TESSERACT ЧЕРЕЗ WINDOW ===
+// === ВНЕШНИЕ БИБЛИОТЕКИ ===
 // ============================================================
-// Tesseract загружен через <script> тег в <head>.
-// window.Tesseract доступен сразу — не нужен import().
+let katex = null;
+let marked = null;
+let pdfjsLib = null;
+let mammoth = null;
 
+async function loadKatex() {
+  if (katex) return katex;
+  if (!document.getElementById('katex-css')) {
+    const l = document.createElement('link');
+    l.id = 'katex-css'; l.rel = 'stylesheet';
+    l.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css';
+    document.head.appendChild(l);
+  }
+  const m = await import('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.mjs');
+  katex = m.default || m;
+  return katex;
+}
+
+async function loadMarked() {
+  if (marked) return marked;
+  const m = await import('https://cdn.jsdelivr.net/npm/marked@12.0.0/lib/marked.esm.js');
+  marked = m.marked || m;
+  if (marked.setOptions) marked.setOptions({ breaks: true, gfm: true });
+  return marked;
+}
+
+async function loadPdfJs() {
+  if (pdfjsLib) return pdfjsLib;
+  const m = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs');
+  m.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
+  pdfjsLib = m;
+  return pdfjsLib;
+}
+
+async function loadMammoth() {
+  if (mammoth) return mammoth;
+  const m = await import('https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js');
+  mammoth = m.default || m;
+  return mammoth;
+}
+
+// ============================================================
+// === OCR ===
+// ============================================================
 function checkTesseract() {
-  if (typeof window.Tesseract === 'undefined') {
-    return { ok: false, error: 'Tesseract не загружен (нет интернета?)' };
-  }
-  const T = window.Tesseract;
-  if (typeof T.createWorker !== 'function') {
-    return { ok: false, error: 'createWorker не найден. Версия: ' + (T.version || '?') };
-  }
-  return { ok: true, api: T };
+  if (typeof window.Tesseract === 'undefined') return { ok: false, error: 'Tesseract не загружен' };
+  if (typeof window.Tesseract.createWorker !== 'function') return { ok: false, error: 'createWorker недоступна' };
+  return { ok: true, api: window.Tesseract };
 }
 
 async function runOCR(imageData, lang, onProgress) {
-  const check = checkTesseract();
-  if (!check.ok) {
-    throw new Error(check.error);
-  }
-
-  const T = check.api;
-
+  const chk = checkTesseract();
+  if (!chk.ok) throw new Error(chk.error);
+  const T = chk.api;
   const worker = await T.createWorker(lang, 1, {
-    logger: m => {
-      if (m.status === 'recognizing text' && onProgress) {
-        onProgress(m.progress || 0);
-      }
-    }
+    logger: m => { if (m.status === 'recognizing text' && onProgress) onProgress(m.progress || 0); }
   });
-
   try {
-    const result = await worker.recognize(imageData);
+    const r = await worker.recognize(imageData);
     return {
-      text: (result.data && result.data.text ? result.data.text : '').trim(),
-      confidence: (result.data && result.data.confidence) || 0,
+      text: (r.data && r.data.text ? r.data.text : '').trim(),
+      confidence: (r.data && r.data.confidence) || 0,
     };
   } finally {
     try { await worker.terminate(); } catch (e) {}
@@ -682,131 +787,140 @@ async function runOCR(imageData, lang, onProgress) {
 }
 
 // ============================================================
-// === MARKED + KATEX ===
-// ============================================================
-let katex = null;
-let marked = null;
-
-async function loadKatex() {
-  if (katex) return katex;
-  if (!document.getElementById('katex-css')) {
-    const link = document.createElement('link');
-    link.id = 'katex-css';
-    link.rel = 'stylesheet';
-    link.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css';
-    document.head.appendChild(link);
-  }
-  const mod = await import('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.mjs');
-  katex = mod.default || mod;
-  return katex;
-}
-
-async function loadMarked() {
-  if (marked) return marked;
-  const mod = await import('https://cdn.jsdelivr.net/npm/marked@12.0.0/lib/marked.esm.js');
-  marked = mod.marked || mod;
-  if (marked.setOptions) marked.setOptions({ breaks: true, gfm: true });
-  return marked;
-}
-
-async function renderMarkdown(text) {
-  try {
-    const md = await loadMarked();
-    const kx = await loadKatex();
-
-    const formulas = [];
-    let processed = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, f) => {
-      formulas.push({ type: 'block', formula: f });
-      return `\n\nFORMULA_BLOCK_${formulas.length - 1}\n\n`;
-    });
-    processed = processed.replace(/\$([^\$\n]+?)\$/g, (_, f) => {
-      formulas.push({ type: 'inline', formula: f });
-      return `FORMULA_INLINE_${formulas.length - 1}`;
-    });
-
-    let html = md.parse(processed);
-
-    html = html.replace(/FORMULA_BLOCK_(\d+)/g, (_, i) => {
-      const f = formulas[parseInt(i)];
-      try { return kx.renderToString(f.formula, { displayMode: true, throwOnError: false }); }
-      catch (e) { return '<code>' + escapeHtml(f.formula) + '</code>'; }
-    });
-    html = html.replace(/FORMULA_INLINE_(\d+)/g, (_, i) => {
-      const f = formulas[parseInt(i)];
-      try { return kx.renderToString(f.formula, { displayMode: false, throwOnError: false }); }
-      catch (e) { return '<code>' + escapeHtml(f.formula) + '</code>'; }
-    });
-
-    return html;
-  } catch (e) {
-    console.warn('MD error:', e);
-    return escapeHtml(text);
-  }
-}
-
-// ============================================================
-// === PDF.js ===
-// ============================================================
-let pdfjsLib = null;
-async function loadPdfJs() {
-  if (pdfjsLib) return pdfjsLib;
-  addMessage('sys', 'Загрузка PDF.js...');
-  const mod = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs');
-  mod.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
-  pdfjsLib = mod;
-  addMessage('stat', '✅ PDF готов');
-  return pdfjsLib;
-}
-
-// ============================================================
-// === Mammoth ===
-// ============================================================
-let mammoth = null;
-async function loadMammoth() {
-  if (mammoth) return mammoth;
-  const mod = await import('https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js');
-  mammoth = mod.default || mod;
-  return mammoth;
-}
-
-// ============================================================
-// === МОДЕЛИ ===
+// === МОДЕЛИ С МЕТКАМИ ЯЗЫКОВ ===
 // ============================================================
 const MODELS = {
-  "smol360": { id: "SmolLM2-360M-Instruct-q4f16_1-MLC", name: "SmolLM2 360M", size: "250 MB", ram: "~600 MB", speed: "25–40", category: "🚀 Быстрые", desc: "Мгновенная", tags: ["быстрые"] },
-  "qwen05": { id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC", name: "Qwen2.5 0.5B", size: "350 MB", ram: "~800 MB", speed: "18–28", category: "🚀 Быстрые", desc: "Максимум скорости", tags: ["быстрые"] },
-  "qwen3_06": { id: "Qwen3-0.6B-q4f16_1-MLC", name: "Qwen3 0.6B", size: "400 MB", ram: "~900 MB", speed: "15–25", category: "🚀 Быстрые", desc: "Новая Qwen", tags: ["быстрые"] },
-  "llama1b": { id: "Llama-3.2-1B-Instruct-q4f16_1-MLC", name: "Llama 3.2 1B", size: "700 MB", ram: "~1.5 GB", speed: "12–18", category: "⚖️ Оптимум", desc: "Быстрая", tags: ["текст"] },
-  "tinyllama": { id: "TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC", name: "TinyLlama 1.1B", size: "700 MB", ram: "~1.5 GB", speed: "10–16", category: "⚖️ Оптимум", desc: "Классика", tags: ["текст"] },
-  "qwen15": { id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC", name: "Qwen2.5 1.5B ⭐", size: "1 GB", ram: "~2 GB", speed: "8–14", category: "⚖️ Оптимум", desc: "Лучший баланс", tags: ["текст", "общее"], default: true },
-  "qwen3_17": { id: "Qwen3-1.7B-q4f16_1-MLC", name: "Qwen3 1.7B", size: "1.1 GB", ram: "~2.1 GB", speed: "7–12", category: "⚖️ Оптимум", desc: "Thinking", tags: ["текст"] },
-  "smol17": { id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC", name: "SmolLM2 1.7B", size: "1 GB", ram: "~2 GB", speed: "7–12", category: "⚖️ Оптимум", desc: "Код", tags: ["код"] },
-  "stable16": { id: "StableLM-2-1.6B-q4f16_1-MLC", name: "StableLM 2 1.6B", size: "1 GB", ram: "~2 GB", speed: "7–12", category: "⚖️ Оптимум", desc: "Нейтральная", tags: ["текст"] },
-  "phi2": { id: "Phi-2-q4f16_1-MLC", name: "Phi-2 (2.7B)", size: "1.5 GB", ram: "~3 GB", speed: "4–7", category: "⚖️ Оптимум", desc: "Логика", tags: ["математика"] },
-  "qwen_math15": { id: "Qwen2.5-Math-1.5B-Instruct-q4f16_1-MLC", name: "Qwen2.5 Math 1.5B 🧮", size: "1 GB", ram: "~2 GB", speed: "8–12", category: "🧮 Математика", desc: "Уравнения", tags: ["математика", "физика"] },
-  "deepseek_r1": { id: "DeepSeek-R1-Distill-Qwen-1.5B-q4f16_1-MLC", name: "DeepSeek R1 1.5B 🧠", size: "1 GB", ram: "~2 GB", speed: "6–10", category: "🧮 Математика", desc: "Chain-of-thought", tags: ["математика"] },
-  "qwen_coder15": { id: "Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC", name: "Qwen2.5 Coder 1.5B 💻", size: "1 GB", ram: "~2 GB", speed: "8–12", category: "💻 Код", desc: "Программирование", tags: ["код"] },
-  "gemma2b": { id: "gemma-2-2b-it-q4f16_1-MLC", name: "Gemma 2 2B", size: "1.5 GB", ram: "~3 GB", speed: "4–7", category: "🧠 Умные", desc: "Google", tags: ["текст"] },
-  "llama3b": { id: "Llama-3.2-3B-Instruct-q4f16_1-MLC", name: "Llama 3.2 3B", size: "2 GB", ram: "~3.5 GB", speed: "3–5", category: "🧠 Умные", desc: "Умнее", tags: ["текст"] },
-  "qwen3b": { id: "Qwen2.5-3B-Instruct-q4f16_1-MLC", name: "Qwen2.5 3B", size: "2 GB", ram: "~3.5 GB", speed: "3–5", category: "🧠 Умные", desc: "Больше знаний", tags: ["текст"] },
-  "phi35": { id: "Phi-3.5-mini-instruct-q4f16_1-MLC", name: "Phi-3.5 Mini", size: "2.2 GB", ram: "~4 GB", speed: "2–4", category: "🧠 Умные", desc: "Логика", tags: ["математика"] },
-  "phi35v": { id: "Phi-3.5-vision-instruct-q4f16_1-MLC", name: "Phi-3.5 Vision 👁️", size: "3.5 GB", ram: "~5.5 GB", speed: "0.3–1", category: "👁️ Vision", desc: "Картинки", tags: ["vision"] },
+  // БЫСТРЫЕ
+  "smol360": {
+    id: "SmolLM2-360M-Instruct-q4f16_1-MLC",
+    name: "SmolLM2 360M", size: "250 MB", ram: "~600 MB", speed: "25–40",
+    category: "🚀 Быстрые",
+    langs: ["eng"], langsLabel: "Английский (слабо рус)",
+    quality: 1, tags: ["fast"],
+  },
+  "qwen05": {
+    id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
+    name: "Qwen2.5 0.5B", size: "350 MB", ram: "~800 MB", speed: "18–28",
+    category: "🚀 Быстрые",
+    langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, 29 языков",
+    quality: 2, tags: ["fast", "rus"],
+  },
+  "qwen3_06": {
+    id: "Qwen3-0.6B-q4f16_1-MLC",
+    name: "Qwen3 0.6B", size: "400 MB", ram: "~900 MB", speed: "15–25",
+    category: "🚀 Быстрые",
+    langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, thinking",
+    quality: 2, tags: ["fast", "rus", "reasoning"],
+  },
+
+  // ОПТИМУМ
+  "llama1b": {
+    id: "Llama-3.2-1B-Instruct-q4f16_1-MLC",
+    name: "Llama 3.2 1B", size: "700 MB", ram: "~1.5 GB", speed: "12–18",
+    category: "⚖️ Оптимум",
+    langs: ["eng", "rus"], langsLabel: "Английский (рус слабо)",
+    quality: 3, tags: ["text"],
+  },
+  "qwen15": {
+    id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+    name: "Qwen2.5 1.5B ⭐", size: "1 GB", ram: "~2 GB", speed: "8–14",
+    category: "⚖️ Оптимум", default: true,
+    langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, татарский, 29 языков",
+    quality: 4, tags: ["text", "rus"],
+  },
+  "qwen3_17": {
+    id: "Qwen3-1.7B-q4f16_1-MLC",
+    name: "Qwen3 1.7B", size: "1.1 GB", ram: "~2.1 GB", speed: "7–12",
+    category: "⚖️ Оптимум",
+    langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, thinking",
+    quality: 4, tags: ["text", "rus", "reasoning"],
+  },
+  "smol17": {
+    id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC",
+    name: "SmolLM2 1.7B", size: "1 GB", ram: "~2 GB", speed: "7–12",
+    category: "⚖️ Оптимум",
+    langs: ["eng"], langsLabel: "Английский",
+    quality: 3, tags: ["text"],
+  },
+  "stable16": {
+    id: "StableLM-2-1.6B-q4f16_1-MLC",
+    name: "StableLM 2 1.6B", size: "1 GB", ram: "~2 GB", speed: "7–12",
+    category: "⚖️ Оптимум",
+    langs: ["eng"], langsLabel: "Английский",
+    quality: 3, tags: ["text"],
+  },
+
+  // МАТЕМАТИКА
+  "qwen_math15": {
+    id: "Qwen2.5-Math-1.5B-Instruct-q4f16_1-MLC",
+    name: "Qwen2.5 Math 1.5B 🧮", size: "1 GB", ram: "~2 GB", speed: "8–12",
+    category: "🧮 Математика",
+    langs: ["eng"], langsLabel: "⚠️ Только английский и формулы! Русский плохо",
+    quality: 4, tags: ["math"],
+    warn: "Не задавай русские вопросы — отвечает мусором! Используй формулами: 'x^2+5x+6=0'",
+  },
+  "deepseek_r1": {
+    id: "DeepSeek-R1-Distill-Qwen-1.5B-q4f16_1-MLC",
+    name: "DeepSeek R1 1.5B 🧠", size: "1 GB", ram: "~2 GB", speed: "6–10",
+    category: "🧮 Математика",
+    langs: ["eng", "rus"], langsLabel: "Английский, русский базово",
+    quality: 4, tags: ["math", "reasoning"],
+  },
+
+  // КОД
+  "qwen_coder15": {
+    id: "Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC",
+    name: "Qwen2.5 Coder 1.5B 💻", size: "1 GB", ram: "~2 GB", speed: "8–12",
+    category: "💻 Код",
+    langs: ["eng"], langsLabel: "Английский (для кода нормально)",
+    quality: 4, tags: ["code"],
+  },
+
+  // УМНЫЕ
+  "gemma2b": {
+    id: "gemma-2-2b-it-q4f16_1-MLC",
+    name: "Gemma 2 2B", size: "1.5 GB", ram: "~3 GB", speed: "4–7",
+    category: "🧠 Умные",
+    langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, 140 языков",
+    quality: 4, tags: ["text", "rus"],
+  },
+  "llama3b": {
+    id: "Llama-3.2-3B-Instruct-q4f16_1-MLC",
+    name: "Llama 3.2 3B", size: "2 GB", ram: "~3.5 GB", speed: "3–5",
+    category: "🧠 Умные",
+    langs: ["eng", "rus"], langsLabel: "Английский (рус средне)",
+    quality: 4, tags: ["text"],
+  },
+  "qwen3b": {
+    id: "Qwen2.5-3B-Instruct-q4f16_1-MLC",
+    name: "Qwen2.5 3B", size: "2 GB", ram: "~3.5 GB", speed: "3–5",
+    category: "🧠 Умные",
+    langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, татарский, 29 языков",
+    quality: 5, tags: ["text", "rus"],
+  },
+  "phi35": {
+    id: "Phi-3.5-mini-instruct-q4f16_1-MLC",
+    name: "Phi-3.5 Mini (3.8B)", size: "2.2 GB", ram: "~4 GB", speed: "2–4",
+    category: "🧠 Умные",
+    langs: ["eng"], langsLabel: "Английский (рус плохо)",
+    quality: 5, tags: ["text", "reasoning"],
+  },
 };
 
 // ============================================================
 // === ПРЕСЕТЫ ===
 // ============================================================
 const PRESETS = {
-  math: { icon: '🧮', name: 'Математика', sub: 'Уравнения', system: 'Ты учитель математики. Решай пошагово, LaTeX.', model: 'qwen_math15' },
-  physics: { icon: '⚛️', name: 'Физика', sub: 'Задачи', system: 'Ты учитель физики. Единицы, размерность, LaTeX.', model: 'qwen_math15' },
-  chemistry: { icon: '🧪', name: 'Химия', sub: 'Реакции', system: 'Ты учитель химии. Балансируй уравнения.', model: 'qwen15' },
-  biology: { icon: '🧬', name: 'Биология', sub: 'Клетки', system: 'Ты учитель биологии. Объясняй ясно.', model: 'qwen15' },
-  history: { icon: '📜', name: 'История', sub: 'Даты', system: 'Ты учитель истории. Причины, события.', model: 'qwen15' },
-  lang: { icon: '🌐', name: 'Языки', sub: 'Перевод', system: 'Ты преподаватель языков. Точно переводи.', model: 'qwen15' },
-  code: { icon: '💻', name: 'Код', sub: 'Python', system: 'Ты программист. Чистый код с комментариями.', model: 'qwen_coder15' },
-  teacher: { icon: '👨‍🏫', name: 'Учитель', sub: 'Наводящие', system: 'Ты учитель. НЕ давай ответ. Задавай вопросы.', model: 'qwen15' },
-  examiner: { icon: '📝', name: 'Экзамен', sub: 'Тесты', system: 'Ты экзаменатор. Оценивай, объясняй ошибки.', model: 'qwen15' },
-  summary: { icon: '📄', name: 'Конспект', sub: 'Сжатие', system: 'Конспектируй: заголовки, тезисы, формулы.', model: 'qwen15' },
+  math: { icon: '🧮', name: 'Математика', sub: 'Уравнения, задачи', system: 'Ты учитель математики. Решай пошагово. Отвечай ТОЛЬКО на русском языке. Используй LaTeX для формул.', model: 'qwen15' },
+  physics: { icon: '⚛️', name: 'Физика', sub: 'Задачи', system: 'Ты учитель физики. Решай пошагово. Отвечай ТОЛЬКО на русском языке.', model: 'qwen15' },
+  chemistry: { icon: '🧪', name: 'Химия', sub: 'Реакции', system: 'Ты учитель химии. Отвечай ТОЛЬКО на русском языке.', model: 'qwen15' },
+  biology: { icon: '🧬', name: 'Биология', sub: 'Клетки', system: 'Ты учитель биологии. Отвечай ТОЛЬКО на русском языке.', model: 'qwen15' },
+  history: { icon: '📜', name: 'История', sub: 'Даты', system: 'Ты учитель истории. Отвечай ТОЛЬКО на русском языке.', model: 'qwen15' },
+  lang: { icon: '🌐', name: 'Языки', sub: 'Перевод', system: 'Ты преподаватель языков. Отвечай на языке запроса.', model: 'qwen15' },
+  code: { icon: '💻', name: 'Код', sub: 'Python', system: 'Ты программист. Пиши код с комментариями на русском.', model: 'qwen_coder15' },
+  teacher: { icon: '👨‍🏫', name: 'Учитель', sub: 'Наводящие', system: 'Ты учитель. НЕ давай готовый ответ. Задавай наводящие вопросы. Отвечай на русском.', model: 'qwen15' },
+  examiner: { icon: '📝', name: 'Экзамен', sub: 'Тесты', system: 'Ты экзаменатор. Отвечай на русском.', model: 'qwen15' },
+  summary: { icon: '📄', name: 'Конспект', sub: 'Сжатие', system: 'Делай конспект: заголовки, тезисы, формулы. На русском языке.', model: 'qwen15' },
 };
 
 // ============================================================
@@ -834,7 +948,6 @@ let lastUserPrompt = null;
 
 let stats = { requests: 0, totalTokens: 0, totalTime: 0, ttfts: [], ocrCount: 0, ocrTime: 0, autoSwitches: 0 };
 let sessionStats = { tokens: 0, start: 0, swaps: 0, files: 0, ocrChars: 0 };
-
 let pomodoro = { workMin: 25, breakMin: 5, timeLeft: 25 * 60, mode: 'work', running: false, interval: null };
 
 const $ = id => document.getElementById(id);
@@ -848,50 +961,56 @@ const progressBar = $('progress-bar');
 const statsEl = $('stats');
 
 // ============================================================
-// === НАСТРОЙКИ ===
+// === НАСТРОЙКИ (обновлены для правильной работы) ===
 // ============================================================
 const DEFAULT_SETTINGS = {
-  temperature: 0.6, max_tokens: 500, context_window_size: 1024,
-  prefill_chunk_size: 256, top_p: 0.9, kvCacheDtype: "q4f16_1",
-  ocrLang: "rus+eng", preprocess: 1, autoMode: 1, tts: 0, theme: "dark",
+  temperature: 0.3,           // ниже для стабильности
+  max_tokens: 400,
+  context_window_size: 1024,
+  prefill_chunk_size: 256,
+  top_p: 0.9,
+  kvCacheDtype: "q4f16_1",
+  ocrLang: "rus+eng",
+  preprocess: 4,              // Ч/Б + резкость (было 1 — плохо)
+  autoMode: 1,
+  tts: 0,
+  theme: "dark",
+  answerLang: "rus",          // новое: язык ответа
 };
 
 let SETTINGS = loadSettings();
 
 function loadSettings() {
   try {
-    const raw = localStorage.getItem('ai-settings-v7');
+    const raw = localStorage.getItem('ai-settings-v8');
     if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
   } catch (e) {}
   return { ...DEFAULT_SETTINGS };
 }
 
 function saveSettings() {
-  try { localStorage.setItem('ai-settings-v7', JSON.stringify(SETTINGS)); } catch (e) {}
+  try { localStorage.setItem('ai-settings-v8', JSON.stringify(SETTINGS)); } catch (e) {}
 }
 
 function applySettings() {
   SETTINGS.temperature = parseFloat($('s-temp').value);
   SETTINGS.max_tokens = parseInt($('s-maxtok').value);
   SETTINGS.context_window_size = parseInt($('s-ctx').value);
-  SETTINGS.top_p = parseFloat($('s-topp').value);
+  SETTINGS.answerLang = $('s-lang').value;
   SETTINGS.ocrLang = $('s-ocr-lang').value;
   SETTINGS.preprocess = parseInt($('s-preprocess').value);
   SETTINGS.autoMode = parseInt($('s-auto').value);
   SETTINGS.tts = parseInt($('s-tts').value);
-  SETTINGS.theme = $('s-theme').value;
   autoMode = SETTINGS.autoMode === 1;
   updateAutoBtn();
-  applyTheme(SETTINGS.theme);
   saveSettings();
-  addMessage('sys', 'Настройки сохранены.');
+  addMessage('sys', '⚙️ Настройки сохранены');
   closeModal('modal-settings');
 }
 window.applySettings = applySettings;
 
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  $('btn-theme').textContent = theme === 'dark' ? '🌙' : '☀️';
 }
 
 // ============================================================
@@ -902,7 +1021,10 @@ function escapeHtml(s) {
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   })[c]);
 }
-function fmtNum(n, d) { if (!isFinite(n)) return '—'; return Number(n).toFixed(d === undefined ? 1 : d); }
+function fmtNum(n, d) {
+  if (!isFinite(n)) return '—';
+  return Number(n).toFixed(d === undefined ? 1 : d);
+}
 function fmtBytes(b) {
   if (b < 1024) return b + ' B';
   if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
@@ -930,67 +1052,121 @@ function addAutoCard(text) {
   chatEl.scrollTop = chatEl.scrollHeight;
 }
 
-function showStatus(text, cls) { statusEl.textContent = text; statusEl.className = cls || ''; }
+function showStatus(text, cls) {
+  statusEl.textContent = text;
+  statusEl.className = cls || '';
+}
 
 function showStats(text) {
   statsEl.innerHTML = text;
   statsEl.classList.add('show');
   clearTimeout(showStats._t);
-  showStats._t = setTimeout(() => statsEl.classList.remove('show'), 6000);
+  showStats._t = setTimeout(() => statsEl.classList.remove('show'), 5000);
 }
 
 function clearChat() { chatEl.innerHTML = ''; }
 function closeModal(id) { $(id).classList.remove('show'); }
 function openModal(id) { $(id).classList.add('show'); }
 window.closeModal = closeModal;
+window.openModal = openModal;
 
 function autoResizeInput() {
   inputEl.style.height = 'auto';
-  inputEl.style.height = Math.min(inputEl.scrollHeight, 100) + 'px';
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
 }
 
+// ============================================================
+// === SYSTEM PROMPT — жёсткое указание языка ===
+// ============================================================
 function getSystemPrompt() {
-  if (currentPreset !== 'default' && PRESETS[currentPreset]) return PRESETS[currentPreset].system;
-  const info = MODELS[currentModelKey];
-  if (info && info.tags && info.tags.includes('математика')) {
-    return 'Ты учитель математики. Решай пошагово, используй LaTeX. Языки: русский, татарский, английский.';
+  let langRule = '';
+  if (SETTINGS.answerLang === 'rus') {
+    langRule = '\n\n⚠️ КРИТИЧНО: Отвечай ТОЛЬКО на русском языке. ' +
+               'Не используй китайский, английский или другие языки. ' +
+               'Только РУССКИЙ.';
+  } else if (SETTINGS.answerLang === 'eng') {
+    langRule = '\n\n⚠️ Answer ONLY in English. Do not use other languages.';
+  } else if (SETTINGS.answerLang === 'tat') {
+    langRule = '\n\n⚠️ Отвечай на татарском языке.';
   }
-  if (info && info.tags && info.tags.includes('код')) return 'Ты программист. Пиши чистый код.';
-  return 'Ты помощник для учёбы. Языки: русский, татарский, английский. Для математики — пошагово.';
+
+  if (currentPreset !== 'default' && PRESETS[currentPreset]) {
+    return PRESETS[currentPreset].system + langRule;
+  }
+  const info = MODELS[currentModelKey];
+  if (info && info.tags && info.tags.includes('math')) {
+    return 'Ты учитель математики. Решай пошагово.' + langRule;
+  }
+  if (info && info.tags && info.tags.includes('code')) {
+    return 'Ты программист. Пиши код с комментариями.' + langRule;
+  }
+  return 'Ты помощник для учёбы. Отвечай кратко и по делу.' + langRule;
 }
 
 function updateAutoBtn() {
-  const btn = $('btn-auto');
-  if (autoMode) { btn.classList.add('on'); btn.textContent = '🎯 Авто ✓'; }
-  else { btn.classList.remove('on'); btn.textContent = '🎯 Авто'; }
+  const b = $('btn-auto');
+  if (autoMode) {
+    b.classList.add('auto-on');
+    b.textContent = '🎯 Авто ✓';
+  } else {
+    b.classList.remove('auto-on');
+    b.textContent = '🎯 Авто';
+  }
 }
 
 // ============================================================
-// === АВТО-ОПРЕДЕЛЕНИЕ МОДЕЛИ ===
+// === MARKDOWN + KATEX ===
 // ============================================================
-const AUTO_RULES = [
-  { priority: 100, patterns: [/\b\d+\s*[+\-*/×÷]\s*\d+/, /\b[xyza]\s*[\^²³]/, /[√∑∫π∞±≤≥≠]/, /\b(уравнени|реши|вычисли|дискриминант|производн|интеграл|матриц|тригонометр)/i, /\b(sin|cos|tan|log|ln|lim)/i, /[²³¹⁰]/], model: "qwen_math15", reason: "математика" },
-  { priority: 95, patterns: [/\b(докажи|доказательство|теорема)/i], model: "deepseek_r1", reason: "логика" },
-  { priority: 90, patterns: [/\b(код|программ|функци|python|javascript|алгоритм)/i, /\b(function|class|def )/], model: "qwen_coder15", reason: "код" },
-  { priority: 70, patterns: [/\b(переведи|перевод|translate)/i], model: "qwen15", reason: "перевод" },
-  { priority: 60, patterns: [/\b(конспект|кратко|сократи|суммируй)/i], model: "qwen15", reason: "конспект" },
-  { priority: 40, patterns: [/^(привет|хай|hello|hi)/i, /^.{0,30}$/], model: "qwen05", reason: "простой" },
-];
+async function renderMarkdown(text) {
+  try {
+    const md = await loadMarked();
+    const kx = await loadKatex();
+    const formulas = [];
+    let p = text.replace(/\$\$([\s\S]+?)\$\$/g, (_, f) => {
+      formulas.push({ block: true, formula: f });
+      return `\n\nFB_${formulas.length - 1}\n\n`;
+    });
+    p = p.replace(/\$([^\$\n]+?)\$/g, (_, f) => {
+      formulas.push({ block: false, formula: f });
+      return `FI_${formulas.length - 1}`;
+    });
+    let html = md.parse(p);
+    html = html.replace(/FB_(\d+)/g, (_, i) => {
+      const f = formulas[parseInt(i)];
+      try { return kx.renderToString(f.formula, { displayMode: true, throwOnError: false }); }
+      catch (e) { return '<code>' + escapeHtml(f.formula) + '</code>'; }
+    });
+    html = html.replace(/FI_(\d+)/g, (_, i) => {
+      const f = formulas[parseInt(i)];
+      try { return kx.renderToString(f.formula, { displayMode: false, throwOnError: false }); }
+      catch (e) { return '<code>' + escapeHtml(f.formula) + '</code>'; }
+    });
+    return html;
+  } catch (e) {
+    return escapeHtml(text);
+  }
+}
 
+// ============================================================
+// === АВТО-ВЫБОР МОДЕЛИ (только по правильным категориям) ===
+// ============================================================
 function detectBestModel(text) {
   if (!text || text.length < 2) return null;
   const t = text.trim();
-  const matched = [];
-  for (const rule of AUTO_RULES) {
-    for (const p of rule.patterns) {
-      if (p.test(t)) { matched.push({ priority: rule.priority, model: rule.model, reason: rule.reason }); break; }
-    }
+
+  // Математика → только Qwen2.5 1.5B (НЕ Math — она ломается на русском)
+  if (/[√∑∫π∞±≤≥≠]|\^|[²³¹⁰]|\b\d+\s*[+\-*/×÷]\s*\d+|\b(уравнени|дискриминант|производн|интеграл|реши|вычисли)\b/i.test(t)) {
+    return { model: 'qwen15', reason: 'математика (универсальная модель)' };
   }
-  if (matched.length === 0) return null;
-  matched.sort((a, b) => b.priority - a.priority);
-  const best = matched[0];
-  if (!MODELS[best.model]) return { model: 'qwen15', reason: best.reason };
-  return best;
+  // Программирование
+  if (/\b(код|программ|python|javascript|функци|алгоритм)\b/i.test(t)) {
+    return { model: 'qwen_coder15', reason: 'программирование' };
+  }
+  // Всё остальное → базовый Qwen 1.5B
+  if (t.length < 30) {
+    return { model: 'qwen05', reason: 'короткий вопрос' };
+  }
+  return { model: 'qwen15', reason: 'общий вопрос' };
 }
 
 function pickByRam(preferred) {
@@ -1007,97 +1183,104 @@ function pickByRam(preferred) {
 }
 
 // ============================================================
-// === ФОРМУЛЫ ===
+// === ПАРСЕР ФОРМУЛ ===
 // ============================================================
 function detectFormulas(text) {
-  const formulas = [];
+  const out = [];
   const lines = text.split('\n');
-  const patterns = [/[=<>≤≥≠±]/, /\b\d+\s*[+\-*/×÷]\s*\d+/, /\^/, /[√∑∏∫π∞]/, /[a-zA-Z]\s*[²³¹⁰]/, /[a-zA-Z]\s*=\s*/, /\b(sin|cos|tan|log|ln)\b/, /\d+[xXyYzZ]\s*[+\-]/];
+  const pats = [/[=<>≤≥≠±]/, /\b\d+\s*[+\-*/×÷]\s*\d+/, /\^/, /[√∑∏∫π∞]/, /[a-zA-Z]\s*[²³¹⁰]/, /[a-zA-Z]\s*=\s*/, /\b(sin|cos|tan|log|ln)\b/, /\d+[xXyYzZ]\s*[+\-]/];
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (line.length < 3) continue;
-    for (const p of patterns) {
-      if (p.test(line)) { formulas.push({ line: i, text: line, latex: textToLatex(line) }); break; }
+    for (const p of pats) {
+      if (p.test(line)) {
+        out.push({ line: i, text: line, latex: textToLatex(line) });
+        break;
+      }
     }
   }
-  return formulas;
+  return out;
 }
 
 function textToLatex(text) {
   let s = text;
   s = s.replace(/\^(\d+)/g, '^{$1}');
-  s = s.replace(/×/g, ' \\times ');
-  s = s.replace(/÷/g, ' \\div ');
-  s = s.replace(/≠/g, ' \\neq ');
-  s = s.replace(/≤/g, ' \\leq ');
-  s = s.replace(/≥/g, ' \\geq ');
-  s = s.replace(/±/g, ' \\pm ');
-  s = s.replace(/√\(([^)]+)\)/g, '\\sqrt{$1}');
-  s = s.replace(/√(\w+)/g, '\\sqrt{$1}');
-  s = s.replace(/π/g, '\\pi ');
-  s = s.replace(/∞/g, '\\infty ');
-  s = s.replace(/∑/g, '\\sum ');
-  s = s.replace(/∫/g, '\\int ');
+  s = s.replace(/×/g, ' \\times ').replace(/÷/g, ' \\div ');
+  s = s.replace(/≠/g, ' \\neq ').replace(/≤/g, ' \\leq ').replace(/≥/g, ' \\geq ').replace(/±/g, ' \\pm ');
+  s = s.replace(/√\(([^)]+)\)/g, '\\sqrt{$1}').replace(/√(\w+)/g, '\\sqrt{$1}');
+  s = s.replace(/π/g, '\\pi ').replace(/∞/g, '\\infty ').replace(/∑/g, '\\sum ').replace(/∫/g, '\\int ');
   s = s.replace(/(\d+)\s*\/\s*(\d+)/g, '\\frac{$1}{$2}');
   return s;
 }
 
 // ============================================================
-// === ОБРАБОТКА ФОТО ===
+// === ОБРАБОТКА ФОТО — улучшенная ===
 // ============================================================
 function preprocessImage(dataUrl, level) {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      const maxDim = 1800;
+      // Увеличиваем для лучшего OCR
+      const maxDim = 2400;
       let w = img.width, h = img.height;
-      if (Math.max(w, h) > maxDim) {
-        const s = maxDim / Math.max(w, h);
-        w = Math.round(w * s); h = Math.round(h * s);
-      }
+      const scaleUp = Math.max(1, Math.min(2, maxDim / Math.max(w, h)));
+      w = Math.round(w * scaleUp);
+      h = Math.round(h * scaleUp);
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
       ctx.drawImage(img, 0, 0, w, h);
 
       if (level > 0) {
         const d = ctx.getImageData(0, 0, w, h).data;
+
+        // 1: контраст
         if (level >= 1) {
-          const f = 1.4;
+          const f = 1.5;
           for (let i = 0; i < d.length; i += 4) {
             d[i] = Math.min(255, Math.max(0, (d[i] - 128) * f + 128));
             d[i+1] = Math.min(255, Math.max(0, (d[i+1] - 128) * f + 128));
             d[i+2] = Math.min(255, Math.max(0, (d[i+2] - 128) * f + 128));
           }
         }
+
+        // 2, 4, 6: Ч/Б адаптивный
         if (level === 2 || level === 4 || level === 6) {
           let sum = 0;
           for (let i = 0; i < d.length; i += 4) sum += 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
-          const th = (sum / (d.length / 4)) * 0.9;
+          const avg = sum / (d.length / 4);
+          const th = Math.max(avg * 0.8, 100);
           for (let i = 0; i < d.length; i += 4) {
             const g = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
             const v = g > th ? 255 : 0;
             d[i] = d[i+1] = d[i+2] = v;
           }
         }
+
+        // 3, 4, 6: резкость
         if (level === 3 || level === 4 || level === 6) {
-          const copy = new Uint8ClampedArray(d);
-          for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
-            const i = (y * w + x) * 4;
-            const v = 5 * copy[i] - copy[i-4] - copy[i+4] - copy[i - w*4] - copy[i + w*4];
-            d[i] = d[i+1] = d[i+2] = Math.max(0, Math.min(255, v));
+          const cp = new Uint8ClampedArray(d);
+          for (let y = 1; y < h - 1; y++) {
+            for (let x = 1; x < w - 1; x++) {
+              const i = (y * w + x) * 4;
+              const v = 5 * cp[i] - cp[i-4] - cp[i+4] - cp[i-w*4] - cp[i+w*4];
+              d[i] = d[i+1] = d[i+2] = Math.max(0, Math.min(255, v));
+            }
           }
         }
+
+        // 5, 6: удаление теней
         if (level === 5 || level === 6) {
           for (let i = 0; i < d.length; i += 4) {
             const g = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
-            if (g > 180) d[i] = d[i+1] = d[i+2] = 255;
-            else if (g < 100) d[i] = d[i+1] = d[i+2] = 0;
+            if (g > 200) d[i] = d[i+1] = d[i+2] = 255;
+            else if (g < 60) d[i] = d[i+1] = d[i+2] = 0;
           }
         }
+
         ctx.putImageData(new ImageData(d, w, h), 0, 0);
       }
-      resolve(canvas.toDataURL('image/jpeg', 0.9));
+      resolve(canvas.toDataURL('image/jpeg', 0.92));
     };
     img.onerror = () => resolve(dataUrl);
     img.src = dataUrl;
@@ -1105,9 +1288,9 @@ function preprocessImage(dataUrl, level) {
 }
 
 // ============================================================
-// === INDEXEDDB (ЧАТЫ) ===
+// === INDEXEDDB ===
 // ============================================================
-const DB_NAME = 'ai-db-v7';
+const DB_NAME = 'ai-db-v8';
 const DB_VERSION = 1;
 
 function openDB() {
@@ -1121,7 +1304,6 @@ function openDB() {
     r.onerror = () => rej(r.error);
   });
 }
-
 async function dbSet(v) {
   const db = await openDB();
   return new Promise((res, rej) => {
@@ -1131,7 +1313,6 @@ async function dbSet(v) {
     r.onerror = () => rej(r.error);
   });
 }
-
 async function dbDel(k) {
   const db = await openDB();
   return new Promise((res, rej) => {
@@ -1141,7 +1322,6 @@ async function dbDel(k) {
     r.onerror = () => rej(r.error);
   });
 }
-
 async function dbAll() {
   const db = await openDB();
   return new Promise((res, rej) => {
@@ -1160,9 +1340,11 @@ async function saveCurrentChat() {
   if (!currentChatId) currentChatId = 'chat_' + Date.now();
   const first = u[0].content;
   await dbSet({
-    id: currentChatId, title: (typeof first === 'string' ? first.slice(0, 60) : 'Чат'),
+    id: currentChatId,
+    title: (typeof first === 'string' ? first.slice(0, 60) : 'Чат'),
     model: currentModelKey, preset: currentPreset,
-    messages: messages.filter(m => m.role !== 'system'), updated: Date.now(),
+    messages: messages.filter(m => m.role !== 'system'),
+    updated: Date.now(),
   });
   await loadChats();
 }
@@ -1213,7 +1395,7 @@ function renderChatList(filter) {
   let f = chats;
   if (filter) {
     const q = filter.toLowerCase();
-    f = chats.filter(c => c.title.toLowerCase().includes(q) || (c.messages || []).some(m => typeof m.content === 'string' && m.content.toLowerCase().includes(q)));
+    f = chats.filter(c => c.title.toLowerCase().includes(q));
   }
   if (f.length === 0) { list.innerHTML = '<p style="color:var(--text2);">Нет чатов.</p>'; return; }
   list.innerHTML = f.slice(0, 100).map(c => `
@@ -1227,24 +1409,11 @@ function renderChatList(filter) {
 function exportChats() {
   const b = new Blob([JSON.stringify(chats, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(b); a.download = 'chats-' + Date.now() + '.json'; a.click();
+  a.href = URL.createObjectURL(b);
+  a.download = 'chats-' + Date.now() + '.json';
+  a.click();
 }
 window.exportChats = exportChats;
-
-function exportChatsMarkdown() {
-  let md = '# Чаты\n\n';
-  for (const c of chats) {
-    md += `## ${c.title}\n\n`;
-    for (const m of c.messages || []) {
-      if (m.role === 'user') md += `**Вы:** ${m.content}\n\n`;
-      else if (m.role === 'assistant') md += `${m.content}\n\n---\n\n`;
-    }
-  }
-  const b = new Blob([md], { type: 'text/markdown' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(b); a.download = 'chats-' + Date.now() + '.md'; a.click();
-}
-window.exportChatsMarkdown = exportChatsMarkdown;
 
 function importChats() {
   const inp = document.createElement('input');
@@ -1263,7 +1432,7 @@ function importChats() {
 }
 window.importChats = importChats;
 
-function printChat() { window.print(); }
+function printChat() { window.print(); closeModal('modal-more'); }
 window.printChat = printChat;
 
 // ============================================================
@@ -1275,16 +1444,16 @@ async function getCachedModels() {
     const dbs = await indexedDB.databases();
     for (const db of dbs) {
       if (db.name && db.name.toLowerCase().includes('webllm')) {
-        const models = await new Promise((res) => {
+        const models = await new Promise(res => {
           const r = indexedDB.open(db.name);
           r.onsuccess = () => {
-            const db = r.result;
-            const s = Array.from(db.objectStoreNames);
-            if (s.length === 0) { res([]); db.close(); return; }
-            const tx = db.transaction(s, 'readonly');
+            const d = r.result;
+            const s = Array.from(d.objectStoreNames);
+            if (s.length === 0) { res([]); d.close(); return; }
+            const tx = d.transaction(s, 'readonly');
             const k = tx.objectStore(s[0]).getAllKeys();
-            k.onsuccess = () => { res(k.result || []); db.close(); };
-            k.onerror = () => { res([]); db.close(); };
+            k.onsuccess = () => { res(k.result || []); d.close(); };
+            k.onerror = () => { res([]); d.close(); };
           };
           r.onerror = () => res([]);
         });
@@ -1310,21 +1479,22 @@ async function updateStorageInfo() {
       const cached = await getCachedModels();
       el.innerHTML = `
         <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-          <span>💾 ${fmtBytes(u)}</span><span>из ${fmtBytes(q)}</span>
+          <span>💾 Использовано: <b>${fmtBytes(u)}</b></span>
+          <span>из <b>${fmtBytes(q)}</b></span>
         </div>
         <div class="storage-bar"><div class="storage-bar-fill" style="width:${p.toFixed(1)}%"></div></div>
-        <div style="margin-top:6px;font-size:10px;">📦 Кэшировано: <b>${cached.size}</b> моделей</div>
+        <div style="margin-top:6px;">📦 Кэшировано моделей: <b>${cached.size}</b></div>
       `;
     } else el.innerHTML = '<span style="color:var(--text2);">Storage API недоступно</span>';
   } catch (e) { el.innerHTML = '<span style="color:var(--error);">' + e.message + '</span>'; }
 }
 
 async function clearModelCache() {
-  if (!confirm('Удалить кэш моделей?')) return;
+  if (!confirm('Удалить кэш?')) return;
   try {
     const dbs = await indexedDB.databases();
     for (const db of dbs) if (db.name && db.name.toLowerCase().includes('webllm')) indexedDB.deleteDatabase(db.name);
-    alert('Кэш очищен. Перезагрузи.');
+    alert('Очищено. Перезагрузи.');
     location.reload();
   } catch (e) { alert('Ошибка: ' + e.message); }
 }
@@ -1346,12 +1516,27 @@ async function renderModelList() {
     ${ms.map(([k, m]) => {
       const isC = cached.has(k);
       const isS = k === currentModelKey;
-      return `<div class="model-opt ${isS?'selected':''} ${isC?'cached':''}" onclick="switchModel('${k}')">
-        ${isC?'<div class="cached-badge">💾</div>':''}
-        <div class="name">${escapeHtml(m.name)}</div>
-        <div class="meta"><span>💾 ${m.size}</span><span>🧠 ${m.ram}</span><span>⚡ ~${m.speed} т/с</span></div>
-        <div class="meta" style="margin-top:3px;">${escapeHtml(m.desc)}</div>
-      </div>`;
+      // Бейджи языков
+      const langBadges = (m.langs || []).map(l => {
+        const cls = l === 'rus' ? 'rus' : l === 'math' ? 'math' : l === 'code' ? 'code' : l === 'multi' ? 'multi' : '';
+        return `<span class="lang-badge ${cls}">${l.toUpperCase()}</span>`;
+      }).join('');
+      // Предупреждение
+      const warnHtml = m.warn ? `<div style="font-size:11px;color:var(--warn);margin-top:6px;padding:6px 8px;background:rgba(210,153,34,0.13);border-radius:6px;">⚠️ ${escapeHtml(m.warn)}</div>` : '';
+      return `
+        <div class="model-opt ${isS ? 'selected' : ''} ${isC ? 'cached' : ''}" onclick="switchModel('${k}')">
+          ${isC ? '<div class="cached-badge">💾 КЭШ</div>' : ''}
+          <div class="name">${escapeHtml(m.name)}</div>
+          <div class="meta">
+            <span>💾 ${m.size}</span>
+            <span>🧠 ${m.ram}</span>
+            <span>⚡ ~${m.speed} т/с</span>
+          </div>
+          <div style="margin-top:5px;">${langBadges}</div>
+          <div class="desc">${escapeHtml(m.langsLabel || '')}</div>
+          ${warnHtml}
+        </div>
+      `;
     }).join('')}
   `).join('');
 }
@@ -1361,35 +1546,47 @@ function autoSelectBest() {
   let p = 'qwen15';
   if (ram >= 8) p = 'qwen15';
   else if (ram >= 6) p = 'qwen15';
-  else if (ram >= 4) p = 'llama1b';
-  else p = 'smol360';
-  if (confirm(`RAM: ${ram} GB. ${MODELS[p].name}?`)) if (currentModelKey !== p) switchModel(p);
+  else if (ram >= 4) p = 'qwen15';
+  else p = 'qwen05';
+  if (confirm(`RAM: ${ram} GB. Рекомендую ${MODELS[p].name}. Использовать?`)) {
+    if (currentModelKey !== p) switchModel(p);
+  }
 }
 window.autoSelectBest = autoSelectBest;
 
 // ============================================================
-// === ПЕРЕКЛЮЧЕНИЕ ===
+// === ПЕРЕКЛЮЧЕНИЕ МОДЕЛИ ===
 // ============================================================
 async function switchModel(key, reason) {
-  if (isLoading) { alert('Подожди.'); return; }
-  if (isGenerating) { alert('Дождись.'); return; }
+  if (isLoading) { alert('Подожди загрузки.'); return; }
+  if (isGenerating) { alert('Дождись ответа.'); return; }
   if (key === currentModelKey && engine) {
     if (reason) addAutoCard(`<b>🎯 ${reason}</b> — уже ${MODELS[key].name}`);
     closeModal('modal-models');
     return;
   }
   if (!MODELS[key]) { addMessage('error', 'Модель не найдена'); return; }
+
   if (messages.filter(m => m.role !== 'system').length > 0) await saveCurrentChat();
   if (engine) { try { await engine.unload(); } catch (e) {} engine = null; }
+
   currentModelKey = key;
   localStorage.setItem('ai-model', key);
   sessionStats.swaps++;
   stats.autoSwitches++;
+
   messages = [{ role: 'system', content: getSystemPrompt() }];
   currentChatId = null;
   clearChat();
   closeModal('modal-models');
+
+  // Предупреждение для Math модели
+  if (MODELS[key].warn) {
+    addMessage('warn', '⚠️ ' + MODELS[key].warn);
+  }
+
   if (reason) addAutoCard(`<b>🎯 ${reason}</b><br>Модель: <b>${MODELS[key].name}</b>`);
+
   await initEngine();
 }
 window.switchModel = switchModel;
@@ -1403,45 +1600,54 @@ async function initEngine() {
   const info = MODELS[currentModelKey];
   if (!info) { addMessage('error', 'Модель не найдена'); return; }
   isLoading = true;
+
   showStatus('Загрузка ' + info.name + '...', 'loading');
   progressEl.classList.add('show');
   progressBar.style.width = '0%';
+
   const cached = await getCachedModels();
   const was = cached.has(currentModelKey);
   addMessage('sys', `Загрузка: ${info.name} (${info.size})`);
   if (!was) addMessage('warn', '⚠️ Первая загрузка. Дождись 100%.');
-  else addMessage('stat', '💾 Из кэша');
+
   const t0 = nowSec();
   let last = -1;
+
   try {
     engine = await webllm.CreateMLCEngine(info.id, {
       initProgressCallback: r => {
         const p = Math.round(r.progress * 100);
         progressBar.style.width = p + '%';
         showStatus(`${info.name}: ${p}%`, 'loading');
-        if (p >= last + 20) { addMessage('sys', `Загрузка ${p}%...`); last = p; }
+        if (p >= last + 25) { addMessage('sys', `Загрузка ${p}%...`); last = p; }
       },
       context_window_size: SETTINGS.context_window_size,
       prefill_chunk_size: SETTINGS.prefill_chunk_size,
       kvCacheDtype: SETTINGS.kvCacheDtype,
     });
+
     const dt = nowSec() - t0;
     showStatus(info.name + ' ✅', 'ready');
     progressBar.style.width = '100%';
     setTimeout(() => progressEl.classList.remove('show'), 400);
     addMessage('stat', `✅ Загружено за ${fmtNum(dt)}с`);
+
     try {
       addMessage('sys', 'Прогрев...');
-      await engine.chat.completions.create({ messages: [{ role: 'user', content: 'ok' }], max_tokens: 1, temperature: 0 });
+      await engine.chat.completions.create({
+        messages: [{ role: 'user', content: 'ok' }],
+        max_tokens: 1, temperature: 0,
+      });
       addMessage('stat', '🔥 Warmup ок');
     } catch (e) {}
+
     messages = [{ role: 'system', content: getSystemPrompt() }];
     inputEl.disabled = false;
     sendBtn.disabled = false;
     inputEl.focus();
   } catch (e) {
     showStatus('Ошибка', 'error');
-    addMessage('error', 'Ошибка: ' + e.message);
+    addMessage('error', 'Ошибка загрузки: ' + e.message);
     engine = null;
   }
   isLoading = false;
@@ -1449,7 +1655,10 @@ async function initEngine() {
 
 function checkThermal() {
   const since = nowSec() - lastRequestTime;
-  if (lastRequestTime > 0 && since < 3) { addMessage('warn', `⚠️ Прошло ${fmtNum(since, 1)}с. Пауза.`); return false; }
+  if (lastRequestTime > 0 && since < 3) {
+    addMessage('warn', `⚠️ Прошло ${fmtNum(since, 1)}с. Дай паузу.`);
+    return false;
+  }
   return true;
 }
 
@@ -1459,38 +1668,50 @@ function checkThermal() {
 function renderOCRCard(o) {
   const card = document.createElement('div');
   card.className = 'ocr-card';
-  const badge = o.isFile ? 'file' : (o.formulas.length > 0 ? 'math' : '');
-  const badgeText = o.isFile ? (o.fileType || 'FILE') : (o.formulas.length > 0 ? `${o.formulas.length} формул` : 'OCR');
+
+  // Проверка качества OCR
+  const hasText = o.ocrText && o.ocrText.length > 5;
+  const isGarbage = o.ocrText && o.ocrText.length < 30 && o.confidence < 60;
+  const badgeCls = o.isFile ? 'file' : (o.formulas.length > 0 ? 'math' : (isGarbage ? 'warn' : ''));
+  const badgeTxt = o.isFile ? (o.fileType || 'FILE')
+    : isGarbage ? '⚠️ Плохое качество'
+    : o.formulas.length > 0 ? `${o.formulas.length} формул` : 'OCR';
+
   let h = `
     <div class="ocr-head">
       <div class="ocr-title">${escapeHtml(o.filename || 'Снимок')}</div>
-      <div class="ocr-badge ${badge}">${badgeText}</div>
-    </div>`;
-  if (o.imageData) h += `<div class="img-wrap"><img src="${o.imageData}"></div>`;
+      <div class="ocr-badge ${badgeCls}">${badgeTxt}</div>
+    </div>
+  `;
+  if (o.imageData) h += `<div class="img-wrap"><img src="${o.imageData}" alt=""></div>`;
   h += `
     <div class="ocr-tabs">
       <div class="ocr-tab active" data-tab="text">📝 Текст</div>
-      ${o.formulas.length > 0 ? `<div class="ocr-tab" data-tab="formulas">🧮 Формулы (${o.formulas.length})</div>` : ''}
-      ${o.formulas.length > 0 ? `<div class="ocr-tab" data-tab="latex">∑ LaTeX</div>` : ''}
+      ${o.formulas.length > 0 ? `<div class="ocr-tab" data-tab="formulas">🧮 Формулы</div>` : ''}
     </div>
-    <div class="ocr-content" data-content="text">${escapeHtml(o.ocrText || '(пусто)')}</div>`;
+    <div class="ocr-content" data-content="text">${escapeHtml(o.ocrText || '(пусто)')}</div>
+  `;
   if (o.formulas.length > 0) {
     h += `<div class="ocr-content hidden" data-content="formulas">`;
     for (const f of o.formulas) h += `<div class="formula-line">${escapeHtml(f.text)}</div>`;
     h += `</div>`;
-    h += `<div class="ocr-content hidden" data-content="latex">`;
-    for (const f of o.formulas) h += `$$${escapeHtml(f.latex)}$$\n\n`;
-    h += `</div>`;
   }
   h += `<div class="ocr-actions">
-      <button class="ocr-btn-copy">📋 Копировать</button>
-      ${o.formulas.length > 0 ? `<button class="ocr-btn-latex">∑ LaTeX</button>` : ''}
-      <button class="ocr-btn-ask">🤖 Спросить ИИ</button>
+    <button class="ocr-btn-copy">📋 Копировать</button>
+    <button class="ocr-btn-ask">🤖 Спросить ИИ</button>
+  </div>`;
+  if (o.ocrTime !== undefined) {
+    const conf = fmtNum(o.confidence, 0);
+    const confColor = o.confidence < 60 ? 'var(--warn)' : 'var(--text2)';
+    h += `<div style="font-size:11px;color:${confColor};margin-top:8px;">
+      ⏱ ${fmtNum(o.ocrTime, 2)}с · уверенность ${conf}%
+      ${o.confidence < 60 ? ' · попробуй другое фото' : ''}
     </div>`;
-  if (o.ocrTime !== undefined) h += `<div style="font-size:10px;color:var(--text2);margin-top:6px;">⏱ ${fmtNum(o.ocrTime, 2)}с · ${fmtNum(o.confidence, 0)}%</div>`;
+  }
   card.innerHTML = h;
   chatEl.appendChild(card);
   chatEl.scrollTop = chatEl.scrollHeight;
+
   const tabs = card.querySelectorAll('.ocr-tab');
   const contents = card.querySelectorAll('.ocr-content');
   tabs.forEach(t => t.onclick = () => {
@@ -1500,70 +1721,107 @@ function renderOCRCard(o) {
   });
   card.querySelector('.ocr-btn-copy').onclick = function() {
     navigator.clipboard.writeText(o.ocrText || '');
-    this.textContent = '✅'; setTimeout(() => this.textContent = '📋 Копировать', 1500);
-  };
-  const bl = card.querySelector('.ocr-btn-latex');
-  if (bl) bl.onclick = function() {
-    const l = o.formulas.map(f => f.latex).join('\n\n');
-    navigator.clipboard.writeText(l);
-    this.textContent = '✅'; setTimeout(() => this.textContent = '∑ LaTeX', 1500);
+    this.textContent = '✅ Скопировано';
+    setTimeout(() => this.textContent = '📋 Копировать', 1500);
   };
   card.querySelector('.ocr-btn-ask').onclick = () => {
-    inputEl.value = 'Проанализируй и реши:';
-    inputEl.focus(); autoResizeInput();
+    inputEl.value = 'Проанализируй текст:';
+    inputEl.focus();
+    autoResizeInput();
   };
   return card;
 }
 
 // ============================================================
-// === OCR-ПРОЦЕСС ===
+// === ОБРАБОТКА ИЗОБРАЖЕНИЯ ===
 // ============================================================
 async function processImage(imageData, filename) {
   if (!engine) { addMessage('warn', 'Модель грузится.'); return; }
+
   addMessage('user', `📷 ${filename || 'Изображение'}`);
+
   const card = document.createElement('div');
   card.className = 'ocr-card';
-  card.innerHTML = `<div class="ocr-head">
-    <div class="ocr-title">${escapeHtml(filename || 'Снимок')}</div>
-    <div class="ocr-badge"><span class="spinner"></span>OCR</div>
-  </div>
-  <div class="img-wrap"><img src="${imageData}"></div>
-  <div class="ocr-progress"><div class="ocr-progress-bar"></div></div>`;
-  chatEl.appendChild(card); chatEl.scrollTop = chatEl.scrollHeight;
+  card.innerHTML = `
+    <div class="ocr-head">
+      <div class="ocr-title">${escapeHtml(filename || 'Снимок')}</div>
+      <div class="ocr-badge"><span class="spinner"></span>OCR</div>
+    </div>
+    <div class="img-wrap"><img src="${imageData}" alt=""></div>
+    <div class="ocr-progress"><div class="ocr-progress-bar"></div></div>
+  `;
+  chatEl.appendChild(card);
+  chatEl.scrollTop = chatEl.scrollHeight;
   const pb = card.querySelector('.ocr-progress-bar');
 
   try {
-    showStatus('Предобработка...', 'loading');
+    showStatus('Обработка фото...', 'loading');
     const processed = await preprocessImage(imageData, SETTINGS.preprocess);
-    showStatus('OCR...', 'loading');
+
+    showStatus('Распознавание...', 'loading');
     const t0 = nowSec();
     const result = await runOCR(processed, SETTINGS.ocrLang, p => {
       pb.style.width = Math.round(p * 100) + '%';
       showStatus(`OCR: ${Math.round(p * 100)}%`, 'loading');
     });
     const dt = nowSec() - t0;
+
     const formulas = detectFormulas(result.text);
     lastOCRText = result.text;
     sessionStats.ocrChars += result.text.length;
     stats.ocrCount++;
     stats.ocrTime += dt;
+
     card.remove();
-    renderOCRCard({ imageData: processed, filename, ocrText: result.text, formulas, ocrTime: dt, confidence: result.confidence });
-    addMessage('stat', `OCR: ${fmtNum(dt, 2)}с · ${result.text.length} симв · ${formulas.length} формул`);
+    renderOCRCard({
+      imageData: processed,
+      filename: filename || 'Снимок',
+      ocrText: result.text,
+      formulas: formulas,
+      ocrTime: dt,
+      confidence: result.confidence,
+    });
+
+    addMessage('stat',
+      `OCR: ${fmtNum(dt, 2)}с · ${result.text.length} симв · ` +
+      `${formulas.length} формул · ${fmtNum(result.confidence, 0)}%`);
+
     showStatus('Готов ✅', 'ready');
-    if (autoMode && result.text) {
+
+    // Проверка качества OCR
+    if (!result.text || result.text.length < 10) {
+      addMessage('warn', '⚠️ Не удалось распознать текст. Попробуй:\n' +
+        '• Другое освещение\n' +
+        '• Ближе к тексту\n' +
+        '• Другую обработку в настройках');
+      return;
+    }
+
+    if (result.confidence < 50) {
+      addMessage('warn', '⚠️ Низкая уверенность OCR (' + fmtNum(result.confidence, 0) + '%). ' +
+        'Результат может быть неточным.');
+    }
+
+    // Авто-выбор модели
+    if (autoMode) {
       const d = detectBestModel(result.text);
       if (d && d.model !== currentModelKey) {
         const r = pickByRam(d.model);
-        if (r !== currentModelKey) await switchModel(r, 'по OCR: ' + d.reason);
+        if (r !== currentModelKey) {
+          await switchModel(r, 'по OCR: ' + d.reason);
+        }
       }
     }
-    if (result.text) {
-      const p = formulas.length > 0
-        ? `Распознанный текст:\n\n${result.text}\n\nФормул: ${formulas.length}.\nПроанализируй и реши.`
-        : `Распознанный текст:\n\n${result.text}\n\nПроанализируй.`;
-      await askLLM(p);
-    } else addMessage('warn', '⚠️ Текст не распознан.');
+
+    // Отправка в LLM — только если OCR не мусор
+    if (result.text.length > 15) {
+      const prompt = formulas.length > 0
+        ? `Распознанный текст:\n\n${result.text}\n\nНайдено формул: ${formulas.length}.\n\nПроанализируй и объясни.`
+        : `Распознанный текст:\n\n${result.text}\n\nПроанализируй и ответь.`;
+      await askLLM(prompt);
+    } else {
+      addMessage('sys', 'Текст слишком короткий — не отправляю в ИИ.');
+    }
   } catch (e) {
     console.error(e);
     addMessage('error', 'Ошибка OCR: ' + e.message);
@@ -1579,28 +1837,61 @@ async function processFile(file) {
   const type = file.type || '';
   const ext = name.toLowerCase().split('.').pop();
   sessionStats.files++;
+
   if (type.startsWith('image/') || ['jpg','jpeg','png','webp','bmp','gif'].includes(ext)) {
     const d = await readFileAsDataURL(file);
-    await processImage(d, name); return;
+    await processImage(d, name);
+    return;
   }
   if (type === 'application/pdf' || ext === 'pdf') { await processPDF(file, name); return; }
   if (type.indexOf('word') >= 0 || ext === 'docx') { await processDocx(file, name); return; }
-  if (type.startsWith('text/') || ['txt','md','markdown','csv','json','log'].includes(ext)) { await processText(file, name); return; }
+  if (type.startsWith('text/') || ['txt','md','markdown','csv','json','log'].includes(ext)) {
+    await processText(file, name);
+    return;
+  }
   addMessage('error', `Формат .${ext} не поддержан.`);
 }
 
-function readFileAsDataURL(f) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('err')); r.readAsDataURL(f); }); }
-function readFileAsText(f) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('err')); r.readAsText(f); }); }
-function readFileAsArrayBuffer(f) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(new Error('err')); r.readAsArrayBuffer(f); }); }
+function readFileAsDataURL(f) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = () => rej(new Error('err'));
+    r.readAsDataURL(f);
+  });
+}
+function readFileAsText(f) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = () => rej(new Error('err'));
+    r.readAsText(f);
+  });
+}
+function readFileAsArrayBuffer(f) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = () => rej(new Error('err'));
+    r.readAsArrayBuffer(f);
+  });
+}
 
 async function processText(file, name) {
   addMessage('user', `📄 ${name}`);
   try {
     const text = await readFileAsText(file);
-    lastOCRText = text; sessionStats.ocrChars += text.length;
-    renderOCRCard({ imageData: null, filename: name, ocrText: text, formulas: detectFormulas(text), ocrTime: 0, confidence: 100, isFile: true, fileType: 'TXT' });
+    lastOCRText = text;
+    sessionStats.ocrChars += text.length;
+    renderOCRCard({
+      imageData: null, filename: name, ocrText: text,
+      formulas: detectFormulas(text), ocrTime: 0, confidence: 100,
+      isFile: true, fileType: 'TXT',
+    });
     addMessage('stat', `📄 ${text.length} символов`);
-    await askLLM(`Файл ${name}:\n\n${text.slice(0, 5000)}\n\nПроанализируй.`);
+    if (text.length > 20) {
+      await askLLM(`Файл ${name}:\n\n${text.slice(0, 5000)}\n\nПроанализируй.`);
+    }
   } catch (e) { addMessage('error', 'Ошибка: ' + e.message); }
 }
 
@@ -1611,8 +1902,13 @@ async function processDocx(file, name) {
     const ab = await readFileAsArrayBuffer(file);
     const result = await M.extractRawText({ arrayBuffer: ab });
     const text = result.value;
-    lastOCRText = text; sessionStats.ocrChars += text.length;
-    renderOCRCard({ imageData: null, filename: name, ocrText: text, formulas: detectFormulas(text), ocrTime: 0, confidence: 100, isFile: true, fileType: 'DOCX' });
+    lastOCRText = text;
+    sessionStats.ocrChars += text.length;
+    renderOCRCard({
+      imageData: null, filename: name, ocrText: text,
+      formulas: detectFormulas(text), ocrTime: 0, confidence: 100,
+      isFile: true, fileType: 'DOCX',
+    });
     addMessage('stat', `📝 ${text.length} символов`);
     await askLLM(`Документ ${name}:\n\n${text.slice(0, 5000)}\n\nПроанализируй.`);
   } catch (e) { addMessage('error', 'Ошибка: ' + e.message); }
@@ -1620,7 +1916,7 @@ async function processDocx(file, name) {
 
 async function processPDF(file, name) {
   addMessage('user', `📕 ${name}`);
-  showStatus('PDF...', 'loading');
+  showStatus('Чтение PDF...', 'loading');
   try {
     const pdfjs = await loadPdfJs();
     const ab = await readFileAsArrayBuffer(file);
@@ -1629,7 +1925,7 @@ async function processPDF(file, name) {
     let txt = '';
     const imgs = [];
     for (let i = 1; i <= n; i++) {
-      showStatus(`PDF ${i}/${n}`, 'loading');
+      showStatus(`PDF: ${i}/${n}`, 'loading');
       const p = await pdf.getPage(i);
       const tc = await p.getTextContent();
       const pt = tc.items.map(x => x.str).join(' ');
@@ -1645,21 +1941,36 @@ async function processPDF(file, name) {
     lastOCRText = txt;
     if (txt.trim().length < 100 && imgs.length > 0) {
       showStatus('OCR скана...', 'loading');
-      const pr = await preprocessImage(imgs[0], 1);
+      const pr = await preprocessImage(imgs[0], 4);
       const t0 = nowSec();
       const ocr = await runOCR(pr, SETTINGS.ocrLang, p => showStatus(`OCR: ${Math.round(p*100)}%`, 'loading'));
       const dt = nowSec() - t0;
-      renderOCRCard({ imageData: pr, filename: name + ' (scan)', ocrText: ocr.text, formulas: detectFormulas(ocr.text), ocrTime: dt, confidence: ocr.confidence, isFile: true, fileType: 'PDF-scan' });
+      renderOCRCard({
+        imageData: pr, filename: name + ' (scan)',
+        ocrText: ocr.text, formulas: detectFormulas(ocr.text),
+        ocrTime: dt, confidence: ocr.confidence,
+        isFile: true, fileType: 'PDF-scan',
+      });
       lastOCRText = ocr.text;
       addMessage('stat', `📕 PDF-scan OCR ${fmtNum(dt, 1)}с`);
-      await askLLM(`Скан PDF ${name}:\n\n${ocr.text}\n\nПроанализируй.`);
+      if (ocr.text.length > 15) {
+        await askLLM(`Скан PDF ${name}:\n\n${ocr.text}\n\nПроанализируй.`);
+      }
     } else {
-      renderOCRCard({ imageData: imgs[0] || null, filename: name, ocrText: txt.slice(0, 8000), formulas: detectFormulas(txt), ocrTime: 0, confidence: 100, isFile: true, fileType: 'PDF' });
+      renderOCRCard({
+        imageData: imgs[0] || null, filename: name,
+        ocrText: txt.slice(0, 8000), formulas: detectFormulas(txt),
+        ocrTime: 0, confidence: 100,
+        isFile: true, fileType: 'PDF',
+      });
       addMessage('stat', `📕 PDF · ${pdf.numPages} стр`);
       await askLLM(`PDF ${name}:\n\n${txt.slice(0, 5000)}\n\nПроанализируй.`);
     }
     showStatus('Готов ✅', 'ready');
-  } catch (e) { console.error(e); addMessage('error', 'Ошибка PDF: ' + e.message); }
+  } catch (e) {
+    console.error(e);
+    addMessage('error', 'Ошибка PDF: ' + e.message);
+  }
 }
 
 // ============================================================
@@ -1669,10 +1980,10 @@ function parseCommand(text) {
   const m = text.match(/^\/([a-z]+)\s*(.*)/i);
   if (!m) return null;
   const c = m[1].toLowerCase(), r = m[2] || '';
-  if (c === 'teacher') return { system: 'Ты учитель. НЕ давай ответ. Задавай вопросы.', prompt: r, label: '👨‍🏫 Учитель' };
-  if (c === 'check') return { system: 'Проверь решение, найди ошибки.', prompt: r, label: '🔎 Проверка' };
-  if (c === 'explain') return { system: 'Объясни подробно с примерами.', prompt: r, label: '🔬 Подробно' };
-  if (c === 'short') return { system: 'Отвечай кратко.', prompt: r, label: '⚡ Кратко' };
+  if (c === 'teacher') return { system: 'Ты учитель. НЕ давай готовый ответ. Задавай наводящие вопросы. Отвечай на русском.', prompt: r, label: '👨‍🏫 Учитель' };
+  if (c === 'check') return { system: 'Проверь решение, найди ошибки. Отвечай на русском.', prompt: r, label: '🔎 Проверка' };
+  if (c === 'explain') return { system: 'Объясни подробно с примерами. Отвечай на русском.', prompt: r, label: '🔬 Подробно' };
+  if (c === 'short') return { system: 'Отвечай кратко. На русском.', prompt: r, label: '⚡ Кратко' };
   return null;
 }
 
@@ -1680,59 +1991,87 @@ function parseCommand(text) {
 // === ЗАПРОС К LLM ===
 // ============================================================
 async function askLLM(prompt, overrideSystem) {
-  if (!engine || isGenerating) { addMessage('warn', 'Занято.'); return; }
-  if (messages.length > 14) { messages.splice(1, messages.length - 11); addMessage('sys', '[история обрезана]'); }
-  let sys = getSystemPrompt();
-  if (overrideSystem) sys = overrideSystem;
+  if (!engine) { addMessage('warn', 'Модель не загружена. Подожди.'); return; }
+  if (isGenerating) { addMessage('warn', 'Подожди ответа.'); return; }
+
+  if (messages.length > 14) {
+    messages.splice(1, messages.length - 11);
+    addMessage('sys', '[история обрезана]');
+  }
+
+  let sys = overrideSystem || getSystemPrompt();
   if (messages[0] && messages[0].role === 'system') messages[0].content = sys;
+
   messages.push({ role: 'user', content: prompt });
   lastUserPrompt = prompt;
+
   inputEl.disabled = true;
   sendBtn.disabled = true;
   stopBtn.classList.add('show');
   isGenerating = true;
+
   const botDiv = addMessage('bot', '');
   botDiv.innerHTML = '<span class="skeleton"></span>';
+
   let full = '', tokens = 0;
   const t0 = nowSec();
   let tFirst = null;
   abortController = new AbortController();
+
   try {
     const chunks = await engine.chat.completions.create({
-      messages, temperature: SETTINGS.temperature, top_p: SETTINGS.top_p,
-      max_tokens: SETTINGS.max_tokens, stream: true,
+      messages,
+      temperature: SETTINGS.temperature,
+      top_p: SETTINGS.top_p,
+      max_tokens: SETTINGS.max_tokens,
+      stream: true,
     });
+
     for await (const c of chunks) {
       if (abortController && abortController.signal.aborted) break;
       const d = c.choices[0] && c.choices[0].delta && c.choices[0].delta.content || '';
       if (d && tFirst === null) tFirst = nowSec();
-      full += d; tokens++;
+      full += d;
+      tokens++;
       botDiv.textContent = full;
       if (autoScroll) chatEl.scrollTop = chatEl.scrollHeight;
     }
+
     const total = nowSec() - t0;
     const ttft = tFirst ? (tFirst - t0) : 0;
     const tps = tokens / Math.max(total, 0.001);
-    stats.requests++; stats.totalTokens += tokens; stats.totalTime += total; stats.ttfts.push(ttft);
+
+    stats.requests++;
+    stats.totalTokens += tokens;
+    stats.totalTime += total;
+    stats.ttfts.push(ttft);
     sessionStats.tokens += tokens;
+
     try {
       const h = await renderMarkdown(full);
       botDiv.innerHTML = h;
     } catch (e) { botDiv.textContent = full; }
+
     const ac = document.createElement('div');
     ac.className = 'msg-actions';
-    ac.innerHTML = `<button onclick="copyMsg(this)">📋</button><button onclick="speakMsg(this)">🔊</button><button onclick="regenMsg(this)">🔄</button>`;
+    ac.innerHTML = `<button onclick="copyMsg(this)">📋 Копировать</button>
+                    <button onclick="speakMsg(this)">🔊 Озвучить</button>
+                    <button onclick="regenMsg(this)">🔄 Заново</button>`;
     botDiv.appendChild(ac);
+
     let v = tps < 3 ? ' ❌' : tps < 6 ? ' ⚠️' : tps < 10 ? ' ✅' : ' 🚀';
     addMessage('stat', `${tokens} ток · ${fmtNum(tps)} т/с · TTFT ${fmtNum(ttft, 2)}с${v}`);
-    showStats(`<b>${fmtNum(tps)}</b> т/с · ${tokens} ток`);
+    showStats(`<b>${fmtNum(tps)}</b> т/с · TTFT ${fmtNum(ttft, 2)}с · ${tokens} ток`);
+
     messages.push({ role: 'assistant', content: full });
     await saveCurrentChat();
+
     if (SETTINGS.tts === 1 && 'speechSynthesis' in window) speakText(full);
   } catch (e) {
     if (e.name === 'AbortError') botDiv.textContent = full + '\n\n[прервано]';
     else botDiv.textContent = 'Ошибка: ' + e.message;
   }
+
   abortController = null;
   isGenerating = false;
   inputEl.disabled = false;
@@ -1748,10 +2087,12 @@ async function send() {
   if (!engine || isLoading || isGenerating) return;
   const text = inputEl.value.trim();
   if (!text) return;
+
   checkThermal();
   lastRequestTime = nowSec();
   inputEl.value = '';
   autoResizeInput();
+
   const cmd = parseCommand(text);
   if (cmd) {
     addMessage('user', text);
@@ -1759,43 +2100,50 @@ async function send() {
     await askLLM(cmd.prompt || 'Продолжай', cmd.system);
     return;
   }
+
+  // Авто-выбор: НЕ переключаем на Math модель (ломается на русском)
   if (autoMode) {
     const d = detectBestModel(text);
-    if (d) {
+    if (d && d.model !== currentModelKey && d.model !== 'qwen_math15') {
       const r = pickByRam(d.model);
       if (r !== currentModelKey) {
         addMessage('user', text);
         await switchModel(r, d.reason);
         let p = text;
-        if (lastOCRText && text.length < 200) p = `Ранее:\n${lastOCRText.slice(0, 3000)}\n\nЗапрос: ${text}`;
+        if (lastOCRText && text.length < 200) p = `Ранее распознано:\n${lastOCRText.slice(0, 3000)}\n\nЗапрос: ${text}`;
         await askLLM(p);
         return;
       }
     }
   }
+
   addMessage('user', text);
   let p = text;
-  if (lastOCRText && text.length < 200) p = `Ранее:\n${lastOCRText.slice(0, 3000)}\n\nЗапрос: ${text}`;
+  if (lastOCRText && text.length < 200) {
+    p = `Ранее распознанный текст:\n${lastOCRText.slice(0, 3000)}\n\nЗапрос: ${text}`;
+  }
   await askLLM(p);
 }
 
-function stopGeneration() { if (abortController) abortController.abort(); }
+function stopGeneration() {
+  if (abortController) abortController.abort();
+}
 
 // ============================================================
-// === ДЕЙСТВИЯ ===
+// === ДЕЙСТВИЯ С СООБЩЕНИЯМИ ===
 // ============================================================
 function copyMsg(btn) {
-  const msg = btn.closest('.msg');
-  const t = msg.textContent.replace(/📋|🔊|🔄/g, '').trim();
+  const m = btn.closest('.msg');
+  const t = m.textContent.replace(/📋 Копировать|🔊 Озвучить|🔄 Заново/g, '').trim();
   navigator.clipboard.writeText(t);
   btn.textContent = '✅';
-  setTimeout(() => btn.textContent = '📋', 1500);
+  setTimeout(() => btn.textContent = '📋 Копировать', 1500);
 }
 window.copyMsg = copyMsg;
 
 function speakMsg(btn) {
-  const msg = btn.closest('.msg');
-  const t = msg.textContent.replace(/📋|🔊|🔄/g, '').trim();
+  const m = btn.closest('.msg');
+  const t = m.textContent.replace(/📋 Копировать|🔊 Озвучить|🔄 Заново/g, '').trim();
   speakText(t);
 }
 window.speakMsg = speakMsg;
@@ -1805,12 +2153,14 @@ function speakText(text) {
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text.slice(0, 3000));
   u.lang = 'ru-RU';
+  u.rate = 1.0;
   speechSynthesis.speak(u);
 }
+window.speakText = speakText;
 
 async function regenMsg(btn) {
-  if (isGenerating) return;
-  if (!lastUserPrompt) return;
+  if (isGenerating) { alert('Подожди.'); return; }
+  if (!lastUserPrompt) { alert('Нет вопроса.'); return; }
   const m = btn.closest('.msg');
   if (m) m.remove();
   if (messages.length >= 2) messages.splice(-2, 2);
@@ -1845,7 +2195,7 @@ function initSR() {
 function toggleMic() {
   if (!recognition) {
     recognition = initSR();
-    if (!recognition) { alert('Не поддерживается.'); return; }
+    if (!recognition) { alert('Голосовой ввод не поддерживается.'); return; }
   }
   if (isRecording) { recognition.stop(); isRecording = false; $('btn-mic').classList.remove('rec'); }
   else { try { recognition.start(); isRecording = true; $('btn-mic').classList.add('rec'); } catch (e) { alert('Ошибка: ' + e.message); } }
@@ -1860,18 +2210,19 @@ function renderStats() {
   const mem = performance.memory ? (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + ' MB' : '?';
   $('stats-content').innerHTML = `
     <p><b>Модель:</b> ${escapeHtml(MODELS[currentModelKey].name)}</p>
-    <p><b>Авто:</b> ${autoMode ? '✅' : '❌'}</p>
+    <p><b>Языки:</b> ${escapeHtml(MODELS[currentModelKey].langsLabel)}</p>
+    <p><b>Авто-режим:</b> ${autoMode ? '✅' : '❌'}</p>
     <p><b>Запросов:</b> ${stats.requests}</p>
     <p><b>Токенов:</b> ${stats.totalTokens}</p>
-    <p><b>Средняя:</b> ${fmtNum(avg, 2)} т/с</p>
-    <p><b>TTFT:</b> ${fmtNum(avgT, 2)} с</p>
+    <p><b>Средняя скорость:</b> ${fmtNum(avg, 2)} т/с</p>
+    <p><b>Средний TTFT:</b> ${fmtNum(avgT, 2)} с</p>
     <p><b>JS heap:</b> ${mem}</p>
     <hr style="border:none;border-top:1px solid var(--bg3);margin:8px 0;">
-    <p><b>OCR:</b> ${stats.ocrCount}</p>
-    <p><b>OCR-время:</b> ${fmtNum(stats.ocrTime, 1)} с</p>
-    <p><b>Символов:</b> ${sessionStats.ocrChars}</p>
+    <p><b>OCR-запросов:</b> ${stats.ocrCount}</p>
+    <p><b>OCR-времени:</b> ${fmtNum(stats.ocrTime, 1)} с</p>
+    <p><b>Символов распознано:</b> ${sessionStats.ocrChars}</p>
     <p><b>Файлов:</b> ${sessionStats.files}</p>
-    <p><b>Авто-смен:</b> ${stats.autoSwitches}</p>
+    <p><b>Авто-переключений:</b> ${stats.autoSwitches}</p>
     <p><b>Сессия:</b> ${Math.floor(nowSec() - sessionStats.start)}с</p>
   `;
 }
@@ -1895,8 +2246,10 @@ async function runBenchmark() {
   c.innerHTML = '<p>Подготовка...</p>';
   $('btn-bench-run').style.display = 'none';
   $('btn-bench-stop').style.display = 'block';
-  const bm = ['smol360', 'qwen05', 'qwen3_06', 'llama1b', 'qwen15', 'smol17', 'qwen_math15', 'deepseek_r1', 'qwen_coder15', 'gemma2b', 'qwen3b', 'phi35'].filter(k => MODELS[k]);
+
+  const bm = ['smol360', 'qwen05', 'qwen3_06', 'llama1b', 'qwen15', 'qwen3_17', 'gemma2b'].filter(k => MODELS[k]);
   const orig = currentModelKey;
+
   for (const k of bm) {
     if (benchShouldStop) break;
     c.innerHTML = `<p><span class="spinner"></span>${escapeHtml(MODELS[k].name)} (${benchResults.length + 1}/${bm.length})</p>${renderBenchTable()}`;
@@ -1905,11 +2258,22 @@ async function runBenchmark() {
       if (engine) { try { await engine.unload(); } catch (e) {} engine = null; }
       currentModelKey = k;
       const tL = nowSec();
-      engine = await webllm.CreateMLCEngine(MODELS[k].id, { initProgressCallback: () => {}, context_window_size: SETTINGS.context_window_size, prefill_chunk_size: SETTINGS.prefill_chunk_size, kvCacheDtype: SETTINGS.kvCacheDtype });
+      engine = await webllm.CreateMLCEngine(MODELS[k].id, {
+        initProgressCallback: () => {},
+        context_window_size: SETTINGS.context_window_size,
+        prefill_chunk_size: SETTINGS.prefill_chunk_size,
+        kvCacheDtype: SETTINGS.kvCacheDtype,
+      });
       r.loadTime = nowSec() - tL;
       const t0 = nowSec();
       let tF = null, tok = 0;
-      const ch = await engine.chat.completions.create({ messages: [{ role: 'system', content: 'Ты помощник.' }, { role: 'user', content: 'Реши: 2x + 5 = 15.' }], temperature: 0.3, max_tokens: 60, stream: true });
+      const ch = await engine.chat.completions.create({
+        messages: [
+          { role: 'system', content: 'Отвечай на русском.' },
+          { role: 'user', content: 'Скажи: раз, два, три.' }
+        ],
+        temperature: 0.3, max_tokens: 60, stream: true
+      });
       for await (const x of ch) {
         if (benchShouldStop) break;
         const d = x.choices[0] && x.choices[0].delta && x.choices[0].delta.content || '';
@@ -1952,7 +2316,8 @@ async function runDiagnostics() {
   const p = (l, v, c) => o.push(`<div class="diag-line"><b>${l}:</b> <span class="${c||''}">${v}</span></div>`);
   const ua = navigator.userAgent.match(/Chrome\/(\d+)/);
   p('Chrome', ua ? ua[1] : '?');
-  p('Tesseract', typeof window.Tesseract !== 'undefined' ? '✅ загружен' : '❌ нет', typeof window.Tesseract !== 'undefined' ? 'ok' : 'bad');
+  p('Tesseract', typeof window.Tesseract !== 'undefined' ? '✅ загружен' : '❌ нет',
+    typeof window.Tesseract !== 'undefined' ? 'ok' : 'bad');
   if (typeof window.Tesseract !== 'undefined') {
     p('createWorker', typeof window.Tesseract.createWorker === 'function' ? '✅' : '❌');
   }
@@ -1961,18 +2326,23 @@ async function runDiagnostics() {
     try {
       const a = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
       if (a) {
-        p('Adapter', '✅', 'ok');
-        p('shader-f16', a.features.has('shader-f16') ? '✅' : '❌');
+        p('Adapter', '✅ получен', 'ok');
+        p('shader-f16', a.features.has('shader-f16') ? '✅' : '❌',
+          a.features.has('shader-f16') ? 'ok' : 'bad');
+        p('subgroups', a.features.has('subgroups') ? '✅' : '❌');
       } else p('Adapter', '❌ null', 'bad');
     } catch (e) { p('Adapter', '❌ ' + e.message, 'bad'); }
   }
   if (performance.memory) {
     p('JS heap used', (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + ' MB');
+    p('JS heap limit', (performance.memory.jsHeapSizeLimit / 1048576).toFixed(0) + ' MB');
   }
   p('Device memory', navigator.deviceMemory ? navigator.deviceMemory + ' GB' : '?');
-  p('Storage', navigator.storage ? '✅' : '❌');
+  p('Hardware threads', navigator.hardwareConcurrency || '?');
   p('SpeechRecognition', ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) ? '✅' : '❌');
   p('SpeechSynthesis', 'speechSynthesis' in window ? '✅' : '❌');
+  p('Service Worker', 'serviceWorker' in navigator ? '✅' : '❌');
+
   $('diag-content').innerHTML = o.join('');
 }
 
@@ -1983,16 +2353,21 @@ let cameraStream = null;
 
 async function openCamera() {
   try {
-    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } });
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
+    });
     const v = $('camera-preview');
     v.srcObject = cameraStream;
     v.classList.add('show');
     openModal('modal-camera');
-  } catch (e) { alert('Камера: ' + e.message); }
+  } catch (e) { alert('Камера: ' + e.message + '\n\nНужен HTTPS.'); }
 }
 
 function closeCamera() {
-  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
   $('camera-preview').classList.remove('show');
   closeModal('modal-camera');
 }
@@ -2001,9 +2376,10 @@ async function snapPhoto() {
   const v = $('camera-preview');
   const c = $('camera-canvas');
   if (!v.videoWidth) { alert('Не готова.'); return; }
-  c.width = v.videoWidth; c.height = v.videoHeight;
+  c.width = v.videoWidth;
+  c.height = v.videoHeight;
   c.getContext('2d').drawImage(v, 0, 0);
-  const d = c.toDataURL('image/jpeg', 0.92);
+  const d = c.toDataURL('image/jpeg', 0.95);
   closeCamera();
   await processImage(d, 'Снимок ' + new Date().toLocaleTimeString());
 }
@@ -2033,7 +2409,7 @@ function togglePomo() {
       if (!pomodoro.running) return;
       pomodoro.timeLeft--;
       if (pomodoro.timeLeft <= 0) {
-        if (pomodoro.mode === 'work') { pomodoro.mode = 'break'; pomodoro.timeLeft = pomodoro.breakMin * 60; speakText('Работа завершена. Отдохни.'); }
+        if (pomodoro.mode === 'work') { pomodoro.mode = 'break'; pomodoro.timeLeft = pomodoro.breakMin * 60; speakText('Работа завершена.'); }
         else { pomodoro.mode = 'work'; pomodoro.timeLeft = pomodoro.workMin * 60; speakText('Перерыв завершён.'); }
       }
       updatePomo();
@@ -2042,12 +2418,22 @@ function togglePomo() {
   updatePomo();
 }
 
+function showPomodoro() {
+  $('pomodoro-panel').classList.toggle('show');
+  updatePomo();
+  closeModal('modal-more');
+}
+window.showPomodoro = showPomodoro;
+
 // ============================================================
 // === ПРЕСЕТЫ ===
 // ============================================================
 function renderPresets() {
   $('preset-grid').innerHTML = Object.entries(PRESETS).map(([k, p]) =>
-    `<div class="preset-btn" onclick="applyPreset('${k}')"><span class="icon">${p.icon}</span><b>${p.name}</b><div class="sub">${p.sub}</div></div>`
+    `<div class="preset-btn" onclick="applyPreset('${k}')">
+      <span class="icon">${p.icon}</span><b>${p.name}</b>
+      <div class="sub">${p.sub}</div>
+    </div>`
   ).join('');
 }
 
@@ -2055,12 +2441,50 @@ function applyPreset(k) {
   if (!PRESETS[k]) return;
   currentPreset = k;
   localStorage.setItem('ai-preset', k);
-  messages[0] = { role: 'system', content: PRESETS[k].system };
+  messages[0] = { role: 'system', content: getSystemPrompt() };
   addMessage('sys', `${PRESETS[k].icon} Предмет: ${PRESETS[k].name}`);
   closeModal('modal-presets');
-  if (PRESETS[k].model && PRESETS[k].model !== currentModelKey && autoMode) switchModel(PRESETS[k].model, 'предмет ' + PRESETS[k].name);
+  if (PRESETS[k].model && PRESETS[k].model !== currentModelKey && autoMode) {
+    // Никогда не переключаем на Math модель автоматически
+    if (PRESETS[k].model !== 'qwen_math15') {
+      switchModel(PRESETS[k].model, 'предмет ' + PRESETS[k].name);
+    }
+  }
 }
 window.applyPreset = applyPreset;
+
+// ============================================================
+// === LORA ===
+// ============================================================
+function downloadNotebook() {
+  const nb = {
+    cells: [
+      { cell_type: "markdown", metadata: {}, source: ["# QLoRA дообучение Qwen2.5"] },
+      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: ["!pip install -q transformers peft trl bitsandbytes accelerate datasets"] },
+      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: ["# См. полный код в репозитории\nprint('Готово')"] },
+    ],
+    metadata: { kernelspec: { display_name: "Python 3", name: "python3" } },
+    nbformat: 4, nbformat_minor: 5,
+  };
+  const b = new Blob([JSON.stringify(nb, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = 'train.ipynb';
+  a.click();
+}
+window.downloadNotebook = downloadNotebook;
+
+function downloadDatasetTemplate() {
+  const t = [
+    { question: "Реши x²+5x+6=0", answer: "D=1, x₁=-2, x₂=-3" },
+  ];
+  const b = new Blob([JSON.stringify(t, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = 'dataset.json';
+  a.click();
+}
+window.downloadDatasetTemplate = downloadDatasetTemplate;
 
 // ============================================================
 // === UI EVENTS ===
@@ -2073,40 +2497,43 @@ $('btn-auto').onclick = () => {
   addMessage('sys', autoMode ? '🎯 Авто вкл' : '🎯 Авто выкл');
 };
 
-$('btn-models').onclick = async () => { openModal('modal-models'); await updateStorageInfo(); await renderModelList(); };
-$('btn-chats').onclick = async () => { if (messages.filter(m => m.role !== 'system').length > 0) await saveCurrentChat(); await loadChats(); renderChatList(); openModal('modal-chats'); };
-$('btn-new').onclick = newChat;
-$('btn-stats').onclick = () => { renderStats(); openModal('modal-stats'); };
-$('btn-bench').onclick = () => openModal('modal-bench');
-$('btn-bench-run').onclick = runBenchmark;
-$('btn-bench-stop').onclick = stopBenchmark;
-$('btn-presets').onclick = () => { renderPresets(); openModal('modal-presets'); };
-$('btn-theme').onclick = () => { SETTINGS.theme = SETTINGS.theme === 'dark' ? 'light' : 'dark'; saveSettings(); applyTheme(SETTINGS.theme); };
-$('btn-diag').onclick = async () => {
-  $('diag-content').innerHTML = '<div class="diag-line"><span class="spinner"></span>Запуск...</div>';
-  openModal('modal-diag');
-  try { await runDiagnostics(); } catch (e) { $('diag-content').innerHTML = '<div style="color:var(--error);">' + e.message + '</div>'; }
+$('btn-models').onclick = async () => {
+  openModal('modal-models');
+  await updateStorageInfo();
+  await renderModelList();
 };
+
+$('btn-chats').onclick = async () => {
+  if (messages.filter(m => m.role !== 'system').length > 0) await saveCurrentChat();
+  await loadChats();
+  renderChatList();
+  openModal('modal-chats');
+};
+
+$('btn-new').onclick = newChat;
+$('btn-presets').onclick = () => { renderPresets(); openModal('modal-presets'); };
 $('btn-settings').onclick = () => {
   $('s-temp').value = SETTINGS.temperature;
   $('s-maxtok').value = SETTINGS.max_tokens;
   $('s-ctx').value = SETTINGS.context_window_size;
-  $('s-topp').value = SETTINGS.top_p;
+  $('s-lang').value = SETTINGS.answerLang;
   $('s-ocr-lang').value = SETTINGS.ocrLang;
   $('s-preprocess').value = SETTINGS.preprocess;
   $('s-auto').value = SETTINGS.autoMode;
   $('s-tts').value = SETTINGS.tts;
-  $('s-theme').value = SETTINGS.theme;
   $('v-temp').textContent = SETTINGS.temperature.toFixed(2);
   $('v-maxtok').textContent = SETTINGS.max_tokens;
   $('v-ctx').textContent = SETTINGS.context_window_size;
-  $('v-topp').textContent = SETTINGS.top_p.toFixed(2);
   openModal('modal-settings');
 };
-$('s-temp').oninput = e => $('v-temp').textContent = parseFloat(e.target.value).toFixed(2);
-$('s-maxtok').oninput = e => $('v-maxtok').textContent = e.target.value;
-$('s-ctx').oninput = e => $('v-ctx').textContent = e.target.value;
-$('s-topp').oninput = e => $('v-topp').textContent = parseFloat(e.target.value).toFixed(2);
+$('btn-more').onclick = () => openModal('modal-more');
+$('btn-theme').onclick = () => {
+  SETTINGS.theme = SETTINGS.theme === 'dark' ? 'light' : 'dark';
+  saveSettings();
+  applyTheme(SETTINGS.theme);
+};
+$('btn-bench-run').onclick = runBenchmark;
+$('btn-bench-stop').onclick = stopBenchmark;
 $('btn-camera').onclick = openCamera;
 $('btn-file').onclick = () => $('file-input').click();
 $('btn-mic').onclick = toggleMic;
@@ -2115,22 +2542,38 @@ $('btn-snap').onclick = snapPhoto;
 $('btn-close-camera').onclick = closeCamera;
 $('stop').onclick = stopGeneration;
 $('chat-search').oninput = e => renderChatList(e.target.value);
-$('btn-pomodoro').onclick = () => { $('pomodoro-panel').classList.toggle('show'); updatePomo(); };
 $('pomodoro-toggle').onclick = togglePomo;
-$('pomodoro-reset').onclick = () => { pomodoro.running = false; pomodoro.mode = 'work'; pomodoro.timeLeft = pomodoro.workMin * 60; updatePomo(); };
+$('pomodoro-reset').onclick = () => {
+  pomodoro.running = false;
+  pomodoro.mode = 'work';
+  pomodoro.timeLeft = pomodoro.workMin * 60;
+  updatePomo();
+};
 $('pomodoro-close').onclick = () => $('pomodoro-panel').classList.remove('show');
 
+$('s-temp').oninput = e => $('v-temp').textContent = parseFloat(e.target.value).toFixed(2);
+$('s-maxtok').oninput = e => $('v-maxtok').textContent = e.target.value;
+$('s-ctx').oninput = e => $('v-ctx').textContent = e.target.value;
+
 sendBtn.onclick = send;
-inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+inputEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
 inputEl.addEventListener('input', autoResizeInput);
 inputEl.addEventListener('input', () => localStorage.setItem('ai-draft', inputEl.value));
 
 document.querySelectorAll('.quick-btn').forEach(b => {
-  b.onclick = () => { inputEl.value = b.dataset.p; inputEl.focus(); autoResizeInput(); };
+  b.onclick = () => {
+    inputEl.value = b.dataset.p;
+    inputEl.focus();
+    autoResizeInput();
+  };
 });
 
 document.querySelectorAll('.modal').forEach(m => {
-  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+  m.addEventListener('click', e => {
+    if (e.target === m) m.classList.remove('show');
+  });
 });
 
 chatEl.addEventListener('scroll', () => {
@@ -2144,6 +2587,7 @@ chatEl.addEventListener('scroll', () => {
   sessionStats.start = nowSec();
   updateAutoBtn();
   applyTheme(SETTINGS.theme);
+
   const d = localStorage.getItem('ai-draft');
   if (d) { inputEl.value = d; autoResizeInput(); }
 
@@ -2153,29 +2597,34 @@ chatEl.addEventListener('scroll', () => {
     return;
   }
 
-  showStatus('Проверка...', 'loading');
+  showStatus('Проверка GPU...', 'loading');
   try {
     const a = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
     if (!a) { showStatus('GPU недоступен', 'error'); return; }
-  } catch (e) { showStatus('Ошибка GPU', 'error'); return; }
-
-  const tCheck = typeof window.Tesseract !== 'undefined' && typeof window.Tesseract.createWorker === 'function';
-  addMessage('sys', `✅ GPU. Tesseract: ${tCheck ? '✅' : '❌'}. Авто: ${autoMode ? '✅' : '❌'}`);
+    const f16 = a.features.has('shader-f16');
+    const tCheck = typeof window.Tesseract !== 'undefined' && typeof window.Tesseract.createWorker === 'function';
+    addMessage('sys', `✅ GPU. shader-f16: ${f16 ? '✅' : '❌'}. Tesseract: ${tCheck ? '✅' : '❌'}`);
+  } catch (e) {
+    showStatus('Ошибка GPU', 'error');
+    return;
+  }
 
   await loadChats();
   await initEngine();
 })();
 
-// Экспорты
+// ============================================================
+// ЭКСПОРТЫ
+// ============================================================
 window.switchModel = switchModel;
 window.openChat = openChat;
 window.deleteChat = deleteChat;
 window.newChat = newChat;
 window.exportChats = exportChats;
-window.exportChatsMarkdown = exportChatsMarkdown;
 window.importChats = importChats;
 window.printChat = printChat;
 window.closeModal = closeModal;
+window.openModal = openModal;
 window.resetStats = resetStats;
 window.applySettings = applySettings;
 window.autoSelectBest = autoSelectBest;
@@ -2184,6 +2633,7 @@ window.applyPreset = applyPreset;
 window.copyMsg = copyMsg;
 window.speakMsg = speakMsg;
 window.regenMsg = regenMsg;
+window.showPomodoro = showPomodoro;
 </script>
 </body>
 </html>
