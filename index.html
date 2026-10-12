@@ -1280,18 +1280,21 @@ function updateToolbar() {
 function getSystemPrompt() {
   let langRule = '';
   if (SETTINGS.answerLang === 'rus') {
-    langRule = '\n\n⚠️ КРИТИЧНО: Отвечай ТОЛЬКО на русском языке. Никаких других языков.';
-  } else if (SETTINGS.answerLang === 'eng') {
-    langRule = '\n\n⚠️ Answer ONLY in English.';
+    langRule = '\n\n⚠️ КРИТИЧНО: Отвечай ТОЛЬКО на русском языке.';
   }
 
-  const mathRule = '\n\n📐 МАТЕМАТИКА: Решай пошагово. ' +
-    'Каждый шаг нумеруй. В конце выдели ОТВЕТ. Используй LaTeX для формул.';
+  const mathRule = '\n\n📐 МАТЕМАТИКА:\n' +
+    '• Все формулы ОБОРАЧИВАЙ в $...$ для inline и $$...$$ для блочных\n' +
+    '• ПРИМЕР ПРАВИЛЬНО: Уравнение $x^2 - 5x + 6 = 0$ имеет корни $x_1 = 2$, $x_2 = 3$\n' +
+    '• ПРИМЕР НЕПРАВИЛЬНО: (x^2 - 5x + 6 = 0) имеет решения (x_1 = 2)\n' +
+    '• НЕ ИСПОЛЬЗУЙ скобки для формул — только $...$\n' +
+    '• Решай ПОШАГОВО, каждый шаг нумеруй\n' +
+    '• В конце выдели **Ответ:** жирным';
 
   if (currentPreset !== 'default' && PRESETS[currentPreset]) {
     return PRESETS[currentPreset].system + langRule + mathRule;
   }
-  return 'Ты помощник для учёбы, 8 класс. Отвечай ясно, по делу.' + langRule + mathRule;
+  return 'Ты помощник для учёбы, 8 класс.' + langRule + mathRule;
 }
 
 // ============================================================
