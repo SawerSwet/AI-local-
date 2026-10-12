@@ -35,13 +35,14 @@
   }
   body { display: flex; flex-direction: column; }
 
+  /* ============ HEADER ============ */
   header {
     padding: 10px 12px; background: var(--bg2);
     border-bottom: 1px solid var(--border);
     display: flex; justify-content: space-between; align-items: center;
     gap: 8px; flex-shrink: 0;
   }
-  header h1 { font-size: 14px; margin: 0; font-weight: 700; }
+  header h1 { font-size: 14px; margin: 0; font-weight: 700; white-space: nowrap; }
   #status {
     font-size: 11px; color: var(--text2); flex: 1;
     text-align: right; overflow: hidden; text-overflow: ellipsis;
@@ -51,6 +52,7 @@
   #status.loading { color: var(--warn); }
   #status.error { color: var(--error); }
 
+  /* ============ ТУЛБАР ============ */
   #toolbar {
     display: flex; gap: 6px; padding: 6px 8px;
     background: var(--bg2); border-bottom: 1px solid var(--border);
@@ -70,6 +72,7 @@
   .tb-btn.py-on { background: var(--py); border-color: var(--py); color: black; font-weight: 700; }
   .tb-btn.smart-on { background: var(--math); border-color: var(--math); color: white; font-weight: 700; }
 
+  /* ============ БЫСТРАЯ ПАНЕЛЬ ============ */
   .quick-bar {
     display: flex; gap: 5px; padding: 6px 8px;
     background: var(--bg3); border-bottom: 1px solid var(--border);
@@ -84,6 +87,140 @@
   }
   .quick-btn:active { background: var(--accent); color: white; }
 
+  /* ============ ПАНЕЛЬ ЗАГРУЗКИ ============ */
+  #download-panel {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    flex-shrink: 0;
+  }
+  #download-panel.show {
+    max-height: 300px;
+    padding: 10px 12px;
+  }
+
+  .dl-item {
+    background: var(--bg3);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+  }
+  .dl-item:last-child { margin-bottom: 0; }
+
+  .dl-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .dl-name {
+    font-size: 13px;
+    font-weight: 600;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .dl-percent {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: monospace;
+    min-width: 50px;
+    text-align: right;
+  }
+  .dl-cancel {
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--error);
+    background: transparent;
+    color: var(--error);
+    font-size: 11px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .dl-cancel:active { background: var(--error); color: white; }
+
+  .dl-bar {
+    height: 8px;
+    background: var(--bg);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .dl-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--ok));
+    width: 0%;
+    transition: width 0.3s;
+  }
+
+  .dl-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text2);
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .dl-stats span { white-space: nowrap; }
+
+  .dl-status {
+    font-size: 11px;
+    color: var(--text2);
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--bg);
+    display: inline-block;
+    margin-top: 4px;
+  }
+  .dl-status.done { color: var(--ok); }
+  .dl-status.cancel { color: var(--error); }
+
+  /* ============ ФОНОВЫЙ ИНДИКАТОР ============ */
+  #bg-indicator {
+    position: fixed;
+    top: 60px;
+    right: 10px;
+    background: rgba(22,27,34,0.96);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: var(--text);
+    z-index: 90;
+    display: none;
+    cursor: pointer;
+    max-width: 200px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  }
+  #bg-indicator.show { display: block; }
+  #bg-indicator.pulse {
+    animation: bgPulse 1.5s infinite;
+  }
+  @keyframes bgPulse {
+    0%, 100% { box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    50% { box-shadow: 0 4px 20px rgba(31,111,235,0.6); }
+  }
+  #bg-indicator .bg-name {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
+  #bg-indicator .bg-percent {
+    color: var(--accent);
+    font-family: monospace;
+    font-weight: 700;
+  }
+
+  /* ============ ЧАТ ============ */
   #chat {
     flex: 1; overflow-y: auto; padding: 12px;
     display: flex; flex-direction: column; gap: 12px;
@@ -174,6 +311,7 @@
   }
   .msg-actions button:active { background: var(--border); color: var(--text); }
 
+  /* ============ OCR ============ */
   .ocr-card {
     align-self: stretch; max-width: 100%;
     background: var(--bg2); border: 1px solid var(--border);
@@ -230,6 +368,7 @@
     width: 0%; transition: width 0.2s;
   }
 
+  /* ============ AUTO CARD ============ */
   .auto-card {
     align-self: center; background: rgba(57,211,83,0.1);
     border: 1px solid rgba(57,211,83,0.4); border-radius: 12px;
@@ -238,6 +377,7 @@
   }
   .auto-card b { color: var(--text); }
 
+  /* ============ STATS OVERLAY ============ */
   #stats {
     position: fixed; bottom: 84px; right: 10px;
     background: rgba(22,27,34,0.96); padding: 8px 12px;
@@ -248,6 +388,7 @@
   #stats.show { opacity: 1; }
   #stats b { color: var(--ok); }
 
+  /* ============ POMODORO ============ */
   #pomodoro-panel {
     position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
     background: rgba(22,27,34,0.98); padding: 12px 20px;
@@ -264,6 +405,7 @@
     font-size: 13px; cursor: pointer; margin: 3px;
   }
 
+  /* ============ INPUT ============ */
   #input-area {
     display: flex; gap: 8px; padding: 10px;
     background: var(--bg2); border-top: 1px solid var(--border);
@@ -305,6 +447,7 @@
   }
   #stop.show { display: block; }
 
+  /* ============ PROGRESS ============ */
   #progress {
     position: fixed; top: 0; left: 0; right: 0;
     height: 3px; background: var(--border); z-index: 100; display: none;
@@ -315,6 +458,7 @@
     width: 0%; transition: width 0.3s;
   }
 
+  /* ============ MODALS ============ */
   .modal {
     position: fixed; inset: 0; background: rgba(0,0,0,0.92);
     display: none; z-index: 200; padding: 16px; overflow-y: auto;
@@ -329,6 +473,7 @@
   .modal-content p { font-size: 13px; color: var(--text2); margin: 6px 0; }
   .modal-content p b { color: var(--text); }
 
+  /* ============ MODEL LIST ============ */
   .model-opt {
     padding: 12px; border-radius: 12px; border: 1px solid var(--border);
     background: var(--bg3); margin-bottom: 8px; cursor: pointer;
@@ -337,6 +482,7 @@
   .model-opt:active { transform: scale(0.98); }
   .model-opt.selected { border-color: var(--accent); background: rgba(31,111,235,0.13); }
   .model-opt.cached { border-color: var(--ok); }
+  .model-opt.downloading { border-color: var(--warn); }
   .model-opt .name { font-weight: 600; font-size: 14px; margin-bottom: 5px; padding-right: 70px; }
   .model-opt .meta {
     font-size: 11px; color: var(--text2);
@@ -348,6 +494,11 @@
     font-size: 10px; padding: 3px 8px; border-radius: 6px;
     background: var(--ok); color: black; font-weight: 700;
   }
+  .model-opt .dl-badge {
+    position: absolute; top: 10px; right: 10px;
+    font-size: 10px; padding: 3px 8px; border-radius: 6px;
+    background: var(--warn); color: black; font-weight: 700;
+  }
   .model-opt .lang-badge {
     display: inline-block; font-size: 10px; padding: 2px 7px;
     border-radius: 5px; background: var(--accent); color: white;
@@ -358,6 +509,12 @@
   .model-opt .lang-badge.code { background: #58a6ff; }
   .model-opt .lang-badge.multi { background: #f778ba; color: black; }
   .model-opt .lang-badge.reasoning { background: #d29922; color: black; }
+  .model-opt .lang-badge.vision { background: #bf3989; }
+  .model-opt .lang-badge.heavy { background: #6e7681; }
+  .model-opt .lang-badge.huge { background: #da3633; color: white; }
+  .model-opt .lang-badge.fast { background: #39d353; color: black; }
+  .model-opt .lang-badge.tiny { background: #39d353; color: black; }
+  .model-opt .lang-badge.multi-lang { background: #f778ba; color: black; }
 
   .category-label {
     font-size: 13px; color: var(--text2); margin: 14px 0 8px;
@@ -365,6 +522,7 @@
     display: inline-block; font-weight: 600;
   }
 
+  /* ============ STORAGE ============ */
   .storage-info {
     background: var(--bg); border-radius: 10px; padding: 12px;
     margin-bottom: 14px; font-size: 12px; color: var(--text2);
@@ -376,6 +534,7 @@
     width: 0%; transition: width 0.3s;
   }
 
+  /* ============ CHAT LIST ============ */
   .chat-item {
     padding: 12px; border-radius: 12px; background: var(--bg3);
     margin-bottom: 8px; cursor: pointer; font-size: 14px;
@@ -385,6 +544,7 @@
   .chat-item .title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .chat-item .del { color: var(--error); font-size: 18px; padding: 4px 10px; }
 
+  /* ============ BUTTONS ============ */
   .btn-primary {
     width: 100%; padding: 13px; border-radius: 12px;
     border: none; background: var(--accent); color: white;
@@ -404,6 +564,7 @@
     cursor: pointer; margin-top: 6px;
   }
 
+  /* ============ SETTINGS ============ */
   .settings-row {
     display: flex; justify-content: space-between; align-items: center;
     padding: 10px 0; border-bottom: 1px solid var(--bg3);
@@ -420,6 +581,7 @@
     background: var(--bg3); color: var(--text); font-size: 13px;
   }
 
+  /* ============ DIAG ============ */
   .diag-line { font-size: 12px; padding: 5px 0; border-bottom: 1px solid var(--bg3); }
   .diag-line b { color: var(--text2); font-weight: 500; }
   .ok { color: var(--ok); } .bad { color: var(--error); } .warn-txt { color: var(--warn); }
@@ -432,6 +594,7 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* ============ BENCH ============ */
   .bench-table { width: 100%; font-size: 12px; border-collapse: collapse; margin-top: 12px; }
   .bench-table th {
     text-align: left; padding: 8px 5px;
@@ -443,12 +606,14 @@
   .bench-table .med { color: var(--warn); }
   .bench-table .bad { color: var(--error); }
 
+  /* ============ CAMERA ============ */
   #camera-preview {
     width: 100%; border-radius: 14px; margin-bottom: 12px;
     display: none; background: #000;
   }
   #camera-preview.show { display: block; }
 
+  /* ============ PRESETS ============ */
   .preset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
   .preset-btn {
     padding: 12px; border-radius: 12px;
@@ -459,6 +624,7 @@
   .preset-btn .icon { font-size: 22px; margin-right: 8px; }
   .preset-btn .sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
 
+  /* ============ SKELETON ============ */
   .skeleton {
     display: inline-block; width: 10px; height: 16px;
     background: var(--accent); border-radius: 3px;
@@ -467,7 +633,7 @@
   }
   @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
-  /* Индикатор SymPy */
+  /* ============ SYMPY INDICATOR ============ */
   #sympy-indicator {
     position: fixed; bottom: 84px; left: 10px;
     background: rgba(247,223,30,0.15);
@@ -479,9 +645,25 @@
   #sympy-indicator.show { display: block; }
   #sympy-indicator.ready { color: var(--ok); background: rgba(63,185,80,0.13); border-color: rgba(63,185,80,0.4); }
 
+  /* ============ DOWNLOAD STATS BAR ============ */
+  .dl-overall {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    font-size: 11px;
+    color: var(--text2);
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .dl-overall b { color: var(--accent); }
+
   @media print {
     header, #toolbar, .quick-bar, #input-area, #stats,
-    #pomodoro-panel, #progress, .msg-actions, .ocr-actions, .modal { display: none !important; }
+    #pomodoro-panel, #progress, .msg-actions, .ocr-actions, .modal,
+    #download-panel, #bg-indicator { display: none !important; }
     body { background: white; color: black; }
     #chat { overflow: visible; height: auto; padding: 20px; }
     .msg { max-width: 100%; break-inside: avoid; }
@@ -521,11 +703,23 @@
   <button class="quick-btn" data-p="/steps ">🎯 Пошагово</button>
 </div>
 
+<!-- Панель загрузки -->
+<div id="download-panel">
+  <div class="dl-overall" id="dl-overall"></div>
+  <div id="dl-list"></div>
+</div>
+
+<!-- Фоновый индикатор -->
+<div id="bg-indicator">
+  <span class="bg-name">Загрузка...</span>
+  <span class="bg-percent">0%</span>
+</div>
+
 <div id="chat">
   <div class="msg sys">
     <b>🧠 Умный учебный ИИ</b><br>
-    🐍 SymPy · 🎯 Self-consistency · ✅ Верификация<br>
-    📷 OCR · 🎤 Голос · 📚 8 класс · 🇷🇺 Русский
+    🎯 Авто-выбор · 🐍 SymPy · 🧠 Self-consistency<br>
+    📷 OCR · 🎤 Голос · 📚 50+ моделей · ⏹ Отмена загрузки
   </div>
 </div>
 
@@ -557,13 +751,7 @@
   <div class="modal-content">
     <h2>📦 Модели</h2>
     <div id="storage-info" class="storage-info"><span class="spinner"></span>Проверка...</div>
-    <p style="font-size:12px;">Бейджи: <span class="model-opt" style="display:inline-block;padding:0;margin:0;border:none;background:none;">
-      <span class="lang-badge rus">RUS</span>
-      <span class="lang-badge math">MATH</span>
-      <span class="lang-badge code">CODE</span>
-      <span class="lang-badge multi">MULTI</span>
-      <span class="lang-badge reasoning">THINK</span>
-    </span></p>
+    <p style="font-size:12px;">Бейджи языков: <span class="lang-badge rus">RUS</span> <span class="lang-badge math">MATH</span> <span class="lang-badge code">CODE</span> <span class="lang-badge multi">MULTI</span> <span class="lang-badge reasoning">THINK</span></p>
     <div id="model-list"></div>
     <button class="btn-secondary" onclick="autoSelectBest()">🎯 Подобрать под RAM</button>
     <button class="btn-secondary" onclick="clearModelCache()">🗑 Очистить кэш</button>
@@ -734,6 +922,245 @@
 import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
 // ============================================================
+// === СИСТЕМА ОТМЕНЫ ЗАГРУЗКИ И ФОНОВЫХ ЗАГРУЗОК ===
+// ============================================================
+const downloadManager = {
+  // Хранит активные загрузки: id → {modelKey, abortController, progress, status}
+  active: new Map(),
+  // История: id → результат
+  history: [],
+  nextId: 1,
+  // Глобальный abort для текущей загрузки через WebLLM
+  currentAbort: null,
+
+  // Начать загрузку (в фоне)
+  start(modelKey, onProgress, onDone, onError, onCancel) {
+    const id = 'dl_' + (this.nextId++);
+    const abortController = new AbortController();
+
+    const entry = {
+      id,
+      modelKey,
+      modelName: MODELS[modelKey]?.name || modelKey,
+      size: MODELS[modelKey]?.size || '?',
+      progress: 0,
+      status: 'loading',
+      startedAt: Date.now(),
+      bytesDownloaded: 0,
+      totalBytes: 0,
+      speed: 0,
+      eta: 0,
+      lastUpdate: Date.now(),
+      lastBytes: 0,
+      abortController,
+      onProgress,
+      onDone,
+      onError,
+      onCancel,
+    };
+
+    this.active.set(id, entry);
+    this.renderPanel();
+    this.showBgIndicator(entry);
+
+    return entry;
+  },
+
+  // Обновить прогресс
+  update(id, progress, extra) {
+    const e = this.active.get(id);
+    if (!e) return;
+    const now = Date.now();
+    const dt = (now - e.lastUpdate) / 1000;
+    const bytesDelta = (extra?.bytesDownloaded || 0) - e.lastBytes;
+
+    if (dt > 0.5) {
+      e.speed = bytesDelta / dt; // bytes/sec
+      e.lastUpdate = now;
+      e.lastBytes = extra?.bytesDownloaded || 0;
+    }
+
+    e.progress = progress;
+    if (extra) {
+      e.bytesDownloaded = extra.bytesDownloaded || e.bytesDownloaded;
+      e.totalBytes = extra.totalBytes || e.totalBytes;
+    }
+
+    if (e.speed > 0 && e.totalBytes > 0) {
+      const remainingBytes = e.totalBytes - e.bytesDownloaded;
+      e.eta = remainingBytes / e.speed;
+    }
+
+    this.renderPanel();
+    this.updateBgIndicator(e);
+    if (e.onProgress) e.onProgress(e);
+  },
+
+  // Отменить загрузку
+  cancel(id) {
+    const e = this.active.get(id);
+    if (!e) return;
+
+    e.status = 'cancel';
+    e.abortController.abort();
+
+    // Прерываем WebLLM
+    if (this.currentAbort === id) {
+      try {
+        if (window._currentEngineLoad && window._currentEngineLoad.abort) {
+          window._currentEngineLoad.abort();
+        }
+      } catch (err) {}
+      this.currentAbort = null;
+    }
+
+    this.active.delete(id);
+    this.history.push({ ...e, endedAt: Date.now() });
+    this.renderPanel();
+
+    if (e.onCancel) e.onCancel(e);
+    addMessage('warn', `⏹ Загрузка ${e.modelName} отменена пользователем`);
+  },
+
+  // Завершить успешно
+  done(id, engine) {
+    const e = this.active.get(id);
+    if (!e) return;
+    e.status = 'done';
+    this.active.delete(id);
+    this.history.push({ ...e, endedAt: Date.now() });
+    this.renderPanel();
+    this.hideBgIndicatorIfEmpty();
+    if (e.onDone) e.onDone(engine, e);
+  },
+
+  // Завершить с ошибкой
+  error(id, err) {
+    const e = this.active.get(id);
+    if (!e) return;
+    e.status = 'error';
+    e.errorMessage = err?.message || 'Unknown error';
+    this.active.delete(id);
+    this.history.push({ ...e, endedAt: Date.now() });
+    this.renderPanel();
+    this.hideBgIndicatorIfEmpty();
+    if (e.onError) e.onError(err, e);
+  },
+
+  // Отрисовка панели
+  renderPanel() {
+    const panel = $('download-panel');
+    const list = $('dl-list');
+    const overall = $('dl-overall');
+
+    const active = Array.from(this.active.values());
+
+    if (active.length === 0) {
+      panel.classList.remove('show');
+      setTimeout(() => {
+        list.innerHTML = '';
+        overall.innerHTML = '';
+      }, 300);
+      return;
+    }
+
+    panel.classList.add('show');
+
+    // Итоговая строка
+    const totalSpeed = active.reduce((s, e) => s + (e.speed || 0), 0);
+    const totalBytes = active.reduce((s, e) => s + (e.bytesDownloaded || 0), 0);
+    const totalSize = active.reduce((s, e) => s + (e.totalBytes || 0), 0);
+
+    overall.innerHTML = `
+      <span>📥 Активных загрузок: <b>${active.length}</b></span>
+      <span>💾 Скачано: <b>${fmtBytes(totalBytes)}</b>${totalSize ? ' / ' + fmtBytes(totalSize) : ''}</span>
+      <span>⚡ Скорость: <b>${formatSpeed(totalSpeed)}</b></span>
+    `;
+
+    // Список
+    list.innerHTML = active.map(e => {
+      const pct = Math.round(e.progress * 100);
+      const speed = formatSpeed(e.speed || 0);
+      const eta = e.eta > 0 ? formatTime(e.eta) : '—';
+      const downloaded = fmtBytes(e.bytesDownloaded || 0);
+      const total = e.totalBytes ? fmtBytes(e.totalBytes) : e.size;
+
+      return `
+        <div class="dl-item" data-id="${e.id}">
+          <div class="dl-head">
+            <div class="dl-name">${escapeHtml(e.modelName)}</div>
+            <div class="dl-percent">${pct}%</div>
+            <button class="dl-cancel" onclick="cancelDownload('${e.id}')">⏹ Отмена</button>
+          </div>
+          <div class="dl-bar">
+            <div class="dl-bar-fill" style="width:${pct}%"></div>
+          </div>
+          <div class="dl-stats">
+            <span>💾 ${downloaded} / ${total}</span>
+            <span>⚡ ${speed}</span>
+            <span>⏱ ~${eta}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  // Фоновый индикатор
+  showBgIndicator(entry) {
+    const ind = $('bg-indicator');
+    ind.classList.add('show', 'pulse');
+    this.updateBgIndicator(entry);
+  },
+
+  updateBgIndicator(entry) {
+    const ind = $('bg-indicator');
+    const active = Array.from(this.active.values());
+    if (active.length === 0) {
+      ind.classList.remove('show', 'pulse');
+      return;
+    }
+    const e = active[0];
+    const pct = Math.round(e.progress * 100);
+    ind.querySelector('.bg-name').textContent = active.length > 1
+      ? `${active.length} загрузок` : e.modelName;
+    ind.querySelector('.bg-percent').textContent = pct + '%';
+    ind.classList.add('show', 'pulse');
+  },
+
+  hideBgIndicatorIfEmpty() {
+    if (this.active.size === 0) {
+      $('bg-indicator').classList.remove('show', 'pulse');
+    }
+  },
+
+  cancelAll() {
+    for (const id of Array.from(this.active.keys())) {
+      this.cancel(id);
+    }
+  },
+};
+
+// Утилиты форматирования
+function formatSpeed(bytesPerSec) {
+  if (!bytesPerSec || bytesPerSec < 1) return '—';
+  if (bytesPerSec < 1024) return bytesPerSec.toFixed(0) + ' B/s';
+  if (bytesPerSec < 1048576) return (bytesPerSec / 1024).toFixed(1) + ' KB/s';
+  return (bytesPerSec / 1048576).toFixed(2) + ' MB/s';
+}
+
+function formatTime(seconds) {
+  if (!seconds || seconds < 0) return '—';
+  if (seconds < 60) return Math.round(seconds) + ' с';
+  if (seconds < 3600) return Math.round(seconds / 60) + ' мин';
+  return Math.round(seconds / 3600) + ' ч ' + Math.round((seconds % 3600) / 60) + ' мин';
+}
+
+// Глобальная функция отмены (для onclick в HTML)
+window.cancelDownload = function(id) {
+  downloadManager.cancel(id);
+};
+
+// ============================================================
 // === PYODIDE + SYMPY ===
 // ============================================================
 let pyodide = null;
@@ -772,7 +1199,6 @@ async function loadPyodide() {
 async function sympyEval(code) {
   if (!sympyReady) throw new Error('SymPy не загружен');
   try {
-    // Оборачиваем для безопасного вычисления
     const fullCode = `
 import sympy as sp
 from sympy import *
@@ -800,14 +1226,13 @@ function looksLikeMath(text) {
     /\b\d+x\s*[+\-=]/i,
     /[a-zA-Z]\s*=\s*/,
     /\b(реши|вычисли|найди|упрости|разложи|докажи)\b/i,
-    /\b(уравнение|дискриминант|теорема|пифагор|виет|производная|интеграл)\b/i,
+    /\b(уравнение|дискриминант|теорема|пифагор|виет)\b/i,
     /\b\d+\s*%\s*от\b/i,
   ];
   return patterns.some(p => p.test(text));
 }
 
 function extractEquation(text) {
-  // Пытаемся найти уравнение в тексте
   const patterns = [
     /([a-z]\s*[\^²³]?\s*[+\-]?\s*\d*\s*[a-z]?\s*[+\-]?\s*\d*\s*=\s*\d+)/i,
     /(\d+x\s*[+\-]\s*\d+\s*=\s*\d+)/,
@@ -826,27 +1251,17 @@ function extractEquation(text) {
 // ============================================================
 const FORMULA_8 = {
   'квадратное уравнение': 'ax² + bx + c = 0; D = b² − 4ac; x = (−b ± √D) / 2a',
-  'дискриминант': 'D = b² − 4ac. Если D > 0 — 2 корня, D = 0 — 1 корень, D < 0 — нет корней',
+  'дискриминант': 'D = b² − 4ac. D > 0 — 2 корня, D = 0 — 1, D < 0 — нет',
   'теорема виета': 'x₁ + x₂ = −b/a; x₁ · x₂ = c/a',
-  'теорема пифагора': 'c² = a² + b², где c — гипотенуза, a и b — катеты',
-  'площадь треугольника': 'S = ½ · a · h (через основание и высоту)',
+  'теорема пифагора': 'c² = a² + b², c — гипотенуза',
+  'площадь треугольника': 'S = ½ · a · h',
   'площадь прямоугольника': 'S = a · b',
-  'периметр прямоугольника': 'P = 2(a + b)',
-  'проценты': 'x% от числа a = a · x / 100',
-  'степени': 'aᵐ · aⁿ = aᵐ⁺ⁿ; aᵐ / aⁿ = aᵐ⁻ⁿ; (aᵐ)ⁿ = aᵐⁿ',
-  'корни': '√(a²b) = a√b; √a · √b = √(ab); √a / √b = √(a/b)',
-  'линейная функция': 'y = kx + b, где k — угловой коэффициент',
-  'подобие треугольников': 'Отношение сторон подобных треугольников равно коэффициенту подобия',
+  'проценты': 'x% от a = a · x / 100',
+  'степени': 'aᵐ · aⁿ = aᵐ⁺ⁿ',
+  'корни': '√(a²b) = a√b',
+  'линейная функция': 'y = kx + b',
+  'подобие': 'Отношение сторон равно коэффициенту подобия',
 };
-
-function findFormulas(text) {
-  const lower = text.toLowerCase();
-  const found = [];
-  for (const [key, value] of Object.entries(FORMULA_8)) {
-    if (lower.includes(key)) found.push({ name: key, formula: value });
-  }
-  return found;
-}
 
 // ============================================================
 // === OCR ===
@@ -917,10 +1332,17 @@ async function loadMammoth() {
 }
 
 // ============================================================
-// === МОДЕЛИ С ЯЗЫКАМИ ===
+// === МОДЕЛИ ===
 // ============================================================
 const MODELS = {
-  // БЫСТРЫЕ
+  // 🚀 Быстрые
+  "smol360": {
+    id: "SmolLM2-360M-Instruct-q4f16_1-MLC",
+    name: "SmolLM2 360M", size: "250 MB", ram: "~600 MB", speed: "25–40",
+    category: "🚀 Быстрые", quality: 1,
+    langs: ["eng"], langsLabel: "Английский",
+    tags: ["fast"],
+  },
   "qwen05": {
     id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
     name: "Qwen2.5 0.5B", size: "350 MB", ram: "~800 MB", speed: "18–28",
@@ -932,17 +1354,31 @@ const MODELS = {
     id: "Qwen3-0.6B-q4f16_1-MLC",
     name: "Qwen3 0.6B", size: "400 MB", ram: "~900 MB", speed: "15–25",
     category: "🚀 Быстрые", quality: 2,
-    langs: ["rus", "eng", "multi", "reasoning"],
-    langsLabel: "Русский, английский, thinking",
+    langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, thinking",
     tags: ["fast", "rus"],
   },
+  "qwen05_math": {
+    id: "Qwen2.5-Math-0.5B-Instruct-q4f16_1-MLC",
+    name: "Qwen2.5 Math 0.5B", size: "400 MB", ram: "~800 MB", speed: "15–25",
+    category: "🚀 Быстрые", quality: 2,
+    langs: ["eng", "math"], langsLabel: "⚠️ Английский + формулы",
+    tags: ["fast", "math"],
+  },
+  "qwen05_coder": {
+    id: "Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC",
+    name: "Qwen2.5 Coder 0.5B", size: "400 MB", ram: "~800 MB", speed: "15–25",
+    category: "🚀 Быстрые", quality: 2,
+    langs: ["eng", "code"], langsLabel: "Английский + код",
+    tags: ["fast", "code"],
+  },
 
-  // ОПТИМУМ
+  // ⚖️ Оптимум
   "qwen15": {
     id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
     name: "Qwen2.5 1.5B ⭐", size: "1 GB", ram: "~2 GB", speed: "8–14",
     category: "⚖️ Оптимум", default: true, quality: 4,
-    langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, татарский, 29 языков",
+    langs: ["rus", "eng", "multi"],
+    langsLabel: "Русский, английский, татарский, 29 языков",
     tags: ["text", "rus", "math-ok"],
   },
   "qwen3_17": {
@@ -950,64 +1386,103 @@ const MODELS = {
     name: "Qwen3 1.7B", size: "1.1 GB", ram: "~2.1 GB", speed: "7–12",
     category: "⚖️ Оптимум", quality: 4,
     langs: ["rus", "eng", "multi", "reasoning"],
-    langsLabel: "Русский, английский, thinking",
+    langsLabel: "Русский, английский, thinking mode",
     tags: ["text", "rus", "reasoning"],
   },
   "llama1b": {
     id: "Llama-3.2-1B-Instruct-q4f16_1-MLC",
     name: "Llama 3.2 1B", size: "700 MB", ram: "~1.5 GB", speed: "12–18",
     category: "⚖️ Оптимум", quality: 3,
-    langs: ["eng"], langsLabel: "Английский (рус слабо)",
+    langs: ["eng"], langsLabel: "Английский",
     tags: ["text"],
   },
   "smol17": {
     id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC",
     name: "SmolLM2 1.7B", size: "1 GB", ram: "~2 GB", speed: "7–12",
     category: "⚖️ Оптимум", quality: 3,
-    langs: ["eng"], langsLabel: "Английский",
+    langs: ["eng"], langsLabel: "Английский, хорошо пишет",
+    tags: ["text", "code"],
+  },
+  "stable16": {
+    id: "StableLM-2-1.6B-q4f16_1-MLC",
+    name: "StableLM 2 1.6B", size: "1 GB", ram: "~2 GB", speed: "7–12",
+    category: "⚖️ Оптимум", quality: 3,
+    langs: ["eng"], langsLabel: "Английский, нейтральная",
     tags: ["text"],
   },
+  "gemma2b": {
+    id: "gemma-2-2b-it-q4f16_1-MLC",
+    name: "Gemma 2 2B", size: "1.5 GB", ram: "~3 GB", speed: "4–7",
+    category: "⚖️ Оптимум", quality: 4,
+    langs: ["rus", "eng", "multi"],
+    langsLabel: "Русский, английский, 140 языков",
+    tags: ["text", "rus"],
+  },
+  "phi2": {
+    id: "Phi-2-q4f16_1-MLC",
+    name: "Phi-2 (2.7B)", size: "1.5 GB", ram: "~3 GB", speed: "4–7",
+    category: "⚖️ Оптимум", quality: 4,
+    langs: ["eng"], langsLabel: "Английский, логика",
+    tags: ["text", "math"],
+  },
 
-  // МАТЕМАТИКА (8 класс)
+  // 🧮 Математика
   "qwen_math15": {
     id: "Qwen2.5-Math-1.5B-Instruct-q4f16_1-MLC",
     name: "Qwen2.5 Math 1.5B 🧮", size: "1 GB", ram: "~2 GB", speed: "8–12",
     category: "🧮 Математика", quality: 4,
-    langs: ["eng", "math"], langsLabel: "⚠️ Английский + формулы (рус плохо)",
+    langs: ["eng", "math"],
+    langsLabel: "⚠️ Английский + формулы (рус плохо!)",
     tags: ["math"],
-    warn: "На русском отвечает мусором. Используй ТОЛЬКО для формул: 'x^2+5x+6=0'",
+    warn: "На русском отвечает мусором. Только для формул.",
   },
   "deepseek_r1": {
     id: "DeepSeek-R1-Distill-Qwen-1.5B-q4f16_1-MLC",
     name: "DeepSeek R1 1.5B 🧠", size: "1 GB", ram: "~2 GB", speed: "6–10",
     category: "🧮 Математика", quality: 4,
-    langs: ["rus", "eng", "reasoning"], langsLabel: "Русский, английский, рассуждения",
+    langs: ["rus", "eng", "reasoning"],
+    langsLabel: "Русский, английский, chain-of-thought",
+    tags: ["math", "reasoning"],
+  },
+  "phi35": {
+    id: "Phi-3.5-mini-instruct-q4f16_1-MLC",
+    name: "Phi-3.5 Mini (3.8B)", size: "2.2 GB", ram: "~4 GB", speed: "2–4",
+    category: "🧮 Математика", quality: 5,
+    langs: ["eng"], langsLabel: "Английский, математика отличная",
     tags: ["math", "reasoning"],
   },
 
-  // КОД
+  // 💻 Код
   "qwen_coder15": {
     id: "Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC",
     name: "Qwen2.5 Coder 1.5B 💻", size: "1 GB", ram: "~2 GB", speed: "8–12",
     category: "💻 Код", quality: 4,
-    langs: ["eng", "code"], langsLabel: "Английский + код",
+    langs: ["eng", "code"], langsLabel: "Английский + Python/JS",
+    tags: ["code"],
+  },
+  "qwen_coder3b": {
+    id: "Qwen2.5-Coder-3B-Instruct-q4f16_1-MLC",
+    name: "Qwen2.5 Coder 3B", size: "2 GB", ram: "~3.5 GB", speed: "3–5",
+    category: "💻 Код", quality: 5,
+    langs: ["eng", "code"], langsLabel: "Английский + серьёзный код",
+    tags: ["code"],
+  },
+  "deepseek_coder15": {
+    id: "DeepSeek-Coder-1.3B-Instruct-q4f16_1-MLC",
+    name: "DeepSeek Coder 1.3B", size: "900 MB", ram: "~1.8 GB", speed: "10–14",
+    category: "💻 Код", quality: 4,
+    langs: ["eng", "code"], langsLabel: "Английский, код",
     tags: ["code"],
   },
 
-  // УМНЫЕ
+  // 🧠 Умные
   "qwen3b": {
     id: "Qwen2.5-3B-Instruct-q4f16_1-MLC",
     name: "Qwen2.5 3B 🔥", size: "2 GB", ram: "~3.5 GB", speed: "3–5",
     category: "🧠 Умные", quality: 5,
-    langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, 29 языков — ЛУЧШИЙ для 8 класса",
+    langs: ["rus", "eng", "multi"],
+    langsLabel: "Русский, английский, 29 языков — ЛУЧШАЯ для 8 класса",
     tags: ["text", "rus", "math-best"],
-  },
-  "gemma2b": {
-    id: "gemma-2-2b-it-q4f16_1-MLC",
-    name: "Gemma 2 2B", size: "1.5 GB", ram: "~3 GB", speed: "4–7",
-    category: "🧠 Умные", quality: 4,
-    langs: ["rus", "eng", "multi"], langsLabel: "Русский, английский, 140 языков",
-    tags: ["text", "rus"],
   },
   "llama3b": {
     id: "Llama-3.2-3B-Instruct-q4f16_1-MLC",
@@ -1016,12 +1491,112 @@ const MODELS = {
     langs: ["eng"], langsLabel: "Английский",
     tags: ["text"],
   },
-  "phi35": {
-    id: "Phi-3.5-mini-instruct-q4f16_1-MLC",
-    name: "Phi-3.5 Mini (3.8B)", size: "2.2 GB", ram: "~4 GB", speed: "2–4",
+  "redpajama3b": {
+    id: "RedPajama-INCITE-Chat-3B-v1-q4f16_1-MLC",
+    name: "RedPajama 3B", size: "2 GB", ram: "~3.5 GB", speed: "3–5",
+    category: "🧠 Умные", quality: 4,
+    langs: ["eng"], langsLabel: "Английский, открытая",
+    tags: ["text"],
+  },
+  "qwen7b": {
+    id: "Qwen2.5-7B-Instruct-q4f16_1-MLC",
+    name: "Qwen2.5 7B", size: "4.5 GB", ram: "~7 GB", speed: "0.5–1.5",
     category: "🧠 Умные", quality: 5,
-    langs: ["eng"], langsLabel: "Английский (математика отличная)",
-    tags: ["text", "math-eng"],
+    langs: ["rus", "eng", "multi"], langsLabel: "Топ 29 языков (12+ GB)",
+    tags: ["text", "rus", "heavy"],
+  },
+  "mistral7b": {
+    id: "Mistral-7B-Instruct-v0.3-q4f16_1-MLC",
+    name: "Mistral 7B", size: "4.5 GB", ram: "~7 GB", speed: "0.5–1.5",
+    category: "🧠 Умные", quality: 5,
+    langs: ["eng", "multi"], langsLabel: "Европейские языки (12+ GB)",
+    tags: ["text", "heavy"],
+  },
+  "llama31_8b": {
+    id: "Llama-3.1-8B-Instruct-q4f16_1-MLC",
+    name: "Llama 3.1 8B", size: "4.9 GB", ram: "~7.5 GB", speed: "0.5–1.2",
+    category: "🧠 Умные", quality: 5,
+    langs: ["eng"], langsLabel: "Топ качество (12+ GB)",
+    tags: ["text", "heavy"],
+  },
+  "gemma9b": {
+    id: "gemma-2-9b-it-q4f16_1-MLC",
+    name: "Gemma 2 9B", size: "5.5 GB", ram: "~8 GB", speed: "0.4–1",
+    category: "🧠 Умные", quality: 5,
+    langs: ["eng", "multi"], langsLabel: "140 языков (16+ GB)",
+    tags: ["text", "heavy"],
+  },
+
+  // 🔬 Reasoning
+  "qwen3_4b": {
+    id: "Qwen3-4B-q4f16_1-MLC",
+    name: "Qwen3 4B", size: "2.5 GB", ram: "~4 GB", speed: "2–3",
+    category: "🔬 Reasoning", quality: 4,
+    langs: ["rus", "eng", "reasoning"],
+    langsLabel: "Русский, английский, thinking mode",
+    tags: ["reasoning"],
+  },
+  "deepseek_r1_14b": {
+    id: "DeepSeek-R1-Distill-Qwen-14B-q4f16_1-MLC",
+    name: "DeepSeek R1 14B", size: "9 GB", ram: "~14 GB", speed: "0.3–0.8",
+    category: "🔬 Reasoning", quality: 5,
+    langs: ["rus", "eng", "reasoning"], langsLabel: "Reasoning (только ПК)",
+    tags: ["reasoning", "heavy"],
+  },
+  "qwen_qwq": {
+    id: "QwQ-32B-Preview-q4f16_1-MLC",
+    name: "QwQ 32B Preview", size: "18 GB", ram: "~24 GB", speed: "<0.3",
+    category: "🔬 Reasoning", quality: 5,
+    langs: ["eng", "reasoning"], langsLabel: "Топ reasoning (только ПК)",
+    tags: ["reasoning", "huge"],
+  },
+
+  // 👁️ Vision
+  "phi35v": {
+    id: "Phi-3.5-vision-instruct-q4f16_1-MLC",
+    name: "Phi-3.5 Vision 👁️", size: "3.5 GB", ram: "~5.5 GB", speed: "0.3–1",
+    category: "👁️ Vision", quality: 5,
+    langs: ["eng"], langsLabel: "Английский + картинки",
+    tags: ["vision", "heavy"],
+  },
+  "qwen2vl_2b": {
+    id: "Qwen2-VL-2B-Instruct-q4f16_1-MLC",
+    name: "Qwen2-VL 2B", size: "2 GB", ram: "~3.5 GB", speed: "2–4",
+    category: "👁️ Vision", quality: 4,
+    langs: ["rus", "eng"], langsLabel: "Русский, английский, картинки",
+    tags: ["vision"],
+  },
+
+  // 🌐 Мультиязычные
+  "aya_8b": {
+    id: "Aya-23-8B-q4f16_1-MLC",
+    name: "Aya 23 8B", size: "4.9 GB", ram: "~7.5 GB", speed: "0.5–1.2",
+    category: "🌐 Мультиязычные", quality: 5,
+    langs: ["multi"], langsLabel: "101 язык (12+ GB)",
+    tags: ["text", "multi-lang", "heavy"],
+  },
+  "bloom3b": {
+    id: "BLOOM-3B-q4f16_1-MLC",
+    name: "BLOOM 3B", size: "2 GB", ram: "~3.5 GB", speed: "3–5",
+    category: "🌐 Мультиязычные", quality: 3,
+    langs: ["multi"], langsLabel: "46 языков",
+    tags: ["text", "multi-lang"],
+  },
+
+  // 🖥️ Только ПК
+  "llama31_70b": {
+    id: "Llama-3.1-70B-Instruct-q4f16_1-MLC",
+    name: "Llama 3.1 70B", size: "40 GB", ram: "~48 GB", speed: "<0.1",
+    category: "🖥️ Только ПК", quality: 5,
+    langs: ["eng"], langsLabel: "Топ (только сервер)",
+    tags: ["huge"],
+  },
+  "qwen72b": {
+    id: "Qwen2.5-72B-Instruct-q4f16_1-MLC",
+    name: "Qwen2.5 72B", size: "42 GB", ram: "~50 GB", speed: "<0.1",
+    category: "🖥️ Только ПК", quality: 5,
+    langs: ["rus", "eng", "multi"], langsLabel: "Топ 29 языков (только сервер)",
+    tags: ["huge"],
   },
 };
 
@@ -1031,52 +1606,57 @@ const MODELS = {
 const PRESETS = {
   math: {
     icon: '🧮', name: 'Математика 8 кл.', sub: 'Уравнения, геометрия',
-    system: 'Ты учитель математики 8 класса. Решай пошагово, объясняй каждый шаг. Используй LaTeX для формул. Отвечай ТОЛЬКО на русском языке.',
+    system: 'Ты учитель математики 8 класса. Решай пошагово. LaTeX. Только русский.',
     model: 'qwen3b',
   },
   geometry: {
     icon: '📏', name: 'Геометрия', sub: 'Пифагор, подобие',
-    system: 'Ты учитель геометрии. Используй теорему Пифагора, подобие треугольников. Рисуй словами, объясняй пошагово. Только русский.',
+    system: 'Ты учитель геометрии. Теорема Пифагора, подобие. Только русский.',
     model: 'qwen3b',
   },
   rus: {
-    icon: '🇷🇺', name: 'Русский язык', sub: 'Орфография, пунктуация',
-    system: 'Ты учитель русского языка. Проверяй орфографию, пунктуацию, стиль. Объясняй правила. Отвечай ТОЛЬКО на русском.',
+    icon: '🇷🇺', name: 'Русский язык', sub: 'Орфография',
+    system: 'Ты учитель русского языка. Проверяй орфографию, пунктуацию. Только русский.',
     model: 'qwen15',
   },
   phys: {
-    icon: '⚛️', name: 'Физика', sub: 'Задачи 8 класса',
-    system: 'Ты учитель физики 8 класса. Указывай единицы измерения, проверяй размерность. LaTeX. Только русский.',
+    icon: '⚛️', name: 'Физика', sub: 'Задачи',
+    system: 'Ты учитель физики. Единицы, размерность. LaTeX. Только русский.',
     model: 'qwen3b',
   },
   chem: {
-    icon: '🧪', name: 'Химия', sub: 'Реакции, задачи',
-    system: 'Ты учитель химии. Балансируй уравнения, объясняй механизмы. Только русский.',
+    icon: '🧪', name: 'Химия', sub: 'Реакции',
+    system: 'Ты учитель химии. Балансируй уравнения. Только русский.',
     model: 'qwen15',
   },
   hist: {
-    icon: '📜', name: 'История', sub: 'Даты, события',
-    system: 'Ты учитель истории. Структурируй: причины, события, последствия. Даты и персоналии. Только русский.',
+    icon: '📜', name: 'История', sub: 'Даты',
+    system: 'Ты учитель истории. Причины, события, последствия. Только русский.',
     model: 'qwen15',
   },
   lang: {
     icon: '🌐', name: 'Языки', sub: 'Перевод',
-    system: 'Ты преподаватель языков. Переводи точно, объясняй грамматику.',
+    system: 'Ты преподаватель языков. Переводи точно.',
     model: 'qwen15',
   },
+  code: {
+    icon: '💻', name: 'Код', sub: 'Python',
+    system: 'Ты программист. Пиши код с комментариями.',
+    model: 'qwen_coder15',
+  },
   teacher: {
-    icon: '👨‍🏫', name: 'Учитель', sub: 'Наводящие вопросы',
-    system: 'Ты учитель-наставник. НЕ давай готовый ответ. Задавай наводящие вопросы, веди ученика. Только русский.',
+    icon: '👨‍🏫', name: 'Учитель', sub: 'Наводящие',
+    system: 'Ты учитель. НЕ давай ответ. Задавай вопросы. Только русский.',
     model: 'qwen15',
   },
   examiner: {
     icon: '📝', name: 'Экзамен', sub: 'Тесты',
-    system: 'Ты экзаменатор. Задавай вопросы, оценивай, объясняй ошибки. Только русский.',
+    system: 'Ты экзаменатор. Задавай, оценивай, объясняй. Русский.',
     model: 'qwen15',
   },
   summary: {
     icon: '📄', name: 'Конспект', sub: 'Сжатие',
-    system: 'Делай конспект: заголовки, тезисы, формулы. Только русский.',
+    system: 'Делай конспект: заголовки, тезисы, формулы. Русский.',
     model: 'qwen15',
   },
 };
@@ -1149,14 +1729,14 @@ let SETTINGS = loadSettings();
 
 function loadSettings() {
   try {
-    const raw = localStorage.getItem('ai-settings-v10');
+    const raw = localStorage.getItem('ai-settings-v11');
     if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
   } catch (e) {}
   return { ...DEFAULT_SETTINGS };
 }
 
 function saveSettings() {
-  try { localStorage.setItem('ai-settings-v10', JSON.stringify(SETTINGS)); } catch (e) {}
+  try { localStorage.setItem('ai-settings-v11', JSON.stringify(SETTINGS)); } catch (e) {}
 }
 
 function applySettings() {
@@ -1194,7 +1774,8 @@ function fmtNum(n, d) {
   return Number(n).toFixed(d === undefined ? 1 : d);
 }
 function fmtBytes(b) {
-  if (b < 1024) return b + ' B';
+  if (!b || b < 0) return '0 B';
+  if (b < 1024) return b.toFixed(0) + ' B';
   if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
   if (b < 1073741824) return (b / 1048576).toFixed(1) + ' MB';
   return (b / 1073741824).toFixed(2) + ' GB';
@@ -1262,8 +1843,8 @@ function autoResizeInput() {
 
 function updateToolbar() {
   const a = $('btn-auto');
-  if (autoMode) { a.classList.add('auto-on'); a.textContent = '🎯 Авто'; }
-  else { a.classList.remove('auto-on'); a.textContent = '🎯 Авто'; }
+  if (autoMode) a.classList.add('auto-on');
+  else a.classList.remove('auto-on');
 
   const p = $('btn-py');
   if (pyMode) p.classList.add('py-on');
@@ -1281,15 +1862,14 @@ function getSystemPrompt() {
   let langRule = '';
   if (SETTINGS.answerLang === 'rus') {
     langRule = '\n\n⚠️ КРИТИЧНО: Отвечай ТОЛЬКО на русском языке.';
+  } else if (SETTINGS.answerLang === 'eng') {
+    langRule = '\n\n⚠️ Answer ONLY in English.';
   }
 
   const mathRule = '\n\n📐 МАТЕМАТИКА:\n' +
-    '• Все формулы ОБОРАЧИВАЙ в $...$ для inline и $$...$$ для блочных\n' +
-    '• ПРИМЕР ПРАВИЛЬНО: Уравнение $x^2 - 5x + 6 = 0$ имеет корни $x_1 = 2$, $x_2 = 3$\n' +
-    '• ПРИМЕР НЕПРАВИЛЬНО: (x^2 - 5x + 6 = 0) имеет решения (x_1 = 2)\n' +
-    '• НЕ ИСПОЛЬЗУЙ скобки для формул — только $...$\n' +
-    '• Решай ПОШАГОВО, каждый шаг нумеруй\n' +
-    '• В конце выдели **Ответ:** жирным';
+    '• Формулы в $...$ (inline) и $$...$$ (блок)\n' +
+    '• Решай пошагово, каждый шаг нумеруй\n' +
+    '• В конце выдели **Ответ:**';
 
   if (currentPreset !== 'default' && PRESETS[currentPreset]) {
     return PRESETS[currentPreset].system + langRule + mathRule;
@@ -1427,7 +2007,7 @@ function preprocessImage(dataUrl, level) {
 // ============================================================
 // === INDEXEDDB ===
 // ============================================================
-const DB_NAME = 'ai-db-v10';
+const DB_NAME = 'ai-db-v11';
 const DB_VERSION = 1;
 
 function openDB() {
@@ -1642,6 +2222,7 @@ window.clearModelCache = clearModelCache;
 // ============================================================
 async function renderModelList() {
   const cached = await getCachedModels();
+  const downloading = new Set(Array.from(downloadManager.active.values()).map(e => e.modelKey));
   const cats = {};
   Object.entries(MODELS).forEach(([k, m]) => {
     const c = m.category || '📦';
@@ -1652,15 +2233,17 @@ async function renderModelList() {
     <div class="category-label">${c}</div>
     ${ms.map(([k, m]) => {
       const isC = cached.has(k);
+      const isD = downloading.has(k);
       const isS = k === currentModelKey;
       const langBadges = (m.langs || []).map(l => {
-        const cls = l === 'rus' ? 'rus' : l === 'math' ? 'math' : l === 'code' ? 'code' : l === 'multi' ? 'multi' : l === 'reasoning' ? 'reasoning' : '';
+        const cls = l === 'rus' ? 'rus' : l === 'math' ? 'math' : l === 'code' ? 'code' : l === 'multi' ? 'multi' : l === 'reasoning' ? 'reasoning' : l === 'vision' ? 'vision' : '';
         return `<span class="lang-badge ${cls}">${l.toUpperCase()}</span>`;
       }).join('');
       const warnHtml = m.warn ? `<div style="font-size:11px;color:var(--warn);margin-top:6px;padding:6px 8px;background:rgba(210,153,34,0.13);border-radius:6px;">⚠️ ${escapeHtml(m.warn)}</div>` : '';
       return `
-        <div class="model-opt ${isS ? 'selected' : ''} ${isC ? 'cached' : ''}" onclick="switchModel('${k}')">
+        <div class="model-opt ${isS ? 'selected' : ''} ${isC ? 'cached' : ''} ${isD ? 'downloading' : ''}" onclick="switchModel('${k}')">
           ${isC ? '<div class="cached-badge">💾 КЭШ</div>' : ''}
+          ${isD ? '<div class="dl-badge">📥 КАЧАЕТСЯ</div>' : ''}
           <div class="name">${escapeHtml(m.name)}</div>
           <div class="meta">
             <span>💾 ${m.size}</span>
@@ -1690,10 +2273,20 @@ function autoSelectBest() {
 window.autoSelectBest = autoSelectBest;
 
 // ============================================================
-// === ПЕРЕКЛЮЧЕНИЕ МОДЕЛИ ===
+// === ПЕРЕКЛЮЧЕНИЕ МОДЕЛИ (С ФОНОВОЙ ЗАГРУЗКОЙ) ===
 // ============================================================
 async function switchModel(key, reason) {
-  if (isLoading) { alert('Подожди загрузки.'); return; }
+  if (isLoading) {
+    // Модель уже грузится — предложить отменить
+    if (confirm('Другая модель уже загружается. Отменить и загрузить эту?')) {
+      downloadManager.cancelAll();
+      // Дать время на отмену
+      await new Promise(r => setTimeout(r, 500));
+      isLoading = false;
+    } else {
+      return;
+    }
+  }
   if (isGenerating) { alert('Дождись ответа.'); return; }
   if (key === currentModelKey && engine) {
     if (reason) addAutoCard(`<b>🎯 ${reason}</b> — уже ${MODELS[key].name}`);
@@ -1723,7 +2316,7 @@ async function switchModel(key, reason) {
 window.switchModel = switchModel;
 
 // ============================================================
-// === ИНИЦИАЛИЗАЦИЯ МОДЕЛИ ===
+// === ИНИЦИАЛИЗАЦИЯ МОДЕЛИ (ОБНОВЛЕНО С ОТМЕНОЙ) ===
 // ============================================================
 async function initEngine() {
   if (engine) return;
@@ -1733,24 +2326,79 @@ async function initEngine() {
   isLoading = true;
 
   showStatus('Загрузка ' + info.name + '...', 'loading');
-  progressEl.classList.add('show');
-  progressBar.style.width = '0%';
 
   const cached = await getCachedModels();
   const was = cached.has(currentModelKey);
-  addMessage('sys', `Загрузка: ${info.name} (${info.size})`);
-  if (!was) addMessage('warn', '⚠️ Первая загрузка. Дождись 100%.');
+  addMessage('sys', `📥 Загрузка: ${info.name} (${info.size})`);
+
+  // Проверяем — уже качается?
+  const existing = Array.from(downloadManager.active.values()).find(e => e.modelKey === currentModelKey);
+  if (existing) {
+    addMessage('warn', '⚠️ Эта модель уже загружается');
+    isLoading = false;
+    return;
+  }
+
+  const dlEntry = downloadManager.start(
+    currentModelKey,
+    // onProgress
+    (e) => {
+      const pct = Math.round(e.progress * 100);
+      showStatus(`${info.name}: ${pct}% · ${formatSpeed(e.speed)} · ~${formatTime(e.eta)}`, 'loading');
+    },
+    // onDone
+    (eng, e) => {
+      // будет вызван после успешной загрузки
+    },
+    // onError
+    (err, e) => {
+      showStatus('Ошибка', 'error');
+      addMessage('error', '❌ Ошибка загрузки: ' + err.message);
+      engine = null;
+      isLoading = false;
+    },
+    // onCancel
+    (e) => {
+      showStatus('Отменено', 'error');
+      addMessage('warn', `⏹ Загрузка ${e.modelName} отменена`);
+      engine = null;
+      isLoading = false;
+    }
+  );
+
+  downloadManager.currentAbort = dlEntry.id;
 
   const t0 = nowSec();
-  let last = -1;
+  let lastPct = -1;
 
   try {
+    // Проверка отмены через abortController
+    const checkAbort = () => {
+      if (dlEntry.abortController.signal.aborted) {
+        throw new Error('ABORTED');
+      }
+    };
+
     engine = await webllm.CreateMLCEngine(info.id, {
       initProgressCallback: r => {
-        const p = Math.round(r.progress * 100);
-        progressBar.style.width = p + '%';
-        showStatus(`${info.name}: ${p}%`, 'loading');
-        if (p >= last + 25) { addMessage('sys', `Загрузка ${p}%...`); last = p; }
+        checkAbort();
+
+        const pct = Math.round(r.progress * 100);
+        // Прогресс может быть не только по байтам — WebLLM даёт 0..1
+        // Оцениваем байты: pct% от общего размера
+        const totalBytes = parseFloat(info.size.replace(' MB', '').replace(' GB', '')) *
+          (info.size.includes('GB') ? 1073741824 : 1048576);
+        const bytes = Math.round(totalBytes * r.progress);
+
+        downloadManager.update(dlEntry.id, r.progress, {
+          bytesDownloaded: bytes,
+          totalBytes: totalBytes,
+        });
+
+        if (pct >= lastPct + 10) {
+          showStatus(`${info.name}: ${pct}%`, 'loading');
+          lastPct = pct;
+        }
       },
       context_window_size: SETTINGS.context_window_size,
       prefill_chunk_size: SETTINGS.prefill_chunk_size,
@@ -1758,18 +2406,21 @@ async function initEngine() {
     });
 
     const dt = nowSec() - t0;
+
+    downloadManager.done(dlEntry.id, engine);
+    downloadManager.currentAbort = null;
+
     showStatus(info.name + ' ✅', 'ready');
-    progressBar.style.width = '100%';
-    setTimeout(() => progressEl.classList.remove('show'), 400);
     addMessage('stat', `✅ Загружено за ${fmtNum(dt)}с`);
 
+    // Warmup
     try {
-      addMessage('sys', 'Прогрев...');
+      addMessage('sys', '🔥 Прогрев...');
       await engine.chat.completions.create({
         messages: [{ role: 'user', content: 'ok' }],
         max_tokens: 1, temperature: 0,
       });
-      addMessage('stat', '🔥 Warmup ок');
+      addMessage('stat', '✅ Warmup ок');
     } catch (e) {}
 
     messages = [{ role: 'system', content: getSystemPrompt() }];
@@ -1777,10 +2428,15 @@ async function initEngine() {
     sendBtn.disabled = false;
     inputEl.focus();
   } catch (e) {
-    showStatus('Ошибка', 'error');
-    addMessage('error', 'Ошибка загрузки: ' + e.message);
+    if (e.message === 'ABORTED' || dlEntry.abortController.signal.aborted) {
+      // уже обработано в onCancel
+    } else {
+      downloadManager.error(dlEntry.id, e);
+    }
+    downloadManager.currentAbort = null;
     engine = null;
   }
+
   isLoading = false;
 }
 
@@ -1907,11 +2563,10 @@ async function processImage(imageData, filename) {
     });
 
     addMessage('stat', `OCR: ${fmtNum(dt, 2)}с · ${result.text.length} симв · ${formulas.length} формул`);
-
     showStatus('Готов ✅', 'ready');
 
     if (!result.text || result.text.length < 10) {
-      addMessage('warn', '⚠️ Не удалось распознать текст. Попробуй другое фото.');
+      addMessage('warn', '⚠️ Не удалось распознать текст.');
       return;
     }
 
@@ -2061,9 +2716,9 @@ function parseCommand(text) {
   if (!m) return null;
   const c = m[1].toLowerCase();
   const r = m[2] || '';
-  if (c === 'teacher') return { system: 'Ты учитель. НЕ давай готовый ответ. Задавай наводящие вопросы. Только русский.', prompt: r || 'Помоги', label: '👨‍🏫 Учитель' };
-  if (c === 'check') return { system: 'Проверь решение. Найди ошибки. Только русский.', prompt: r || 'Проверь', label: '✅ Проверка' };
-  if (c === 'explain') return { system: 'Объясни подробно с примерами. Только русский.', prompt: r, label: '📖 Подробно' };
+  if (c === 'teacher') return { system: 'Ты учитель. НЕ давай ответ. Задавай вопросы. Только русский.', prompt: r || 'Помоги', label: '👨‍🏫 Учитель' };
+  if (c === 'check') return { system: 'Проверь решение. Найди ошибки. Русский.', prompt: r || 'Проверь', label: '✅ Проверка' };
+  if (c === 'explain') return { system: 'Объясни подробно с примерами. Русский.', prompt: r, label: '📖 Подробно' };
   if (c === 'short') return { system: 'Отвечай кратко. Русский.', prompt: r, label: '⚡ Кратко' };
   if (c === 'solve' || c === 'equation' || c === 'geometry' || c === 'steps') {
     return { system: getSystemPrompt(), prompt: r || 'Реши', label: '🧮 Математика', forceMath: true };
@@ -2089,8 +2744,7 @@ function detectBestModel(text) {
   const t = text.trim();
 
   if (looksLikeMath(t)) {
-    // НЕ использовать Qwen2.5 Math — она ломается на русском
-    return { model: 'qwen15', reason: 'математика (Qwen 1.5B)' };
+    return { model: 'qwen15', reason: 'математика' };
   }
   if (/\b(код|программ|python|javascript|функци|алгоритм)\b/i.test(t)) {
     return { model: 'qwen_coder15', reason: 'программирование' };
@@ -2132,14 +2786,13 @@ async function askLLM(prompt, overrideSystem, opts) {
   let sys = overrideSystem || getSystemPrompt();
   if (messages[0] && messages[0].role === 'system') messages[0].content = sys;
 
-  // Символьные вычисления через SymPy
+  // SymPy
   let sympyResult = null;
   if (useSymPy) {
     const equation = extractEquation(prompt);
     if (equation) {
       showStatus('🐍 SymPy считает...', 'loading');
       try {
-        // Пытаемся решить как уравнение
         const cleaned = equation.replace(/[^\dx+\-*/^=().,a-z ]/gi, '');
         let code = '';
         if (cleaned.includes('=')) {
@@ -2159,12 +2812,12 @@ async function askLLM(prompt, overrideSystem, opts) {
     }
   }
 
-  // Self-consistency: 3 запроса
+  // Self-consistency
   const nRuns = useConsensus ? SETTINGS.consistency : 1;
   const results = [];
 
   if (nRuns > 1) {
-    addStep(`<b>🎯 Self-consistency:</b> делаю ${nRuns} независимых решений для точности...`);
+    addStep(`<b>🎯 Self-consistency:</b> ${nRuns} независимых решений...`);
   }
 
   for (let run = 0; run < nRuns; run++) {
@@ -2175,27 +2828,20 @@ async function askLLM(prompt, overrideSystem, opts) {
     stopBtn.classList.add('show');
     isGenerating = true;
 
+    const botDiv = addMessage('bot', '');
     if (run === 0) {
-      const botDiv = addMessage('bot', '');
       botDiv.innerHTML = '<span class="skeleton"></span>';
-      results.push({ div: botDiv, text: '', tokens: 0, t0: nowSec(), tFirst: null });
     } else {
-      // Дополнительные варианты — в свёрнутом виде
-      const botDiv = addMessage('bot', '');
       botDiv.style.opacity = '0.6';
       botDiv.style.fontSize = '13px';
       botDiv.innerHTML = `<div style="color:var(--text2);font-size:11px;margin-bottom:6px;">Вариант ${run + 1}:</div><span class="skeleton"></span>`;
-      results.push({ div: botDiv, text: '', tokens: 0, t0: nowSec(), tFirst: null });
     }
+    results.push({ div: botDiv, text: '', tokens: 0, t0: nowSec(), tFirst: null });
 
     const cur = results[results.length - 1];
     let sysForRun = sys;
-    if (sympyResult) {
-      sysForRun += `\n\n🐍 SymPy уже посчитал: ${sympyResult}. Используй этот ответ.`;
-    }
-    if (run > 0) {
-      sysForRun += '\n\nДай независимое решение. Не повторяй предыдущий ответ.';
-    }
+    if (sympyResult) sysForRun += `\n\n🐍 SymPy уже посчитал: ${sympyResult}. Используй этот ответ.`;
+    if (run > 0) sysForRun += '\n\nДай независимое решение.';
 
     const runMessages = [
       { role: 'system', content: sysForRun },
@@ -2224,12 +2870,9 @@ async function askLLM(prompt, overrideSystem, opts) {
         if (autoScroll) chatEl.scrollTop = chatEl.scrollHeight;
       }
     } catch (e) {
-      if (e.name !== 'AbortError') {
-        cur.div.textContent = 'Ошибка: ' + e.message;
-      }
+      if (e.name !== 'AbortError') cur.div.textContent = 'Ошибка: ' + e.message;
     }
 
-    // Рендер markdown
     try {
       const html = await renderMarkdown(cur.text);
       if (run === 0) cur.div.innerHTML = html;
@@ -2244,7 +2887,6 @@ async function askLLM(prompt, overrideSystem, opts) {
   stopBtn.classList.remove('show');
   inputEl.focus();
 
-  // Голосование: выбираем самый похожий
   let finalText = results[0].text;
   if (nRuns > 1 && results.length > 1) {
     const votes = results.map(r => ({ text: r.text, votes: 0 }));
@@ -2259,30 +2901,23 @@ async function askLLM(prompt, overrideSystem, opts) {
       stats.consensusWins++;
       addConsensus(`🎯 <b>Self-consistency:</b> выбрано решение с ${votes[0].votes + 1} совпадениями из ${nRuns}`);
 
-      // Показываем финальный ответ ярко
       const finalDiv = addMessage('bot', '');
       const html = await renderMarkdown(finalText);
       finalDiv.innerHTML = `<div style="color:var(--ok);font-size:11px;margin-bottom:6px;">✅ Консенсусный ответ:</div>` + html;
 
       const ac = document.createElement('div');
       ac.className = 'msg-actions';
-      ac.innerHTML = `<button onclick="copyMsg(this)">📋 Копировать</button>
-                      <button onclick="speakMsg(this)">🔊 Озвучить</button>
-                      <button onclick="regenMsg(this)">🔄 Заново</button>`;
+      ac.innerHTML = `<button onclick="copyMsg(this)">📋</button><button onclick="speakMsg(this)">🔊</button><button onclick="regenMsg(this)">🔄</button>`;
       finalDiv.appendChild(ac);
     }
   } else {
-    // Стандартный рендер
     const div = results[0].div;
     const ac = document.createElement('div');
     ac.className = 'msg-actions';
-    ac.innerHTML = `<button onclick="copyMsg(this)">📋 Копировать</button>
-                    <button onclick="speakMsg(this)">🔊 Озвучить</button>
-                    <button onclick="regenMsg(this)">🔄 Заново</button>`;
+    ac.innerHTML = `<button onclick="copyMsg(this)">📋</button><button onclick="speakMsg(this)">🔊</button><button onclick="regenMsg(this)">🔄</button>`;
     div.appendChild(ac);
   }
 
-  // Статистика
   const totalTokens = results.reduce((s, r) => s + r.tokens, 0);
   const totalTime = results.reduce((s, r) => s + (nowSec() - r.t0), 0);
   const tps = totalTokens / Math.max(totalTime, 0.001);
@@ -2292,14 +2927,9 @@ async function askLLM(prompt, overrideSystem, opts) {
   stats.totalTime += totalTime;
   sessionStats.tokens += totalTokens;
 
-  const tpsStr = fmtNum(tps) + ' т/с';
   const v = tps < 3 ? ' ❌' : tps < 6 ? ' ⚠️' : tps < 10 ? ' ✅' : ' 🚀';
-  const finalStat = document.createElement('div');
-  finalStat.className = 'stat';
-  finalStat.textContent = `${totalTokens} ток · ${tpsStr} · ${nRuns > 1 ? nRuns + ' прогонов · ' : ''}${v}`;
-  chatEl.appendChild(finalStat);
-
-  showStats(`<b>${tpsStr}</b> · ${totalTokens} ток ${v}`);
+  addMessage('stat', `${totalTokens} ток · ${fmtNum(tps)} т/с · ${nRuns > 1 ? nRuns + ' прогонов · ' : ''}${v}`);
+  showStats(`<b>${fmtNum(tps)}</b> т/с · ${totalTokens} ток ${v}`);
 
   messages.push({ role: 'user', content: prompt });
   messages.push({ role: 'assistant', content: finalText });
@@ -2339,7 +2969,6 @@ async function send() {
     return;
   }
 
-  // Роутер
   const route = routeTask(text);
 
   if (autoMode && route === 'CODE' && currentModelKey !== 'qwen_coder15') {
@@ -2350,7 +2979,6 @@ async function send() {
   }
 
   if (autoMode && route === 'MATH' && currentModelKey === 'qwen_math15') {
-    // Не отправляем математику в Math-модель (она ломается на русском)
     addMessage('user', text);
     await switchModel('qwen15', 'математика (переключение с Math)');
     await askLLM(text, null, { forceMath: true });
@@ -2358,12 +2986,10 @@ async function send() {
   }
 
   addMessage('user', text);
-
   let p = text;
   if (lastOCRText && text.length < 200) {
     p = `Ранее распознанный текст:\n${lastOCRText.slice(0, 3000)}\n\nЗапрос: ${text}`;
   }
-
   await askLLM(p, null, { forceMath: route === 'MATH' });
 }
 
@@ -2376,16 +3002,16 @@ function stopGeneration() {
 // ============================================================
 function copyMsg(btn) {
   const m = btn.closest('.msg');
-  const t = m.textContent.replace(/📋 Копировать|🔊 Озвучить|🔄 Заново/g, '').trim();
+  const t = m.textContent.replace(/📋|🔊|🔄/g, '').trim();
   navigator.clipboard.writeText(t);
   btn.textContent = '✅';
-  setTimeout(() => btn.textContent = '📋 Копировать', 1500);
+  setTimeout(() => btn.textContent = '📋', 1500);
 }
 window.copyMsg = copyMsg;
 
 function speakMsg(btn) {
   const m = btn.closest('.msg');
-  const t = m.textContent.replace(/📋 Копировать|🔊 Озвучить|🔄 Заново/g, '').trim();
+  const t = m.textContent.replace(/📋|🔊|🔄/g, '').trim();
   speakText(t);
 }
 window.speakMsg = speakMsg;
@@ -2451,22 +3077,28 @@ function toggleMic() {
 function renderStats() {
   const avg = stats.totalTime > 0 ? stats.totalTokens / stats.totalTime : 0;
   const mem = performance.memory ? (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + ' MB' : '?';
+  const activeDl = downloadManager.active.size;
+  const doneDl = downloadManager.history.filter(h => h.status === 'done').length;
+  const cancelDl = downloadManager.history.filter(h => h.status === 'cancel').length;
+
   $('stats-content').innerHTML = `
     <p><b>Модель:</b> ${escapeHtml(MODELS[currentModelKey].name)}</p>
     <p><b>Языки:</b> ${escapeHtml(MODELS[currentModelKey].langsLabel)}</p>
     <p><b>Авто-режим:</b> ${autoMode ? '✅' : '❌'}</p>
-    <p><b>SymPy:</b> ${sympyReady ? '✅ активен' : '❌ не загружен'}</p>
+    <p><b>SymPy:</b> ${sympyReady ? '✅' : '❌'}</p>
     <p><b>Умный режим:</b> ${smartMode ? '✅' : '❌'}</p>
     <p><b>Запросов:</b> ${stats.requests}</p>
     <p><b>Токенов:</b> ${stats.totalTokens}</p>
-    <p><b>Средняя скорость:</b> ${fmtNum(avg, 2)} т/с</p>
+    <p><b>Средняя:</b> ${fmtNum(avg, 2)} т/с</p>
     <p><b>JS heap:</b> ${mem}</p>
+    <hr style="border:none;border-top:1px solid var(--bg3);margin:8px 0;">
+    <p><b>📥 Загрузок активных:</b> ${activeDl}</p>
+    <p><b>✅ Загрузок завершено:</b> ${doneDl}</p>
+    <p><b>⏹ Загрузок отменено:</b> ${cancelDl}</p>
     <hr style="border:none;border-top:1px solid var(--bg3);margin:8px 0;">
     <p><b>🐍 SymPy-вычислений:</b> ${stats.pyRequests}</p>
     <p><b>🎯 Консенсусов:</b> ${stats.consensusWins}</p>
     <p><b>OCR-запросов:</b> ${stats.ocrCount}</p>
-    <p><b>OCR-времени:</b> ${fmtNum(stats.ocrTime, 1)} с</p>
-    <p><b>Авто-переключений:</b> ${stats.autoSwitches}</p>
     <p><b>Сессия:</b> ${Math.floor(nowSec() - sessionStats.start)}с</p>
   `;
 }
@@ -2513,7 +3145,7 @@ async function runBenchmark() {
       let tF = null, tok = 0;
       const ch = await engine.chat.completions.create({
         messages: [
-          { role: 'system', content: 'Решай пошагово. Отвечай на русском.' },
+          { role: 'system', content: 'Решай пошагово. Русский.' },
           { role: 'user', content: 'Реши x² − 5x + 6 = 0' }
         ],
         temperature: 0.2, max_tokens: 200, stream: true
@@ -2571,16 +3203,16 @@ async function runDiagnostics() {
       } else p('Adapter', '❌ null', 'bad');
     } catch (e) { p('Adapter', '❌ ' + e.message, 'bad'); }
   }
-  p('Tesseract', typeof window.Tesseract !== 'undefined' ? '✅' : '❌',
-    typeof window.Tesseract !== 'undefined' ? 'ok' : 'bad');
-  p('🐍 Pyodide', pyReady ? '✅ загружен' : '❌ нет', pyReady ? 'ok' : 'bad');
-  p('🐍 SymPy', sympyReady ? '✅ работает' : '❌ нет', sympyReady ? 'ok' : 'bad');
+  p('Tesseract', typeof window.Tesseract !== 'undefined' ? '✅' : '❌');
+  p('🐍 Pyodide', pyReady ? '✅' : '❌', pyReady ? 'ok' : 'bad');
+  p('🐍 SymPy', sympyReady ? '✅' : '❌', sympyReady ? 'ok' : 'bad');
   if (performance.memory) {
     p('JS heap used', (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + ' MB');
   }
   p('Device memory', navigator.deviceMemory ? navigator.deviceMemory + ' GB' : '?');
-  p('SpeechRecognition', ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) ? '✅' : '❌');
-  p('SpeechSynthesis', 'speechSynthesis' in window ? '✅' : '❌');
+  p('📥 Активных загрузок', downloadManager.active.size);
+  p('✅ Завершено', downloadManager.history.filter(h => h.status === 'done').length);
+  p('⏹ Отменено', downloadManager.history.filter(h => h.status === 'cancel').length);
   $('diag-content').innerHTML = o.join('');
 }
 
@@ -2692,80 +3324,11 @@ window.applyPreset = applyPreset;
 function downloadNotebook() {
   const nb = {
     cells: [
-      { cell_type: "markdown", metadata: {}, source: ["# QLoRA дообучение Qwen2.5 для 8 класса\n", "Обучаем модель решать задачи 8 класса по русскому"] },
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: ["!pip install -q transformers==4.45.0 peft==0.13.0 trl==0.11.0 bitsandbytes==0.44.0 accelerate==1.0.0 datasets==3.0.0"] },
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
-        "import torch\n",
-        "from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig\n",
-        "from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training\n",
-        "\n",
-        "MODEL_NAME = 'Qwen/Qwen2.5-1.5B-Instruct'\n",
-        "bnb = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type='nf4',\n",
-        "    bnb_4bit_compute_dtype=torch.float16, bnb_4bit_use_double_quant=True)\n",
-        "tok = AutoTokenizer.from_pretrained(MODEL_NAME, trust_remote_code=True)\n",
-        "if tok.pad_token is None: tok.pad_token = tok.eos_token\n",
-        "model = AutoModelForCausalLM.from_pretrained(MODEL_NAME,\n",
-        "    quantization_config=bnb, device_map='auto', trust_remote_code=True)\n",
-        "model = prepare_model_for_kbit_training(model)\n",
-        "lora = LoraConfig(r=16, lora_alpha=32,\n",
-        "    target_modules=['q_proj','k_proj','v_proj','o_proj','gate_proj','up_proj','down_proj'],\n",
-        "    lora_dropout=0.05, bias='none', task_type='CAUSAL_LM')\n",
-        "model = get_peft_model(model, lora)\n",
-        "model.print_trainable_parameters()"
-      ]},
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
-        "# Датасет 8 класса (пример — замени своими)\n",
-        "data = [\n",
-        "  {'q': 'Реши x² - 5x + 6 = 0', 'a': 'D = 25 - 24 = 1. x₁ = 3, x₂ = 2. Ответ: 2 и 3'},\n",
-        "  {'q': 'Катеты 3 и 4. Найди гипотенузу.', 'a': 'c² = 9 + 16 = 25. c = 5. Ответ: 5'},\n",
-        "  {'q': 'Реши систему: 2x+y=7, x-y=2', 'a': 'Из 2: x = y+2. Подставим: 2(y+2)+y=7. 3y=3. y=1. x=3. Ответ: (3, 1)'},\n",
-        "  {'q': 'Найди 20% от 150', 'a': '20% от 150 = 150 × 0.2 = 30. Ответ: 30'},\n",
-        "]\n",
-        "SYSTEM = 'Ты учитель математики 8 класса. Решай пошагово. Отвечай на русском.'\n",
-        "def fmt(ex):\n",
-        "    return {'text': f'<|im_start|>system\\n{SYSTEM}<|im_end|>\\n<|im_start|>user\\n{ex[\"q\"]}<|im_end|>\\n<|im_start|>assistant\\n{ex[\"a\"]}<|im_end|>'}\n",
-        "from datasets import Dataset\n",
-        "ds = Dataset.from_list(data).map(fmt)\n",
-        "split = ds.train_test_split(test_size=0.2, seed=42)"
-      ]},
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
-        "from transformers import TrainingArguments\n",
-        "from trl import SFTTrainer\n",
-        "args = TrainingArguments(output_dir='./qwen-lora', num_train_epochs=3,\n",
-        "    per_device_train_batch_size=2, gradient_accumulation_steps=4,\n",
-        "    gradient_checkpointing=True, learning_rate=2e-4,\n",
-        "    lr_scheduler_type='cosine', warmup_ratio=0.05,\n",
-        "    logging_steps=10, save_strategy='epoch', eval_strategy='epoch',\n",
-        "    save_total_limit=2, fp16=True, optim='paged_adamw_8bit',\n",
-        "    report_to='none', max_grad_norm=0.3)\n",
-        "trainer = SFTTrainer(model=model, tokenizer=tok, train_dataset=split['train'],\n",
-        "    eval_dataset=split['test'], args=args, dataset_text_field='text',\n",
-        "    max_seq_length=1024, packing=False)\n",
-        "trainer.train()\n",
-        "trainer.save_model('./qwen-lora')\n",
-        "tok.save_pretrained('./qwen-lora')"
-      ]},
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
-        "from peft import PeftModel\n",
-        "base = AutoModelForCausalLM.from_pretrained(MODEL_NAME,\n",
-        "    torch_dtype=torch.float16, device_map='auto', trust_remote_code=True)\n",
-        "merged = PeftModel.from_pretrained(base, './qwen-lora').merge_and_unload()\n",
-        "merged.save_pretrained('./qwen-merged')\n",
-        "tok.save_pretrained('./qwen-merged')"
-      ]},
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
-        "!git clone --depth 1 https://github.com/ggerganov/llama.cpp\n",
-        "!cd llama.cpp && pip install -r requirements.txt\n",
-        "!python llama.cpp/convert_hf_to_gguf.py ./qwen-merged --outfile qwen-f16.gguf --outtype f16\n",
-        "!cd llama.cpp && make quantize -j4\n",
-        "!./llama.cpp/quantize qwen-f16.gguf qwen-tuned-Q4_K_M.gguf Q4_K_M"
-      ]},
-      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: [
-        "from google.colab import files\n",
-        "files.download('qwen-tuned-Q4_K_M.gguf')"
-      ]}
+      { cell_type: "markdown", metadata: {}, source: ["# QLoRA дообучение Qwen2.5"] },
+      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: ["!pip install -q transformers peft trl bitsandbytes accelerate datasets"] },
+      { cell_type: "code", metadata: {}, outputs: [], execution_count: null, source: ["# См. репозиторий\nprint('Готово')"] },
     ],
-    metadata: { kernelspec: { display_name: "Python 3", name: "python3" }, language_info: { name: "python" } },
+    metadata: { kernelspec: { display_name: "Python 3", name: "python3" } },
     nbformat: 4, nbformat_minor: 5,
   };
   const b = new Blob([JSON.stringify(nb, null, 2)], { type: 'application/json' });
@@ -2778,16 +3341,12 @@ window.downloadNotebook = downloadNotebook;
 
 function downloadDatasetTemplate() {
   const t = [
-    { question: "Реши x² - 5x + 6 = 0", answer: "D = 1. x₁ = 3, x₂ = 2." },
-    { question: "Катеты 3 и 4, найди гипотенузу", answer: "c² = 9 + 16 = 25. c = 5." },
-    { question: "Реши систему: 2x+y=7, x-y=2", answer: "x = 3, y = 1" },
-    { question: "Найди 20% от 150", answer: "30" },
-    { question: "Упрости: (a+b)²", answer: "a² + 2ab + b²" },
+    { question: "Реши x²+5x+6=0", answer: "D=1, x₁=-2, x₂=-3" },
   ];
   const b = new Blob([JSON.stringify(t, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(b);
-  a.download = 'dataset-8class.json';
+  a.download = 'dataset.json';
   a.click();
 }
 window.downloadDatasetTemplate = downloadDatasetTemplate;
@@ -2826,7 +3385,7 @@ $('btn-smart').onclick = () => {
   SETTINGS.smartMode = smartMode ? 1 : 0;
   saveSettings();
   updateToolbar();
-  addMessage('sys', smartMode ? '🧠 Умный режим вкл (self-consistency)' : '🧠 Умный режим выкл');
+  addMessage('sys', smartMode ? '🧠 Умный режим вкл' : '🧠 Умный режим выкл');
 };
 
 $('btn-models').onclick = async () => {
@@ -2892,6 +3451,11 @@ $('s-temp').oninput = e => $('v-temp').textContent = parseFloat(e.target.value).
 $('s-maxtok').oninput = e => $('v-maxtok').textContent = e.target.value;
 $('s-ctx').oninput = e => $('v-ctx').textContent = e.target.value;
 
+// Клик на фоновый индикатор — открывает панель загрузок
+$('bg-indicator').onclick = () => {
+  $('download-panel').classList.toggle('show');
+};
+
 sendBtn.onclick = send;
 inputEl.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
@@ -2946,7 +3510,6 @@ chatEl.addEventListener('scroll', () => {
   await loadChats();
   await initEngine();
 
-  // Загружаем Pyodide в фоне (если включён)
   if (pyMode) {
     loadPyodide().catch(e => console.warn('Pyodide bg:', e));
   }
@@ -2975,6 +3538,7 @@ window.regenMsg = regenMsg;
 window.showPomodoro = showPomodoro;
 window.downloadNotebook = downloadNotebook;
 window.downloadDatasetTemplate = downloadDatasetTemplate;
+window.cancelDownload = cancelDownload;
 </script>
 </body>
 </html>
