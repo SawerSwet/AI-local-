@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta name="theme-color" content="#0a0a0f">
-<title>Math Solver 8 — Qwen + Tesseract OCR + Figure</title>
+<title>Math Solver 8 — Qwen 0.5B/1.5B + OCR</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <style>
   :root{
@@ -335,20 +335,22 @@
 <!-- ============ QWEN ЧАТ ============ -->
 <section class="panel" id="panel-ai">
   <div class="card">
-    <h2>🤖 Qwen2.5-1.5B-Instruct (CDN)</h2>
+    <h2>🤖 Qwen2.5 (CDN, авто-выбор модели)</h2>
     <p class="small" style="color:var(--fg2);margin:0 0 8px">
-      Модель загружается по ссылке с HuggingFace CDN через transformers.js.
-      Первая загрузка ~1 ГБ, дальше — из кэша браузера.
+      На телефоне загружается <b>Qwen2.5-0.5B-Instruct</b> через WASM (~350 МБ, стабильно).
+      На компьютере — <b>Qwen2.5-1.5B-Instruct</b> через WebGPU (~950 МБ, быстро).
+      Первая загрузка скачивает модель с HuggingFace, потом — из кэша браузера.
     </p>
     <div class="stat-line mb"><span>Модель:</span><b id="aiModelStatus">не загружена</b></div>
-    <div class="stat-line mb"><span>Устройство:</span><b id="aiDevice">—</b></div>
+    <div class="stat-line mb"><span>Бэкенд:</span><b id="aiDevice">—</b></div>
+    <div class="stat-line mb"><span>Устройство:</span><b id="aiDeviceKind">—</b></div>
     <div class="progress" id="aiLoadProgress"><div id="aiLoadFill"></div></div>
     <div class="row">
-      <button class="btn primary flex1" id="btnLoadAI">📥 Загрузить Qwen2.5-1.5B</button>
+      <button class="btn primary flex1" id="btnLoadAI">📥 Загрузить Qwen</button>
     </div>
     <div class="small mt" style="color:var(--fg2)">
-      💡 Модель качается с onnx-community/Qwen2.5-1.5B-Instruct.
-      Нужен Chrome/Edge на Android 12+ или десктоп с WebGPU.
+      💡 На телефоне первая загрузка 3–5 минут, дальше мгновенно.
+      Если браузер падает — закрой все вкладки и приложения перед загрузкой.
     </div>
   </div>
 
@@ -603,9 +605,9 @@
       <li>Набери 500+ verified задач</li>
       <li>Скачай JSONL (только verified)</li>
       <li>Открой Google Colab (бесплатно)</li>
-      <li>Модель: <code>unsloth/Qwen2.5-1.5B-Instruct-bnb-4bit</code></li>
-      <li>Обучи LoRA (2-4 часа на T4)</li>
-      <li>Скачай адаптер (10-50 МБ)</li>
+      <li>Модель: <code>unsloth/Qwen2.5-0.5B-Instruct-bnb-4bit</code></li>
+      <li>Обучи LoRA (1–2 часа на T4)</li>
+      <li>Скачай адаптер (10–50 МБ)</li>
     </ol>
   </div>
 </section>
@@ -2171,12 +2173,16 @@ function drawTaskFigure(taskText, container) {
 }
 
 /* ============================================================
-   QWEN — загрузка через CDN pipeline
+   QWEN — авто-выбор модели и бэкенда
    ============================================================ */
 let qwenPipeline = null;
 let qwenLoading = false;
 let qwenDevice = '—';
 let qwenCurrentPrompt = 'Ты учитель математики 8 класса. Решай пошагово по-русски. Используй LaTeX для формул.';
+
+function isMobileDevice() {
+  return /Android|iPhone|iPad|iPod|Mobile|Opera Mini/i.test(navigator.userAgent);
+}
 
 async function loadQwen() {
   if (qwenPipeline || qwenLoading) return;
@@ -2184,53 +2190,85 @@ async function loadQwen() {
     toast('transformers.js не загружен');
     return;
   }
+
   qwenLoading = true;
   $('#aiLoadProgress').classList.add('show');
   $('#btnLoadAI').disabled = true;
   $('#aiModelStatus').textContent = 'загружается...';
 
-  try {
-    const hasWebGPU = !!navigator.gpu;
-    const device = hasWebGPU ? 'webgpu' : 'wasm';
-    qwenDevice = device;
-    $('#aiDevice').textContent = device;
+  const mobile = isMobileDevice();
+  const tryDevices = mobile ? ['wasm'] : ['webgpu', 'wasm'];
+  const modelId = mobile
+    ? 'onnx-community/Qwen2.5-0.5B-Instruct'
+    : 'onnx-community/Qwen2.5-1.5B-Instruct';
 
-    logMsg('🤖 Загрузка Qwen2.5-1.5B через CDN (' + device + ')...');
-    logMsg('💡 Модель ~1 ГБ. Первая загрузка 5-15 минут.');
+  $('#aiDeviceKind').textContent = mobile ? 'мобильное' : 'десктоп';
+  logMsg('📱 Устройство: ' + (mobile ? 'мобильное' : 'десктоп'));
+  logMsg('🧠 Модель: ' + modelId);
 
-    qwenPipeline = await window.__pipeline(
-      'text-generation',
-      'onnx-community/Qwen2.5-1.5B-Instruct',
-      {
-        dtype: 'q4',
-        device: device,
-        progress_callback: (p) => {
-          if (p.status === 'progress') {
-            const pct = Math.round(p.progress || 0);
-            $('#aiLoadFill').style.width = pct + '%';
-            if (p.file) logMsg(`📦 ${p.file}: ${pct}%`);
-          } else if (p.status === 'ready') {
-            logMsg('✅ Модель готова');
+  let lastError = null;
+  window.__lastQwenLog = '';
+
+  for (const device of tryDevices) {
+    try {
+      logMsg('🤖 Попытка загрузки на ' + device + '...');
+      $('#aiDevice').textContent = device;
+
+      qwenPipeline = await window.__pipeline(
+        'text-generation',
+        modelId,
+        {
+          dtype: 'q4',
+          device: device,
+          progress_callback: (p) => {
+            if (p.status === 'progress') {
+              const pct = Math.round(p.progress || 0);
+              $('#aiLoadFill').style.width = pct + '%';
+              if (p.file) {
+                const key = p.file + ':' + Math.floor(pct / 20);
+                if (key !== window.__lastQwenLog) {
+                  window.__lastQwenLog = key;
+                  logMsg(`📦 ${p.file}: ${pct}%`);
+                }
+              }
+            } else if (p.status === 'ready') {
+              logMsg('✅ Модель готова (' + device + ')');
+            } else if (p.status === 'initiate') {
+              logMsg('⏳ Инициализация: ' + (p.file || ''));
+            } else if (p.status === 'done') {
+              logMsg('✔️ ' + (p.file || ''));
+            }
           }
         }
-      }
-    );
+      );
 
-    $('#aiModelStatus').textContent = 'загружена ✓';
-    $('#btnLoadAI').disabled = true;
-    $('#aiLoadProgress').classList.remove('show');
-    $('#statQwen').textContent = 'загружен';
-    toast('Qwen2.5-1.5B готова');
-    logMsg('✅ Модель загружена на ' + device);
-  } catch (e) {
-    logMsg('❌ Ошибка: ' + e.message);
-    $('#aiModelStatus').textContent = 'ошибка';
-    $('#btnLoadAI').disabled = false;
-    $('#aiLoadProgress').classList.remove('show');
-    toast('Ошибка: ' + e.message);
-  } finally {
-    qwenLoading = false;
+      qwenDevice = device;
+      $('#aiModelStatus').textContent = 'загружена (' + device + ') ✓';
+      $('#aiDevice').textContent = device;
+      $('#btnLoadAI').disabled = true;
+      $('#aiLoadProgress').classList.remove('show');
+      $('#statQwen').textContent = mobile ? 'загружен (0.5B/' + device + ')' : 'загружен (1.5B/' + device + ')';
+      toast('Qwen ' + (mobile ? '0.5B' : '1.5B') + ' готова (' + device + ')');
+      logMsg('✅ Модель загружена на ' + device);
+      qwenLoading = false;
+      return;
+
+    } catch (e) {
+      lastError = e;
+      logMsg('❌ Ошибка на ' + device + ': ' + (e.message || e));
+      qwenPipeline = null;
+      if (device !== tryDevices[tryDevices.length - 1]) {
+        logMsg('⚠️ Пробую следующий бэкенд...');
+      }
+    }
   }
+
+  logMsg('❌ Все бэкенды отказали: ' + (lastError && lastError.message || lastError));
+  $('#aiModelStatus').textContent = 'ошибка';
+  $('#btnLoadAI').disabled = false;
+  $('#aiLoadProgress').classList.remove('show');
+  toast('Ошибка загрузки: ' + (lastError && lastError.message || 'неизвестно'));
+  qwenLoading = false;
 }
 
 async function askQwen(userMessage, options = {}) {
@@ -2238,8 +2276,11 @@ async function askQwen(userMessage, options = {}) {
     await loadQwen();
     if (!qwenPipeline) return null;
   }
+
   const maxTokens = options.maxTokens || parseInt($('#aiMaxTokens').value) || 400;
-  const temperature = options.temperature !== undefined ? options.temperature : (parseFloat($('#aiTemperature').value) || 0.3);
+  const temperature = options.temperature !== undefined
+    ? options.temperature
+    : (parseFloat($('#aiTemperature').value) || 0.3);
   const systemPrompt = options.systemPrompt || qwenCurrentPrompt;
 
   const messages = [
@@ -2268,7 +2309,7 @@ async function askQwen(userMessage, options = {}) {
     }
     return responseText;
   } catch (e) {
-    logMsg('❌ Qwen: ' + e.message);
+    logMsg('❌ Qwen run: ' + (e.message || e));
     return null;
   }
 }
@@ -2446,7 +2487,7 @@ async function ocrFromPhoto() {
 async function solveTextWithQwen(text, solutionEl) {
   if (!text.trim()) { toast('Пустой текст'); return; }
   if (!qwenPipeline) {
-    solutionEl.innerHTML = '<div class="solution-error">🤖 Qwen не загружен. Открой вкладку «Qwen Чат» и нажми «Загрузить Qwen2.5-1.5B».</div>';
+    solutionEl.innerHTML = '<div class="solution-error">🤖 Qwen не загружен. Открой вкладку «Qwen Чат» и нажми «Загрузить Qwen».</div>';
     return;
   }
   solutionEl.innerHTML = '<div class="solution-step"><span class="num">⏳</span> Qwen думает...</div>';
@@ -3354,14 +3395,14 @@ async function solveAndShow() {
   if (!result && (currentSolveMode === 'auto' || currentSolveMode === 'ai')) {
     if (!qwenPipeline) {
       $('#detectedType').textContent = 'Тип: нужен Qwen';
-      $('#solutionAnswer').innerHTML = '<div class="solution-error">🤖 Qwen не загружен. Перейди во вкладку «🤖 Qwen Чат» и нажми «Загрузить Qwen2.5-1.5B».</div>';
+      $('#solutionAnswer').innerHTML = '<div class="solution-error">🤖 Qwen не загружен. Перейди во вкладку «🤖 Qwen Чат» и нажми «Загрузить Qwen».</div>';
       return;
     }
 
-    $('#detectedType').textContent = 'Тип: Qwen2.5-1.5B';
+    $('#detectedType').textContent = 'Тип: Qwen2.5';
     const loading = document.createElement('div');
     loading.className = 'solution-step';
-    loading.innerHTML = '<span class="num">⏳</span> Qwen думает... (30-60 секунд)';
+    loading.innerHTML = '<span class="num">⏳</span> Qwen думает...';
     $('#solutionSteps').appendChild(loading);
 
     const prompt = `Реши задачу пошагово. Ответь СТРОГО в формате JSON:
@@ -3377,7 +3418,7 @@ async function solveAndShow() {
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
           result = {
-            ruleName: 'Qwen2.5-1.5B',
+            ruleName: 'Qwen2.5',
             ruleKey: 'qwen',
             steps: parsed.steps || [],
             answerLatex: parsed.answerLatex || parsed.answer || '',
@@ -3385,7 +3426,7 @@ async function solveAndShow() {
           };
         } else {
           result = {
-            ruleName: 'Qwen2.5-1.5B',
+            ruleName: 'Qwen2.5',
             ruleKey: 'qwen',
             steps: [{ text: qwenResp, latex: '' }],
             answerLatex: '',
@@ -3394,7 +3435,7 @@ async function solveAndShow() {
         }
       } catch (e) {
         result = {
-          ruleName: 'Qwen2.5-1.5B',
+          ruleName: 'Qwen2.5',
           ruleKey: 'qwen',
           steps: [{ text: qwenResp, latex: '' }],
           answerLatex: '',
@@ -3411,7 +3452,7 @@ async function solveAndShow() {
 
   if (!result) {
     $('#detectedType').textContent = 'Тип: не распознан';
-    $('#solutionAnswer').innerHTML = '<div class="solution-error">Не удалось распознать задачу локальными правилами. Попробуй режим «Только Qwen» (нужна загруженная модель).</div>';
+    $('#solutionAnswer').innerHTML = '<div class="solution-error">Не удалось распознать задачу локальными правилами. Попробуй режим «Только Qwen».</div>';
     return;
   }
 
@@ -4171,6 +4212,7 @@ function initButtons() {
   $('#btnDiag').onclick = () => {
     const info = {
       WebGPU: !!navigator.gpu,
+      mobile: isMobileDevice(),
       transformers: typeof window.__pipeline !== 'undefined',
       tfjs: typeof tf !== 'undefined',
       katex: typeof katex !== 'undefined',
@@ -4227,6 +4269,8 @@ async function init() {
 
   renderGeometryPanel();
 
+  const mobile = isMobileDevice();
+  logMsg('Устройство: ' + (mobile ? 'мобильное' : 'десктоп'));
   logMsg('WebGPU: ' + (navigator.gpu ? '✓' : '✗'));
   logMsg('TF.js: ' + (typeof tf !== 'undefined' ? '✓' : '✗'));
   logMsg('PDF.js: ' + (window.pdfjsLib ? '✓' : '⚠'));
@@ -4234,6 +4278,8 @@ async function init() {
   logMsg('Камера: ' + (navigator.mediaDevices ? '✓' : '✗'));
   logMsg('Правил: ' + Object.keys(RULES).length);
   logMsg('Теорем: ' + GEOMETRY_KNOWLEDGE.theorems.length);
+  logMsg('Qwen на мобильном: 0.5B (WASM)');
+  logMsg('Qwen на десктопе: 1.5B (WebGPU → WASM)');
 
   window.addEventListener('qwen-ready', () => {
     logMsg('✅ transformers.js готов');
