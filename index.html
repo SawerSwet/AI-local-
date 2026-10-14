@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta name="theme-color" content="#0a0a0f">
-<title>Math Solver 8 — Qwen 0.5B/1.5B + OCR</title>
+<title>Math Solver 8 — Qwen WebGPU + OCR + Figure</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <style>
   :root{
@@ -335,22 +335,24 @@
 <!-- ============ QWEN ЧАТ ============ -->
 <section class="panel" id="panel-ai">
   <div class="card">
-    <h2>🤖 Qwen2.5 (CDN, авто-выбор модели)</h2>
+    <h2>🤖 Qwen2.5 (WebGPU → WASM)</h2>
     <p class="small" style="color:var(--fg2);margin:0 0 8px">
-      На телефоне загружается <b>Qwen2.5-0.5B-Instruct</b> через WASM (~350 МБ, стабильно).
-      На компьютере — <b>Qwen2.5-1.5B-Instruct</b> через WebGPU (~950 МБ, быстро).
+      На телефоне загружается <b>Qwen2.5-0.5B-Instruct</b> (~350 МБ q4).
+      На компьютере — <b>Qwen2.5-1.5B-Instruct</b> (~950 МБ q4).
+      Сначала пробуем WebGPU, при ошибке автоматически падаем на WASM.
       Первая загрузка скачивает модель с HuggingFace, потом — из кэша браузера.
     </p>
     <div class="stat-line mb"><span>Модель:</span><b id="aiModelStatus">не загружена</b></div>
     <div class="stat-line mb"><span>Бэкенд:</span><b id="aiDevice">—</b></div>
     <div class="stat-line mb"><span>Устройство:</span><b id="aiDeviceKind">—</b></div>
+    <div class="stat-line mb"><span>WebGPU:</span><b id="aiWebGPU">—</b></div>
     <div class="progress" id="aiLoadProgress"><div id="aiLoadFill"></div></div>
     <div class="row">
       <button class="btn primary flex1" id="btnLoadAI">📥 Загрузить Qwen</button>
     </div>
     <div class="small mt" style="color:var(--fg2)">
-      💡 На телефоне первая загрузка 3–5 минут, дальше мгновенно.
-      Если браузер падает — закрой все вкладки и приложения перед загрузкой.
+      💡 Если WebGPU недоступен — включи chrome://flags/#enable-unsafe-webgpu и перезапусти браузер.
+      Первая загрузка на телефоне 3–5 минут, дальше мгновенно из кэша.
     </div>
   </div>
 
@@ -2173,7 +2175,7 @@ function drawTaskFigure(taskText, container) {
 }
 
 /* ============================================================
-   QWEN — авто-выбор модели и бэкенда
+   QWEN — WebGPU первым, WASM как фоллбэк
    ============================================================ */
 let qwenPipeline = null;
 let qwenLoading = false;
@@ -2197,19 +2199,32 @@ async function loadQwen() {
   $('#aiModelStatus').textContent = 'загружается...';
 
   const mobile = isMobileDevice();
-  const tryDevices = mobile ? ['wasm'] : ['webgpu', 'wasm'];
+
+  // WebGPU первым — на любом устройстве.
+  // Если он падает — автоматический откат на WASM.
+  const tryDevices = ['webgpu', 'wasm'];
+
   const modelId = mobile
     ? 'onnx-community/Qwen2.5-0.5B-Instruct'
     : 'onnx-community/Qwen2.5-1.5B-Instruct';
 
   $('#aiDeviceKind').textContent = mobile ? 'мобильное' : 'десктоп';
+  $('#aiWebGPU').textContent = navigator.gpu ? 'доступен' : 'нет';
+
   logMsg('📱 Устройство: ' + (mobile ? 'мобильное' : 'десктоп'));
   logMsg('🧠 Модель: ' + modelId);
+  logMsg('⚡ WebGPU: ' + (navigator.gpu ? 'есть' : 'нет'));
 
   let lastError = null;
   window.__lastQwenLog = '';
 
   for (const device of tryDevices) {
+    // Если WebGPU нет — пропускаем сразу
+    if (device === 'webgpu' && !navigator.gpu) {
+      logMsg('⚠️ WebGPU нет в браузере, пропускаю');
+      continue;
+    }
+
     try {
       logMsg('🤖 Попытка загрузки на ' + device + '...');
       $('#aiDevice').textContent = device;
@@ -2248,8 +2263,22 @@ async function loadQwen() {
       $('#btnLoadAI').disabled = true;
       $('#aiLoadProgress').classList.remove('show');
       $('#statQwen').textContent = mobile ? 'загружен (0.5B/' + device + ')' : 'загружен (1.5B/' + device + ')';
-      toast('Qwen ' + (mobile ? '0.5B' : '1.5B') + ' готова (' + device + ')');
       logMsg('✅ Модель загружена на ' + device);
+
+      // Прогрев модели — чтобы первый запрос в чате был быстрым
+      try {
+        logMsg('🔥 Прогрев модели (2-5 сек)...');
+        await qwenPipeline([{ role: 'user', content: 'Привет' }], {
+          max_new_tokens: 4,
+          temperature: 0.01,
+          do_sample: false
+        });
+        logMsg('✅ Прогрев завершён');
+      } catch (e) {
+        logMsg('⚠️ Прогрев не удался: ' + (e.message || e));
+      }
+
+      toast('Qwen ' + (mobile ? '0.5B' : '1.5B') + ' готова (' + device + ')');
       qwenLoading = false;
       return;
 
@@ -4278,8 +4307,7 @@ async function init() {
   logMsg('Камера: ' + (navigator.mediaDevices ? '✓' : '✗'));
   logMsg('Правил: ' + Object.keys(RULES).length);
   logMsg('Теорем: ' + GEOMETRY_KNOWLEDGE.theorems.length);
-  logMsg('Qwen на мобильном: 0.5B (WASM)');
-  logMsg('Qwen на десктопе: 1.5B (WebGPU → WASM)');
+  logMsg('Qwen: WebGPU первым, WASM как фоллбэк');
 
   window.addEventListener('qwen-ready', () => {
     logMsg('✅ transformers.js готов');
