@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta name="theme-color" content="#0a0a0f">
-<title>Math Solver 8 — Qwen + Figure + Камера</title>
+<title>Math Solver 8 — Qwen + Tesseract OCR + Figure</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <style>
   :root{
@@ -199,7 +199,7 @@
 
 <nav class="tabs">
   <button class="tab-btn active" data-tab="solve">🧮 Решить</button>
-  <button class="tab-btn" data-tab="camera">📷 Камера</button>
+  <button class="tab-btn" data-tab="camera">📷 Камера + OCR</button>
   <button class="tab-btn" data-tab="ai">🤖 Qwen Чат</button>
   <button class="tab-btn" data-tab="geometry">📐 Геометрия</button>
   <button class="tab-btn" data-tab="learn">🧠 Обучение</button>
@@ -257,6 +257,7 @@
     <div class="stat-line"><span>В датасете:</span><b id="statDataset">0</b></div>
     <div class="stat-line"><span>Классификатор:</span><b id="statClassifier">не обучен</b></div>
     <div class="stat-line"><span>Qwen:</span><b id="statQwen">не загружен</b></div>
+    <div class="stat-line"><span>OCR:</span><b id="statOCR">не загружен</b></div>
   </div>
 </section>
 
@@ -265,8 +266,8 @@
   <div class="card">
     <h2>📷 Сфотографировать задачу</h2>
     <p class="small" style="color:var(--fg2);margin:0 0 8px">
-      Наведи камеру на задачу и нажми кружок. Qwen распознает текст и решит.
-      Требует HTTPS или localhost.
+      Наведи камеру на задачу и нажми кружок. Tesseract распознает текст (rus+eng),
+      затем можно поправить руками и отправить в Qwen или решить правилами.
     </p>
     <div class="stat-line mb"><span>Камера:</span><b id="cameraStatus">не активна</b></div>
     <div>
@@ -281,13 +282,26 @@
     <div class="camera-controls" id="cameraControls" style="display:none">
       <button class="camera-btn" id="btnSnapshot"></button>
     </div>
+
     <img id="snapshotPreview" class="snapshot-preview" style="display:none" />
     <div class="row mt" id="snapshotActions" style="display:none">
-      <button class="btn primary flex1" id="btnSolveFromCamera">🤖 Решить через Qwen</button>
+      <button class="btn primary flex1" id="btnOCRFromCamera">🔍 Распознать текст</button>
       <button class="btn" id="btnRetakeCamera">🔄 Переснять</button>
       <button class="btn danger" id="btnDeleteSnapshot">🗑</button>
     </div>
-    <div id="cameraOCRResult" class="code-out mt" style="display:none">—</div>
+
+    <div id="ocrBlock" style="display:none" class="mt">
+      <div class="stat-line"><span>OCR:</span><b id="ocrStatus">—</b></div>
+      <div class="progress" id="ocrProgress"><div id="ocrFill"></div></div>
+      <label class="small" style="color:var(--fg2)">Распознанный текст (можно править):</label>
+      <textarea id="ocrText" style="min-height:100px" placeholder="Здесь появится распознанный текст задачи..."></textarea>
+      <div class="row mt">
+        <button class="btn primary flex1" id="btnSolveFromOCR">🤖 Решить через Qwen</button>
+        <button class="btn" id="btnSolveFromOCRrules">📐 Правилами</button>
+        <button class="btn" id="btnCopyOCR">📋 Копировать</button>
+      </div>
+    </div>
+
     <div id="cameraSolution" class="mt"></div>
   </div>
 
@@ -299,10 +313,22 @@
     </div>
     <img id="photoPreview" class="snapshot-preview" style="display:none" />
     <div class="row mt" id="photoActions" style="display:none">
-      <button class="btn primary flex1" id="btnSolveFromPhoto">🤖 Решить через Qwen</button>
+      <button class="btn primary flex1" id="btnOCRFromPhoto">🔍 Распознать текст</button>
       <button class="btn danger" id="btnDeletePhoto">🗑</button>
     </div>
-    <div id="photoOCRResult" class="code-out mt" style="display:none">—</div>
+
+    <div id="photoOcrBlock" style="display:none" class="mt">
+      <div class="stat-line"><span>OCR:</span><b id="photoOcrStatus">—</b></div>
+      <div class="progress" id="photoOcrProgress"><div id="photoOcrFill"></div></div>
+      <label class="small" style="color:var(--fg2)">Распознанный текст (можно править):</label>
+      <textarea id="photoOcrText" style="min-height:100px"></textarea>
+      <div class="row mt">
+        <button class="btn primary flex1" id="btnSolveFromPhotoOCR">🤖 Решить через Qwen</button>
+        <button class="btn" id="btnSolveFromPhotoOCRrules">📐 Правилами</button>
+      </div>
+    </div>
+
+    <div id="photoSolution" class="mt"></div>
   </div>
 </section>
 
@@ -321,7 +347,7 @@
       <button class="btn primary flex1" id="btnLoadAI">📥 Загрузить Qwen2.5-1.5B</button>
     </div>
     <div class="small mt" style="color:var(--fg2)">
-      💡 Модель качается сама с onnx-community/Qwen2.5-1.5B-Instruct.
+      💡 Модель качается с onnx-community/Qwen2.5-1.5B-Instruct.
       Нужен Chrome/Edge на Android 12+ или десктоп с WebGPU.
     </div>
   </div>
@@ -551,7 +577,7 @@
   <div class="card">
     <h2>📊 Датасет для fine-tuning</h2>
     <p class="small" style="color:var(--fg2);margin:0 0 8px">
-      Все задачи из PDF, решённые через Qwen, сохраняются в формате JSONL.
+      Все задачи из PDF, OCR и решённые через Qwen сохраняются в формате JSONL.
       Формат: {"messages": [{"role":"user",...},{"role":"assistant",...}]}
     </p>
     <div class="stat-line mb"><span>Записей:</span><b id="datasetCount">0</b></div>
@@ -625,13 +651,11 @@
 
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 
 <script type="module">
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2';
-
-// Не использовать локальные модели
 env.allowLocalModels = false;
-
 window.__pipeline = pipeline;
 window.__env = env;
 window.dispatchEvent(new Event('qwen-ready'));
@@ -2299,6 +2323,224 @@ async function sendQwenMessage(userText) {
 }
 
 /* ============================================================
+   OCR — Tesseract.js
+   ============================================================ */
+let ocrWorker = null;
+let ocrWorkerLoading = false;
+let currentOCRContext = null;
+
+function setOCRProgress(pct) {
+  if (currentOCRContext === 'camera') {
+    $('#ocrProgress').classList.add('show');
+    $('#ocrFill').style.width = pct + '%';
+  } else if (currentOCRContext === 'photo') {
+    $('#photoOcrProgress').classList.add('show');
+    $('#photoOcrFill').style.width = pct + '%';
+  }
+}
+function setOCRStatus(s) {
+  if (currentOCRContext === 'camera') $('#ocrStatus').textContent = s;
+  else if (currentOCRContext === 'photo') $('#photoOcrStatus').textContent = s;
+}
+
+async function getOCRWorker() {
+  if (ocrWorker) return ocrWorker;
+  if (ocrWorkerLoading) {
+    while (ocrWorkerLoading) await new Promise(r => setTimeout(r, 200));
+    return ocrWorker;
+  }
+  ocrWorkerLoading = true;
+  try {
+    logMsg('🔍 Загрузка Tesseract (rus+eng)...');
+    ocrWorker = await Tesseract.createWorker(['rus', 'eng'], 1, {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          const pct = Math.round((m.progress || 0) * 100);
+          setOCRProgress(pct);
+          setOCRStatus('распознавание ' + pct + '%');
+        } else {
+          setOCRStatus(m.status || '');
+          if (m.status) logMsg('OCR: ' + m.status + (m.progress ? ' ' + Math.round(m.progress*100)+'%' : ''));
+        }
+      }
+    });
+    logMsg('✅ Tesseract готов');
+    $('#statOCR').textContent = 'загружен';
+  } catch (e) {
+    logMsg('❌ Tesseract: ' + e.message);
+    ocrWorker = null;
+    $('#statOCR').textContent = 'ошибка';
+  } finally {
+    ocrWorkerLoading = false;
+  }
+  return ocrWorker;
+}
+
+function cleanOCRText(raw) {
+  if (!raw) return '';
+  let t = raw;
+  t = t.replace(/[|_~`^]/g, ' ');
+  t = t.replace(/\s+/g, ' ');
+  t = t.replace(/(\d)\s*[xXхХ]\s*(\d)/g, '$1×$2');
+  t = t.replace(/[—–]/g, '-');
+  t = t.replace(/(\d)\s*[.,]\s*(\d)/g, '$1.$2');
+  t = t.replace(/([а-яА-Я])\s+([а-яА-Я])/g, '$1$2');
+  t = t.trim();
+  return t;
+}
+
+async function runOCR(imageSource, context) {
+  currentOCRContext = context;
+  const worker = await getOCRWorker();
+  if (!worker) {
+    setOCRStatus('ошибка загрузки');
+    toast('OCR не загрузился');
+    return null;
+  }
+  setOCRProgress(0);
+  setOCRStatus('подготовка...');
+  try {
+    const { data } = await worker.recognize(imageSource);
+    const text = cleanOCRText(data.text || '');
+    setOCRStatus('готово');
+    setOCRProgress(100);
+    setTimeout(() => {
+      if (context === 'camera') $('#ocrProgress').classList.remove('show');
+      else $('#photoOcrProgress').classList.remove('show');
+    }, 800);
+    return text;
+  } catch (e) {
+    setOCRStatus('ошибка: ' + e.message);
+    logMsg('OCR: ' + e.message);
+    return null;
+  }
+}
+
+async function ocrFromCamera() {
+  if (!currentSnapshot) { toast('Нет фото'); return; }
+  $('#ocrBlock').style.display = 'block';
+  $('#ocrText').value = '...';
+  const file = new File([currentSnapshot], 'snapshot.jpg', { type: 'image/jpeg' });
+  const text = await runOCR(file, 'camera');
+  if (text !== null) {
+    $('#ocrText').value = text || '(ничего не распознано)';
+    toast('OCR готов. Проверь текст.');
+  } else {
+    $('#ocrText').value = '';
+  }
+}
+
+async function ocrFromPhoto() {
+  if (!currentPhotoFile) { toast('Нет фото'); return; }
+  $('#photoOcrBlock').style.display = 'block';
+  $('#photoOcrText').value = '...';
+  const text = await runOCR(currentPhotoFile, 'photo');
+  if (text !== null) {
+    $('#photoOcrText').value = text || '(ничего не распознано)';
+    toast('OCR готов. Проверь текст.');
+  } else {
+    $('#photoOcrText').value = '';
+  }
+}
+
+async function solveTextWithQwen(text, solutionEl) {
+  if (!text.trim()) { toast('Пустой текст'); return; }
+  if (!qwenPipeline) {
+    solutionEl.innerHTML = '<div class="solution-error">🤖 Qwen не загружен. Открой вкладку «Qwen Чат» и нажми «Загрузить Qwen2.5-1.5B».</div>';
+    return;
+  }
+  solutionEl.innerHTML = '<div class="solution-step"><span class="num">⏳</span> Qwen думает...</div>';
+
+  const prompt = `Реши задачу пошагово. Ответь СТРОГО в формате JSON:
+{"steps":[{"text":"пояснение","latex":"формула"}],"answerLatex":"ответ","answer":"ответ текстом"}
+Задача: ${text}`;
+
+  const resp = await askQwen(prompt, { temperature: 0.1, maxTokens: 800 });
+  solutionEl.innerHTML = '';
+
+  if (!resp) {
+    solutionEl.innerHTML = '<div class="solution-error">❌ Qwen не ответил</div>';
+    return;
+  }
+
+  let result = null;
+  try {
+    const jsonMatch = resp.match(/\{[\s\S]*\}/);
+    if (jsonMatch) result = JSON.parse(jsonMatch[0]);
+  } catch (e) {}
+
+  if (result && result.steps) {
+    result.steps.forEach((s, i) => {
+      const d = document.createElement('div');
+      d.className = 'solution-step';
+      const num = document.createElement('span');
+      num.className = 'num';
+      num.textContent = i + 1;
+      d.appendChild(num);
+      const t = document.createElement('span');
+      t.textContent = s.text || '';
+      d.appendChild(t);
+      if (s.latex) {
+        const f = document.createElement('div');
+        f.className = 'formula';
+        renderKatex(f, s.latex, true);
+        d.appendChild(f);
+      }
+      solutionEl.appendChild(d);
+    });
+    const ansDiv = document.createElement('div');
+    ansDiv.className = 'solution-answer';
+    ansDiv.innerHTML = '<div>✅ Ответ:</div><div class="ansf"></div>';
+    solutionEl.appendChild(ansDiv);
+    if (result.answerLatex) renderKatex(ansDiv.querySelector('.ansf'), result.answerLatex, true);
+    else ansDiv.querySelector('.ansf').textContent = result.answer || '';
+  } else {
+    const d = document.createElement('div');
+    d.className = 'solution-step';
+    d.textContent = resp;
+    solutionEl.appendChild(d);
+  }
+
+  await saveToDataset(text, resp, { verified: false, source: 'ocr-qwen' });
+}
+
+function solveTextWithRules(text, solutionEl) {
+  const norm = normalizeInput(text);
+  const result = detectAndSolve(norm);
+  solutionEl.innerHTML = '';
+  if (!result) {
+    solutionEl.innerHTML = '<div class="solution-error">Правила не распознали задачу. Попробуй Qwen.</div>';
+    return;
+  }
+  result.steps.forEach((s, i) => {
+    const d = document.createElement('div');
+    d.className = 'solution-step';
+    const num = document.createElement('span');
+    num.className = 'num';
+    num.textContent = i + 1;
+    d.appendChild(num);
+    const t = document.createElement('span');
+    t.textContent = s.text;
+    d.appendChild(t);
+    if (s.latex) {
+      const f = document.createElement('div');
+      f.className = 'formula';
+      renderKatex(f, s.latex, true);
+      d.appendChild(f);
+    }
+    solutionEl.appendChild(d);
+  });
+  const ansDiv = document.createElement('div');
+  ansDiv.className = 'solution-answer';
+  ansDiv.innerHTML = '<div>✅ Ответ:</div><div class="ansf"></div>';
+  solutionEl.appendChild(ansDiv);
+  if (result.answerLatex) renderKatex(ansDiv.querySelector('.ansf'), result.answerLatex, true);
+  else ansDiv.querySelector('.ansf').textContent = result.answer;
+
+  saveToDataset(text, buildAnswerText(result), { verified: true, source: 'ocr-rules' });
+}
+
+/* ============================================================
    УЧЕБНИКИ
    ============================================================ */
 let currentBookId = null;
@@ -3370,7 +3612,7 @@ async function startCamera() {
     $('#cameraControls').style.display = 'flex';
     $('#snapshotPreview').style.display = 'none';
     $('#snapshotActions').style.display = 'none';
-    $('#cameraOCRResult').style.display = 'none';
+    $('#ocrBlock').style.display = 'none';
     $('#cameraSolution').innerHTML = '';
   } catch (e) {
     $('#cameraStatus').textContent = 'ошибка';
@@ -3410,43 +3652,10 @@ function takeSnapshot() {
     $('#snapshotPreview').src = url;
     $('#snapshotPreview').style.display = 'block';
     $('#snapshotActions').style.display = 'flex';
+    $('#ocrBlock').style.display = 'none';
+    $('#cameraSolution').innerHTML = '';
     toast('Фото сделано');
   }, 'image/jpeg', 0.9);
-}
-
-async function solveFromSnapshot() {
-  if (!currentSnapshot) { toast('Нет фото'); return; }
-  const file = new File([currentSnapshot], 'snapshot.jpg', { type: 'image/jpeg' });
-  await solveFromImageFile(file, '#cameraOCRResult', '#cameraSolution');
-}
-
-async function solveFromImageFile(file, ocrResultSelector, solutionSelector) {
-  if (!qwenPipeline) {
-    toast('Qwen не загружен. Открой вкладку "Qwen Чат".');
-    return;
-  }
-
-  const ocrEl = $(ocrResultSelector);
-  ocrEl.style.display = 'block';
-  ocrEl.textContent = '🔍 Отправка в Qwen...';
-
-  const dataUrl = await new Promise(resolve => {
-    const r = new FileReader();
-    r.onload = e => resolve(e.target.result);
-    r.readAsDataURL(file);
-  });
-
-  // Qwen text-only — просим пользователя описать, либо решаем по подсказке.
-  // Так как модель текстовая, отправляем просто URL картинки + просьбу.
-  const response = await askQwen(
-    `На фото задача по математике. Опиши, что на ней написано, и реши её пошагово. Если не можешь распознать текст, попроси пользователя ввести его вручную.`,
-    { maxTokens: 500 }
-  );
-
-  ocrEl.textContent = '📝 Ответ Qwen:\n\n' + (response || 'нет ответа');
-
-  const solEl = $(solutionSelector);
-  solEl.innerHTML = '<div class="small" style="color:var(--fg2)">Введи текст задачи с фото в поле ввода и нажми «Решить» — так точнее.</div>';
 }
 
 /* ============================================================
@@ -3585,18 +3794,26 @@ function initButtons() {
     currentSnapshot = null;
     $('#snapshotPreview').style.display = 'none';
     $('#snapshotActions').style.display = 'none';
-    $('#cameraOCRResult').style.display = 'none';
+    $('#ocrBlock').style.display = 'none';
     $('#cameraSolution').innerHTML = '';
   };
   $('#btnDeleteSnapshot').onclick = () => {
     currentSnapshot = null;
     $('#snapshotPreview').style.display = 'none';
     $('#snapshotActions').style.display = 'none';
-    $('#cameraOCRResult').style.display = 'none';
+    $('#ocrBlock').style.display = 'none';
     $('#cameraSolution').innerHTML = '';
     toast('Удалено');
   };
-  $('#btnSolveFromCamera').onclick = solveFromSnapshot;
+  $('#btnOCRFromCamera').onclick = ocrFromCamera;
+  $('#btnSolveFromOCR').onclick = () => solveTextWithQwen($('#ocrText').value, $('#cameraSolution'));
+  $('#btnSolveFromOCRrules').onclick = () => solveTextWithRules($('#ocrText').value, $('#cameraSolution'));
+  $('#btnCopyOCR').onclick = async () => {
+    try {
+      await navigator.clipboard.writeText($('#ocrText').value);
+      toast('Скопировано');
+    } catch (e) { toast('Не удалось скопировать'); }
+  };
 
   // Загрузка фото
   $('#photoDropZone2').onclick = () => $('#photoFile2').click();
@@ -3608,6 +3825,8 @@ function initButtons() {
       $('#photoPreview').src = url;
       $('#photoPreview').style.display = 'block';
       $('#photoActions').style.display = 'flex';
+      $('#photoOcrBlock').style.display = 'none';
+      $('#photoSolution').innerHTML = '';
     }
   };
   $('#photoDropZone2').ondragover = e => { e.preventDefault(); $('#photoDropZone2').classList.add('dragover'); };
@@ -3622,17 +3841,19 @@ function initButtons() {
       $('#photoPreview').src = url;
       $('#photoPreview').style.display = 'block';
       $('#photoActions').style.display = 'flex';
+      $('#photoOcrBlock').style.display = 'none';
+      $('#photoSolution').innerHTML = '';
     }
   };
-  $('#btnSolveFromPhoto').onclick = async () => {
-    if (!currentPhotoFile) { toast('Нет фото'); return; }
-    await solveFromImageFile(currentPhotoFile, '#photoOCRResult', '#cameraSolution');
-  };
+  $('#btnOCRFromPhoto').onclick = ocrFromPhoto;
+  $('#btnSolveFromPhotoOCR').onclick = () => solveTextWithQwen($('#photoOcrText').value, $('#photoSolution'));
+  $('#btnSolveFromPhotoOCRrules').onclick = () => solveTextWithRules($('#photoOcrText').value, $('#photoSolution'));
   $('#btnDeletePhoto').onclick = () => {
     currentPhotoFile = null;
     $('#photoPreview').style.display = 'none';
     $('#photoActions').style.display = 'none';
-    $('#photoOCRResult').style.display = 'none';
+    $('#photoOcrBlock').style.display = 'none';
+    $('#photoSolution').innerHTML = '';
   };
 
   // Qwen
@@ -3954,6 +4175,8 @@ function initButtons() {
       tfjs: typeof tf !== 'undefined',
       katex: typeof katex !== 'undefined',
       pdfjs: !!window.pdfjsLib,
+      tesseract: typeof Tesseract !== 'undefined',
+      ocrWorkerReady: !!ocrWorker,
       indexedDB: !!window.indexedDB,
       camera: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
       qwenLoaded: !!qwenPipeline,
@@ -4007,11 +4230,11 @@ async function init() {
   logMsg('WebGPU: ' + (navigator.gpu ? '✓' : '✗'));
   logMsg('TF.js: ' + (typeof tf !== 'undefined' ? '✓' : '✗'));
   logMsg('PDF.js: ' + (window.pdfjsLib ? '✓' : '⚠'));
+  logMsg('Tesseract: ' + (typeof Tesseract !== 'undefined' ? '✓' : '✗'));
   logMsg('Камера: ' + (navigator.mediaDevices ? '✓' : '✗'));
   logMsg('Правил: ' + Object.keys(RULES).length);
   logMsg('Теорем: ' + GEOMETRY_KNOWLEDGE.theorems.length);
 
-  // Слушаем готовность Qwen
   window.addEventListener('qwen-ready', () => {
     logMsg('✅ transformers.js готов');
     $('#statQwen').textContent = 'CDN загружен';
@@ -4019,7 +4242,7 @@ async function init() {
 
   $('#statusBadge').textContent = 'готово';
   $('#statusBadge').className = 'status-badge ok';
-  toast('Готово. Загрузи Qwen во вкладке "Qwen Чат"');
+  toast('Готово. Qwen — во вкладке «Qwen Чат», OCR — во вкладке «Камера».');
 }
 
 window.addEventListener('pdfjs-ready', () => logMsg('✅ PDF.js загружен'));
@@ -4031,7 +4254,6 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 }
 </script>
 
-<!-- PDF.js подключаем через отдельный script type=module — уже включён в конце -->
 <script type="module">
 import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs';
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
