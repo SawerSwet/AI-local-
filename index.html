@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta name="theme-color" content="#0a0a0f">
-<title>Math Solver 8 — ONNX Runtime Web Direct</title>
+<title>Math Solver 8 — ONNX Runtime Direct + KV Cache</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <style>
   :root{
@@ -335,22 +335,23 @@
 <!-- ============ QWEN ЧАТ ============ -->
 <section class="panel" id="panel-ai">
   <div class="card">
-    <h2>🤖 Qwen2.5 — ONNX Runtime Web Direct</h2>
+    <h2>🤖 Qwen2.5 — ONNX Runtime Direct + KV-кэш</h2>
     <p class="small" style="color:var(--fg2);margin:0 0 8px">
-      Прямая загрузка ONNX через <code>onnxruntime-web</code> без обёрток.
-      Одна копия весов в памяти, никаких дубликатов, никаких WebGPU-копий.
+      Прямая загрузка ONNX через <code>onnxruntime-web</code>, ручное управление
+      <code>past_key_values</code> для 24 слоёв. WASM, 4 потока, без WebGPU.
       Модель: <b>Qwen2.5-0.5B-Instruct q4</b> (~350 МБ).
     </p>
     <div class="stat-line mb"><span>Модель:</span><b id="aiModelStatus">не загружена</b></div>
     <div class="stat-line mb"><span>Бэкенд:</span><b id="aiDevice">—</b></div>
     <div class="stat-line mb"><span>Токенизатор:</span><b id="aiTokenizerStatus">не загружен</b></div>
+    <div class="stat-line mb"><span>Слоёв KV:</span><b id="aiKvLayers">—</b></div>
     <div class="progress" id="aiLoadProgress"><div id="aiLoadFill"></div></div>
     <div class="row">
       <button class="btn primary flex1" id="btnLoadAI">📥 Загрузить Qwen2.5-0.5B</button>
     </div>
     <div class="small mt" style="color:var(--fg2)">
-      💡 Модель качается с HuggingFace. Первая загрузка 3–8 минут, дальше — из кэша браузера.
-      Памяти ест в 2–3 раза меньше, чем transformers.js, потому что нет дублирующих буферов.
+      💡 Первая загрузка 3–8 минут, дальше — из кэша браузера.
+      Память ~700 МБ в пике для 0.5B, ~1.8 ГБ для 1.5B.
     </div>
   </div>
 
@@ -363,7 +364,7 @@
       <button class="btn" id="btnAIClear">🗑</button>
     </div>
     <div class="row mt">
-      <input type="number" id="aiMaxTokens" value="300" style="max-width:100px" title="Макс токенов">
+      <input type="number" id="aiMaxTokens" value="200" style="max-width:100px" title="Макс токенов">
       <input type="number" id="aiTemperature" value="0.3" step="0.1" min="0" max="2" style="max-width:100px" title="Температура">
       <button class="btn small" id="btnAIPresetGeometry">📐 Геометрия</button>
       <button class="btn small" id="btnAIPresetAlgebra">🧮 Алгебра</button>
@@ -2173,12 +2174,13 @@ function drawTaskFigure(taskText, container) {
 }
 
 /* ============================================================
-   QWEN — прямой onnxruntime-web без transformers.js
+   QWEN — прямой onnxruntime-web с ручным KV-кэшем
    ============================================================ */
 let qwenSession = null;
 let qwenTokenizer = null;
 let qwenLoading = false;
 let qwenDevice = '—';
+let qwenKvLayers = 0;
 let qwenCurrentPrompt = 'Ты учитель математики 8 класса. Решай пошагово по-русски. Используй LaTeX для формул.';
 
 const QWEN_IM_START = 151644;
@@ -2197,7 +2199,6 @@ function getModelRepo() {
     : 'onnx-community/Qwen2.5-1.5B-Instruct';
 }
 
-/* Скачивание с прогрессом через fetch + ReadableStream */
 async function fetchWithProgress(url, onProgress) {
   const resp = await fetch(url);
   if (!resp.ok) throw new Error('HTTP ' + resp.status + ' для ' + url);
@@ -2225,6 +2226,18 @@ async function fetchWithProgress(url, onProgress) {
   return result;
 }
 
+function countKvLayers(inputNames) {
+  let maxLayer = -1;
+  for (const name of inputNames) {
+    const m = name.match(/past_key_values\.(\d+)\.key/);
+    if (m) {
+      const idx = parseInt(m[1]);
+      if (idx > maxLayer) maxLayer = idx;
+    }
+  }
+  return maxLayer + 1;
+}
+
 async function loadQwen() {
   if (qwenSession || qwenLoading) return;
 
@@ -2245,7 +2258,6 @@ async function loadQwen() {
   logMsg('🧠 Модель: ' + repo);
 
   try {
-    // 1. Настраиваем WASM
     ort.env.wasm.numThreads = Math.min(navigator.hardwareConcurrency || 4, 4);
     ort.env.wasm.simd = true;
     ort.env.logLevel = 'error';
@@ -2254,7 +2266,6 @@ async function loadQwen() {
     $('#aiDevice').textContent = qwenDevice;
     logMsg('🎯 Бэкенд: ' + qwenDevice + ' (потоков: ' + ort.env.wasm.numThreads + ')');
 
-    // 2. Загружаем токенизатор
     if (!window.__AutoTokenizer) {
       logMsg('⏳ Ждём токенизатор...');
       await new Promise(r => {
@@ -2269,7 +2280,6 @@ async function loadQwen() {
       $('#aiTokenizerStatus').textContent = 'готов';
     }
 
-    // 3. Скачиваем ONNX-модель
     logMsg('📦 Скачивание ONNX (~' + (mobile ? '350' : '950') + ' МБ)...');
     $('#aiLoadFill').style.width = '5%';
 
@@ -2285,22 +2295,24 @@ async function loadQwen() {
     logMsg('✅ Файл скачан, размер: ' + (modelBuffer.byteLength / 1024 / 1024).toFixed(1) + ' МБ');
     $('#aiLoadFill').style.width = '50%';
 
-    // 4. Создаём сессию
     logMsg('⚙️ Создание сессии...');
-    qwenSession = await ort.InferenceSession.create(modelBuffer, {
+    qwenSession = await ort.InferenceSession.create(modelBuffer.buffer, {
       executionProviders: ['wasm'],
       graphOptimizationLevel: 'all',
       executionMode: 'sequential'
     });
 
     logMsg('✅ Сессия готова');
-    logMsg('Входы модели: ' + qwenSession.inputNames.join(', '));
-    logMsg('Выходы модели: ' + qwenSession.outputNames.join(', '));
-    $('#aiLoadFill').style.width = '90%';
+    logMsg('Входы модели: ' + qwenSession.inputNames.slice(0, 3).join(', ') + ' ... (всего ' + qwenSession.inputNames.length + ')');
+    logMsg('Выходы модели: ' + qwenSession.outputNames.slice(0, 3).join(', ') + ' ... (всего ' + qwenSession.outputNames.length + ')');
 
+    qwenKvLayers = countKvLayers(qwenSession.inputNames);
+    $('#aiKvLayers').textContent = String(qwenKvLayers);
+    logMsg('🧠 Слоёв KV-кэша: ' + qwenKvLayers);
+
+    $('#aiLoadFill').style.width = '90%';
     logMsg('🧹 Буфер скачанного файла освобождён');
 
-    // 5. Прогрев
     logMsg('🔥 Прогрев модели...');
     $('#aiLoadFill').style.width = '95%';
     try {
@@ -2329,7 +2341,6 @@ async function loadQwen() {
   }
 }
 
-/* Сэмплирование из logits */
 function sampleFromLogits(logits, temperature) {
   if (temperature <= 0.01) {
     let bestIdx = 0, bestVal = -Infinity;
@@ -2357,75 +2368,95 @@ function sampleFromLogits(logits, temperature) {
   return probs.length - 1;
 }
 
-/* Основная функция генерации */
 async function qwenGenerate(userMessage, options = {}) {
   if (!qwenSession) throw new Error('Сессия не готова');
 
-  const maxNewTokens = options.maxNewTokens || 300;
+  const maxNewTokens = options.maxNewTokens || 200;
   const temperature = options.temperature !== undefined ? options.temperature : 0.3;
   const systemPrompt = options.systemPrompt || qwenCurrentPrompt;
 
-  // 1. Формируем prompt в формате Qwen2.5 ChatML
   let prompt = '';
   prompt += `<|im_start|>system\n${systemPrompt}<|im_end|>\n`;
   prompt += `<|im_start|>user\n${userMessage}<|im_end|>\n`;
   prompt += `<|im_start|>assistant\n`;
 
-  // 2. Токенизация
-  if (!qwenTokenizer) {
-    throw new Error('Токенизатор не загружен');
-  }
+  if (!qwenTokenizer) throw new Error('Токенизатор не загружен');
 
   const encoded = await qwenTokenizer(prompt, { return_tensor: false });
   let inputIds = encoded.input_ids;
-
   if (Array.isArray(inputIds[0])) inputIds = inputIds[0];
 
-  const generated = [];
+  // Параметры Qwen2.5-0.5B/1.5B
+  const numKvHeads = 2;
+  const headDim = 64;
 
-  // 3. Генерация по токену
+  // Инициализируем пустой KV-кэш для всех слоёв
+  const pastKeyValues = {};
+  for (let i = 0; i < qwenKvLayers; i++) {
+    const keyName = `past_key_values.${i}.key`;
+    const valName = `past_key_values.${i}.value`;
+    if (qwenSession.inputNames.includes(keyName)) {
+      pastKeyValues[keyName] = new ort.Tensor(
+        'float32',
+        new Float32Array(0),
+        [1, numKvHeads, 0, headDim]
+      );
+    }
+    if (qwenSession.inputNames.includes(valName)) {
+      pastKeyValues[valName] = new ort.Tensor(
+        'float32',
+        new Float32Array(0),
+        [1, numKvHeads, 0, headDim]
+      );
+    }
+  }
+
+  const generated = [];
+  let positionOffset = 0;
+  let currentInputIds = inputIds.slice();
+
   for (let step = 0; step < maxNewTokens; step++) {
-    const seqLen = inputIds.length;
+    const seqLen = currentInputIds.length;
 
     const inputIdsTensor = new ort.Tensor(
       'int64',
-      BigInt64Array.from(inputIds.map(x => BigInt(x))),
-      [1, seqLen]
-    );
-    const attentionMaskTensor = new ort.Tensor(
-      'int64',
-      BigInt64Array.from(inputIds.map(() => 1n)),
+      BigInt64Array.from(currentInputIds.map(x => BigInt(x))),
       [1, seqLen]
     );
 
-    const feeds = {};
-    for (const name of qwenSession.inputNames) {
-      if (name === 'input_ids') feeds[name] = inputIdsTensor;
-      else if (name === 'attention_mask') feeds[name] = attentionMaskTensor;
-      else if (name === 'position_ids') {
-        // position_ids: [1, seqLen]
-        const pos = new BigInt64Array(seqLen);
-        for (let i = 0; i < seqLen; i++) pos[i] = BigInt(i);
-        feeds[name] = new ort.Tensor('int64', pos, [1, seqLen]);
-      }
+    const feeds = {
+      input_ids: inputIdsTensor
+    };
+
+    if (qwenSession.inputNames.includes('attention_mask')) {
+      feeds.attention_mask = new ort.Tensor(
+        'int64',
+        BigInt64Array.from(currentInputIds.map(() => 1n)),
+        [1, seqLen]
+      );
+    }
+
+    if (qwenSession.inputNames.includes('position_ids')) {
+      const pos = new BigInt64Array(seqLen);
+      for (let i = 0; i < seqLen; i++) pos[i] = BigInt(positionOffset + i);
+      feeds.position_ids = new ort.Tensor('int64', pos, [1, seqLen]);
+    }
+
+    // Подаём прошлый KV-кэш
+    for (const [name, tensor] of Object.entries(pastKeyValues)) {
+      feeds[name] = tensor;
     }
 
     const output = await qwenSession.run(feeds);
 
     let logitsTensor = null;
     for (const name of qwenSession.outputNames) {
-      if (name.includes('logits')) {
-        logitsTensor = output[name];
-        break;
-      }
+      if (name === 'logits') { logitsTensor = output[name]; break; }
     }
     if (!logitsTensor) {
       for (const name of qwenSession.outputNames) {
         const t = output[name];
-        if (t && t.dims && t.dims.length === 3) {
-          logitsTensor = t;
-          break;
-        }
+        if (t && t.dims && t.dims.length === 3) { logitsTensor = t; break; }
       }
     }
     if (!logitsTensor) throw new Error('Не найден выход logits');
@@ -2443,30 +2474,36 @@ async function qwenGenerate(userMessage, options = {}) {
     if (nextToken === QWEN_IM_END || nextToken === QWEN_EOS) break;
 
     generated.push(nextToken);
-    inputIds.push(nextToken);
+
+    // После первого шага подаём только последний токен, потому что KV-кэш уже накоплен
+    currentInputIds = [nextToken];
+
+    // Обновляем past_key_values
+    for (const name of qwenSession.outputNames) {
+      if (name.startsWith('present.')) {
+        const newName = name.replace('present.', 'past_key_values.');
+        pastKeyValues[newName] = output[name];
+      }
+    }
+
+    positionOffset += seqLen;
 
     if (step % 5 === 0) {
       await new Promise(r => setTimeout(r, 0));
     }
-
-    if (inputIds.length > 2048) {
-      inputIds = inputIds.slice(-2000);
-    }
   }
 
-  // 4. Декодирование
   const text = await qwenTokenizer.decode(generated, { skip_special_tokens: true });
   return text;
 }
 
-/* Публичная функция — совместимость с остальным кодом */
 async function askQwen(userMessage, options = {}) {
   if (!qwenSession) {
     await loadQwen();
     if (!qwenSession) return null;
   }
   try {
-    const maxTokens = options.maxTokens || parseInt($('#aiMaxTokens').value) || 300;
+    const maxTokens = options.maxTokens || parseInt($('#aiMaxTokens').value) || 200;
     const temperature = options.temperature !== undefined
       ? options.temperature
       : (parseFloat($('#aiTemperature').value) || 0.3);
@@ -2665,7 +2702,7 @@ async function solveTextWithQwen(text, solutionEl) {
 {"steps":[{"text":"пояснение","latex":"формула"}],"answerLatex":"ответ","answer":"ответ текстом"}
 Задача: ${text}`;
 
-  const resp = await askQwen(prompt, { temperature: 0.1, maxTokens: 500 });
+  const resp = await askQwen(prompt, { temperature: 0.1, maxTokens: 300 });
   solutionEl.innerHTML = '';
 
   if (!resp) {
@@ -2872,7 +2909,7 @@ async function autoProcessBook() {
           const prompt = `Реши задачу пошагово. Ответь СТРОГО в формате JSON:
 {"steps":[{"text":"пояснение","latex":"формула"}],"answerLatex":"ответ","answer":"ответ текстом"}
 Задача: ${task}`;
-          const qwenResp = await askQwen(prompt, { temperature: 0.1, maxTokens: 500 });
+          const qwenResp = await askQwen(prompt, { temperature: 0.1, maxTokens: 300 });
           if (qwenResp) {
             await saveToDataset(task, qwenResp, { verified: false, source: 'qwen' });
             savedToDataset++;
@@ -3578,7 +3615,7 @@ async function solveAndShow() {
 {"steps":[{"text":"пояснение","latex":"формула"}],"answerLatex":"ответ","answer":"ответ текстом"}
 Задача: ${raw}`;
 
-    const qwenResp = await askQwen(prompt, { temperature: 0.1, maxTokens: 500 });
+    const qwenResp = await askQwen(prompt, { temperature: 0.1, maxTokens: 300 });
     loading.remove();
 
     if (qwenResp) {
@@ -4385,6 +4422,8 @@ function initButtons() {
       onnxruntime: typeof ort !== 'undefined',
       tokenizer: !!window.__AutoTokenizer,
       qwenSessionReady: !!qwenSession,
+      qwenKvLayers: qwenKvLayers,
+      qwenDevice: qwenDevice,
       tfjs: typeof tf !== 'undefined',
       katex: typeof katex !== 'undefined',
       pdfjs: !!window.pdfjsLib,
@@ -4392,7 +4431,6 @@ function initButtons() {
       ocrWorkerReady: !!ocrWorker,
       indexedDB: !!window.indexedDB,
       camera: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
-      qwenDevice: qwenDevice,
       classifierTrained: classifierTrained,
       rules: Object.keys(RULES).length,
       theorems: GEOMETRY_KNOWLEDGE.theorems.length,
@@ -4449,7 +4487,7 @@ async function init() {
   logMsg('Камера: ' + (navigator.mediaDevices ? '✓' : '✗'));
   logMsg('Правил: ' + Object.keys(RULES).length);
   logMsg('Теорем: ' + GEOMETRY_KNOWLEDGE.theorems.length);
-  logMsg('Qwen: прямой onnxruntime-web, WASM, без WebGPU');
+  logMsg('Qwen: onnxruntime-web + ручной KV-кэш, WASM');
 
   window.addEventListener('tokenizer-ready', () => {
     logMsg('✅ AutoTokenizer готов');
