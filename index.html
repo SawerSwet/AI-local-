@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta name="theme-color" content="#0a0a0f">
-<title>Math Solver 8 — ONNX Runtime Direct + KV Cache</title>
+<title>Math Solver 9 — Qwen Classifier + Geometry AI</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <style>
   :root{
@@ -187,12 +187,44 @@
   .camera-btn:active{transform:scale(.9);}
   .snapshot-preview{max-width:100%;border-radius:8px;margin:8px auto;
     display:block;border:1px solid var(--border);}
+  .block-item{background:var(--bg3);border-radius:8px;padding:8px;margin:6px 0;
+    border-left:3px solid var(--border);font-size:12px;line-height:1.5;}
+  .block-item.task{border-left-color:#ffab00;}
+  .block-item.example{border-left-color:#00e676;}
+  .block-item.property{border-left-color:#00d2ff;}
+  .block-item.theory{border-left-color:#6c5ce7;}
+  .block-item.noise{border-left-color:#606070;opacity:.5;}
+  .block-item .block-header{display:flex;gap:6px;align-items:center;
+    margin-bottom:6px;flex-wrap:wrap;}
+  .block-item .block-type{font-size:10px;font-weight:700;padding:2px 6px;
+    border-radius:8px;background:var(--bg2);color:var(--fg2);cursor:pointer;}
+  .block-item .block-type.task{color:#ffab00;}
+  .block-item .block-type.example{color:#00e676;}
+  .block-item .block-type.property{color:#00d2ff;}
+  .block-item .block-type.theory{color:#6c5ce7;}
+  .block-item .block-topic{font-size:10px;color:var(--fg2);}
+  .block-item .block-content{color:var(--fg);font-size:12px;}
+  .block-item .block-actions{margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;}
+  .type-picker{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+  .type-picker button{padding:3px 8px;font-size:10px;border-radius:8px;
+    border:1px solid var(--border);background:var(--bg2);color:var(--fg2);
+    cursor:pointer;}
+  .type-picker button.active{background:var(--accent);color:#fff;
+    border-color:var(--accent);}
+  .topic-item{background:var(--bg3);border-radius:6px;padding:8px;
+    margin-bottom:6px;font-size:11px;cursor:pointer;}
+  .topic-item:hover{background:var(--accent);color:#fff;}
+  .geo-result{background:var(--bg3);border-radius:8px;padding:10px;
+    margin-top:8px;font-size:12px;}
+  .geo-result .geo-title{font-weight:700;color:var(--accent2);
+    margin-bottom:6px;font-size:13px;}
+  .geo-result .geo-line{font-size:11px;color:var(--fg2);margin:2px 0;}
 </style>
 </head>
 <body data-theme="dark">
 
 <header>
-  <h1>📐 Math Solver 8</h1>
+  <h1>📐 Math Solver 9</h1>
   <span id="statusBadge" class="status-badge">загрузка...</span>
   <button class="theme-btn" id="themeBtn">🌙</button>
 </header>
@@ -218,7 +250,8 @@
   <div class="card">
     <h2>🧮 Введи задачу</h2>
     <div class="mode-switch">
-      <button class="mode-btn active" data-mode="auto">🎯 Авто (правила → Qwen)</button>
+      <button class="mode-btn active" data-mode="auto">🎯 Авто (пример → правила → Qwen)</button>
+      <button class="mode-btn" data-mode="example">📚 По примеру из учебника</button>
       <button class="mode-btn" data-mode="rules">📐 Только правила</button>
       <button class="mode-btn" data-mode="ai">🤖 Только Qwen</button>
     </div>
@@ -235,6 +268,7 @@
     <h2>📝 Решение</h2>
     <div id="detectedType" class="small mb" style="color:var(--fg2)"></div>
     <div id="neuralPrediction" class="small mb" style="color:var(--accent2);display:none"></div>
+    <div id="exampleSource" class="small mb" style="color:var(--success);display:none"></div>
     <div id="solutionSteps"></div>
     <div id="solutionAnswer"></div>
     <div id="figureContainer"></div>
@@ -252,6 +286,7 @@
     <div class="stat-line"><span>Правил:</span><b id="statRules">0</b></div>
     <div class="stat-line"><span>Учебников:</span><b id="statBooks">0</b></div>
     <div class="stat-line"><span>Страниц:</span><b id="statPages">0</b></div>
+    <div class="stat-line"><span>Блоков:</span><b id="statBlocks">0</b></div>
     <div class="stat-line"><span>Шаблонов:</span><b id="statTemplates">0</b></div>
     <div class="stat-line"><span>Примеров:</span><b id="statExamples">0</b></div>
     <div class="stat-line"><span>В датасете:</span><b id="statDataset">0</b></div>
@@ -266,8 +301,9 @@
   <div class="card">
     <h2>📷 Сфотографировать задачу</h2>
     <p class="small" style="color:var(--fg2);margin:0 0 8px">
-      Наведи камеру на задачу и нажми кружок. Tesseract распознает текст (rus+eng),
-      затем можно поправить руками и отправить в Qwen или решить правилами.
+      Наведи камеру на задачу и нажми кружок. Tesseract распознает текст (rus+eng).
+      Если на фото есть геометрия (треугольник, ромб, углы, буквы A B C) — приложение
+      само извлечёт вершины, стороны, углы и нарисует чертёж.
     </p>
     <div class="stat-line mb"><span>Камера:</span><b id="cameraStatus">не активна</b></div>
     <div>
@@ -295,9 +331,13 @@
       <div class="progress" id="ocrProgress"><div id="ocrFill"></div></div>
       <label class="small" style="color:var(--fg2)">Распознанный текст (можно править):</label>
       <textarea id="ocrText" style="min-height:100px" placeholder="Здесь появится распознанный текст задачи..."></textarea>
+      <div id="ocrGeoResult"></div>
+      <div id="ocrFigureContainer"></div>
       <div class="row mt">
         <button class="btn primary flex1" id="btnSolveFromOCR">🤖 Решить через Qwen</button>
         <button class="btn" id="btnSolveFromOCRrules">📐 Правилами</button>
+        <button class="btn" id="btnSolveFromOCRexample">📚 По примеру</button>
+        <button class="btn" id="btnDrawFromOCR">📐 Нарисовать по условию</button>
         <button class="btn" id="btnCopyOCR">📋 Копировать</button>
       </div>
     </div>
@@ -322,9 +362,13 @@
       <div class="progress" id="photoOcrProgress"><div id="photoOcrFill"></div></div>
       <label class="small" style="color:var(--fg2)">Распознанный текст (можно править):</label>
       <textarea id="photoOcrText" style="min-height:100px"></textarea>
+      <div id="photoGeoResult"></div>
+      <div id="photoFigureContainer"></div>
       <div class="row mt">
         <button class="btn primary flex1" id="btnSolveFromPhotoOCR">🤖 Решить через Qwen</button>
         <button class="btn" id="btnSolveFromPhotoOCRrules">📐 Правилами</button>
+        <button class="btn" id="btnSolveFromPhotoOCRexample">📚 По примеру</button>
+        <button class="btn" id="btnDrawFromPhoto">📐 Нарисовать по условию</button>
       </div>
     </div>
 
@@ -458,8 +502,13 @@
 
   <div class="card">
     <h2>📐 Шаблоны решений из учебников</h2>
+    <p class="small" style="color:var(--fg2);margin:0 0 8px">
+      Строятся автоматически из блоков типа <b>example</b> после разбора страниц через Qwen.
+      По ним решаются похожие задачи — как учитель по образцу.
+    </p>
     <div class="row mb">
       <button class="btn small" id="btnRefreshTemplates">🔄 Обновить</button>
+      <button class="btn small" id="btnRebuildTemplates">🔨 Пересобрать из блоков</button>
       <button class="btn small danger" id="btnCleanTemplates">🧹 Очистить мусор</button>
       <button class="btn small danger" id="btnClearTemplates">🗑 Очистить всё</button>
     </div>
@@ -487,9 +536,11 @@
   <div class="card" id="bookCard" style="display:none">
     <h2>📖 <span id="bookNameLabel">—</span></h2>
     <div class="stat-line"><span>Страниц:</span><b id="bookPages">0</b></div>
+    <div class="stat-line"><span>Блоков:</span><b id="bookBlocks">0</b></div>
     <div class="stat-line"><span>Шаблонов:</span><b id="bookTemplates">0</b></div>
     <div class="row mt">
       <button class="btn flex1" id="btnViewBookPages">📄 Страницы</button>
+      <button class="btn flex1" id="btnViewBookBlocks">🧩 Блоки</button>
       <button class="btn flex1" id="btnViewBookTemplates">📐 Шаблоны</button>
       <button class="btn primary flex1" id="btnAutoProcessBook">🤖 Обработать через Qwen</button>
       <button class="btn danger" id="btnDeleteBook">🗑</button>
@@ -524,11 +575,16 @@
     <div class="row mt">
       <button class="btn small" id="btnPdfRaw">📄 Сырой текст</button>
       <button class="btn small" id="btnPdfEdit">✏️ Редактировать</button>
+      <button class="btn small primary" id="btnAiClassifyPage">🤖 Разобрать страницу через ИИ</button>
+      <button class="btn small" id="btnShowPageBlocks">🧩 Блоки страницы</button>
     </div>
     <div id="pdfRawText" class="code-out mt" style="display:none">—</div>
     <textarea id="pdfEditedText" class="mt" style="display:none;min-height:200px"></textarea>
     <button class="btn primary mt" id="btnSaveEditedPage" style="display:none">💾 Сохранить</button>
     <div id="pdfPageText" class="code-out mt" style="display:none">—</div>
+    <div id="pdfAiProgress" class="progress"><div id="pdfAiFill"></div></div>
+    <div id="pdfAiStatus" class="small mt" style="color:var(--fg2);display:none">—</div>
+    <div id="pageBlocksContainer" class="mt"></div>
     <canvas id="pdfCanvas" class="preview mt" style="display:none"></canvas>
   </div>
 </section>
@@ -625,6 +681,7 @@
     <div class="stat-line mt"><span>Размер:</span><b id="exportSize">—</b></div>
     <div class="stat-line"><span>Учебников:</span><b id="exportBooks">0</b></div>
     <div class="stat-line"><span>Страниц:</span><b id="exportPages">0</b></div>
+    <div class="stat-line"><span>Блоков:</span><b id="exportBlocks">0</b></div>
     <div class="stat-line"><span>Шаблонов:</span><b id="exportTemplates">0</b></div>
     <div class="stat-line"><span>Примеров:</span><b id="exportExamples">0</b></div>
   </div>
@@ -1264,8 +1321,8 @@ function detectAndSolve(input) {
 /* ============================================================
    БАЗА ДАННЫХ
    ============================================================ */
-const DB_NAME = 'mathsolver8_qwen';
-const DB_VERSION = 4;
+const DB_NAME = 'mathsolver9_qwen';
+const DB_VERSION = 5;
 let db = null;
 let dbReady = null;
 
@@ -1281,6 +1338,18 @@ function openDB() {
       if (!d.objectStoreNames.contains('pages')) {
         const s = d.createObjectStore('pages', { keyPath: 'id' });
         s.createIndex('bookId', 'bookId');
+      }
+      if (!d.objectStoreNames.contains('pageBlocks')) {
+        const s = d.createObjectStore('pageBlocks', { keyPath: 'id' });
+        s.createIndex('pageId', 'pageId');
+        s.createIndex('bookId', 'bookId');
+        s.createIndex('type', 'type');
+        s.createIndex('topic', 'topic');
+      }
+      if (!d.objectStoreNames.contains('solutionTemplates')) {
+        const s = d.createObjectStore('solutionTemplates', { keyPath: 'id' });
+        s.createIndex('bookId', 'bookId');
+        s.createIndex('topic', 'topic');
       }
       if (!d.objectStoreNames.contains('templates')) {
         const s = d.createObjectStore('templates', { keyPath: 'id' });
@@ -1324,6 +1393,18 @@ function idbGetAll(store) {
       await openDB();
       const tx = db.transaction(store, 'readonly');
       const r = tx.objectStore(store).getAll();
+      r.onsuccess = () => resolve(r.result);
+      r.onerror = () => reject(r.error);
+    } catch (e) { reject(e); }
+  });
+}
+function idbGetByIndex(store, indexName, value) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await openDB();
+      const tx = db.transaction(store, 'readonly');
+      const idx = tx.objectStore(store).index(indexName);
+      const r = idx.getAll(value);
       r.onsuccess = () => resolve(r.result);
       r.onerror = () => reject(r.error);
     } catch (e) { reject(e); }
@@ -1818,8 +1899,142 @@ function parseTaskToFigure(taskText) {
 }
 
 /* ============================================================
-   ПОСТРОЕНИЕ ФИГУР
+   ИЗВЛЕЧЕНИЕ ГЕОМЕТРИИ ИЗ ТЕКСТА (для OCR)
    ============================================================ */
+function extractGeometryFromText(text) {
+  const result = {
+    figureType: null,
+    vertices: [],
+    sides: {},
+    angles: {},
+    diagonals: {},
+    special: [],
+    rawText: text
+  };
+  if (!text || text.length < 5) return result;
+
+  const lower = text.toLowerCase();
+
+  const typeMap = [
+    { kw: ['треугольник', 'треуг'], type: 'triangle' },
+    { kw: ['прямоугольн'], type: 'right_triangle' },
+    { kw: ['равнобедренн'], type: 'isosceles_triangle' },
+    { kw: ['равносторонн'], type: 'equilateral_triangle' },
+    { kw: ['параллелограмм'], type: 'parallelogram' },
+    { kw: ['прямоугольник'], type: 'rectangle' },
+    { kw: ['ромб'], type: 'rhombus' },
+    { kw: ['квадрат'], type: 'square' },
+    { kw: ['трапец'], type: 'trapezoid' },
+    { kw: ['окружност', 'круг'], type: 'circle' },
+    { kw: ['вектор'], type: 'vector' }
+  ];
+  for (const tm of typeMap) {
+    if (tm.kw.some(k => lower.includes(k))) {
+      result.figureType = tm.type;
+      break;
+    }
+  }
+
+  const vertMatches = text.match(/\b[A-Z]\b/g) || [];
+  const unique = [...new Set(vertMatches)];
+  const stopWords = new Set(['S', 'V', 'P', 'R', 'D', 'H', 'M']);
+  const letters = unique.filter(v => !stopWords.has(v) || /[A-Z]/.test(v));
+  result.vertices = letters;
+
+  const sideRegex = /\b([A-Z])([A-Z])\s*=\s*(\d+(?:[.,]\d+)?)/g;
+  let m;
+  while ((m = sideRegex.exec(text)) !== null) {
+    result.sides[m[1] + m[2]] = parseFloat(m[3].replace(',', '.'));
+  }
+
+  const angleRegex = /[∠∠]\s*([A-Z])(?:\s*=\s*)?(\d+(?:[.,]\d+)?)°/g;
+  while ((m = angleRegex.exec(text)) !== null) {
+    result.angles[m[1]] = parseFloat(m[2].replace(',', '.'));
+  }
+
+  const angleWordRegex = /угол\s+([A-Z])\s*=\s*(\d+(?:[.,]\d+)?)/gi;
+  while ((m = angleWordRegex.exec(text)) !== null) {
+    result.angles[m[1]] = parseFloat(m[2].replace(',', '.'));
+  }
+
+  const diagRegex = /диагонал\w*\s*([A-Z])([A-Z])\s*=\s*(\d+(?:[.,]\d+)?)/gi;
+  while ((m = diagRegex.exec(text)) !== null) {
+    result.diagonals[m[1] + m[2]] = parseFloat(m[3].replace(',', '.'));
+  }
+  const diagWordRegex = /диагонал\w*\s*(?:равны\s*)?(\d+(?:[.,]\d+)?)\s*и\s*(\d+(?:[.,]\d+)?)/i;
+  const dm = text.match(diagWordRegex);
+  if (dm) {
+    result.diagonals['d1'] = parseFloat(dm[1].replace(',', '.'));
+    result.diagonals['d2'] = parseFloat(dm[2].replace(',', '.'));
+  }
+
+  const specialKw = ['биссектрис', 'медиан', 'высот', 'касательн', 'вписанн', 'описанн', 'перпендикуляр', 'параллельн'];
+  for (const kw of specialKw) {
+    if (lower.includes(kw)) result.special.push(kw);
+  }
+
+  return result;
+}
+
+function summarizeGeometry(geo) {
+  const parts = [];
+  if (geo.figureType) parts.push('фигура: ' + geo.figureType);
+  if (geo.vertices.length > 0) parts.push('вершины: ' + geo.vertices.join(', '));
+  const sideEntries = Object.entries(geo.sides);
+  if (sideEntries.length > 0) parts.push('стороны: ' + sideEntries.map(([k, v]) => k + '=' + v).join(', '));
+  const angleEntries = Object.entries(geo.angles);
+  if (angleEntries.length > 0) parts.push('углы: ' + angleEntries.map(([k, v]) => '∠' + k + '=' + v + '°').join(', '));
+  const diagEntries = Object.entries(geo.diagonals);
+  if (diagEntries.length > 0) parts.push('диагонали: ' + diagEntries.map(([k, v]) => k + '=' + v).join(', '));
+  if (geo.special.length > 0) parts.push('элементы: ' + geo.special.join(', '));
+  return parts.join(' · ');
+}
+
+function buildFigureFromGeometry(geo, canvas) {
+  const type = geo.figureType;
+  if (!type) return null;
+
+  const fakeTask = buildFakeTaskFromGeo(geo);
+  const fig = parseTaskToFigure(fakeTask);
+  if (!fig) return null;
+  return buildFigureFromParse(fig, canvas);
+}
+
+function buildFakeTaskFromGeo(geo) {
+  let text = '';
+  if (geo.figureType === 'triangle') text += 'треугольник ' + geo.vertices.slice(0, 3).join('');
+  else if (geo.figureType === 'right_triangle') text += 'прямоугольный треугольник ' + geo.vertices.slice(0, 3).join('');
+  else if (geo.figureType === 'isosceles_triangle') text += 'равнобедренный треугольник ' + geo.vertices.slice(0, 3).join('');
+  else if (geo.figureType === 'equilateral_triangle') text += 'равносторонний треугольник ' + geo.vertices.slice(0, 3).join('');
+  else if (geo.figureType === 'rhombus') text += 'ромб ' + geo.vertices.slice(0, 4).join('');
+  else if (geo.figureType === 'parallelogram') text += 'параллелограмм ' + geo.vertices.slice(0, 4).join('');
+  else if (geo.figureType === 'rectangle') text += 'прямоугольник ' + geo.vertices.slice(0, 4).join('');
+  else if (geo.figureType === 'square') text += 'квадрат ' + geo.vertices.slice(0, 4).join('');
+  else if (geo.figureType === 'trapezoid') text += 'трапеция ' + geo.vertices.slice(0, 4).join('');
+  else if (geo.figureType === 'circle') text += 'окружность радиус 5';
+  else text += 'треугольник ABC';
+
+  for (const [k, v] of Object.entries(geo.sides)) {
+    text += ' ' + k + '=' + v;
+  }
+  if (geo.diagonals.d1 && geo.diagonals.d2) {
+    text += ' диагонали ' + geo.diagonals.d1 + ' и ' + geo.diagonals.d2;
+  }
+  for (const [k, v] of Object.entries(geo.angles)) {
+    text += ' ∠' + k + '=' + v;
+  }
+  if (geo.special.includes('биссектрис') && geo.vertices.length >= 3) {
+    text += ' биссектриса ' + geo.vertices[0] + 'D';
+  }
+  if (geo.special.includes('медиан') && geo.vertices.length >= 3) {
+    text += ' медиана ' + geo.vertices[0] + 'M';
+  }
+  if (geo.special.includes('высот') && geo.vertices.length >= 3) {
+    text += ' высота ' + geo.vertices[0] + 'H';
+  }
+  return text;
+}
+
 function buildTriangleFigure(fig, canvas) {
   const f = new Figure(canvas);
   const [A, B, C] = fig.points;
@@ -2173,6 +2388,53 @@ function drawTaskFigure(taskText, container) {
   container.appendChild(card);
 }
 
+function drawGeometryFromOCR(geo, container) {
+  container.innerHTML = '';
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = '<h2>📐 Чертёж по условию</h2>';
+
+  const summary = document.createElement('div');
+  summary.className = 'geo-result';
+  summary.innerHTML = '<div class="geo-title">Распознанная геометрия</div>' +
+    '<div class="geo-line">' + escapeHtml(summarizeGeometry(geo)) + '</div>';
+  card.appendChild(summary);
+
+  if (!geo.figureType) {
+    const warn = document.createElement('div');
+    warn.className = 'small';
+    warn.style.color = 'var(--warn)';
+    warn.style.marginTop = '8px';
+    warn.textContent = 'Тип фигуры не распознан, но вершины/стороны извлечены.';
+    card.appendChild(warn);
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 500;
+  canvas.height = 400;
+  canvas.className = 'preview';
+  card.appendChild(canvas);
+
+  try {
+    const figure = buildFigureFromGeometry(geo, canvas);
+    if (figure) {
+      figure.render();
+    } else {
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#333';
+      ctx.font = '14px sans-serif';
+      ctx.fillText('Не удалось построить чертёж по условию.', 20, 40);
+      ctx.fillText('Попробуй дополнить текст: тип фигуры + вершины + стороны.', 20, 70);
+    }
+  } catch (e) {
+    logMsg('Ошибка построения чертежа из OCR: ' + e.message);
+  }
+
+  container.appendChild(card);
+}
+
 /* ============================================================
    QWEN — прямой onnxruntime-web с ручным KV-кэшем
    ============================================================ */
@@ -2386,11 +2648,9 @@ async function qwenGenerate(userMessage, options = {}) {
   let inputIds = encoded.input_ids;
   if (Array.isArray(inputIds[0])) inputIds = inputIds[0];
 
-  // Параметры Qwen2.5-0.5B/1.5B
   const numKvHeads = 2;
   const headDim = 64;
 
-  // Инициализируем пустой KV-кэш для всех слоёв
   const pastKeyValues = {};
   for (let i = 0; i < qwenKvLayers; i++) {
     const keyName = `past_key_values.${i}.key`;
@@ -2442,7 +2702,6 @@ async function qwenGenerate(userMessage, options = {}) {
       feeds.position_ids = new ort.Tensor('int64', pos, [1, seqLen]);
     }
 
-    // Подаём прошлый KV-кэш
     for (const [name, tensor] of Object.entries(pastKeyValues)) {
       feeds[name] = tensor;
     }
@@ -2475,10 +2734,8 @@ async function qwenGenerate(userMessage, options = {}) {
 
     generated.push(nextToken);
 
-    // После первого шага подаём только последний токен, потому что KV-кэш уже накоплен
     currentInputIds = [nextToken];
 
-    // Обновляем past_key_values
     for (const name of qwenSession.outputNames) {
       if (name.startsWith('present.')) {
         const newName = name.replace('present.', 'past_key_values.');
@@ -2567,6 +2824,219 @@ async function sendQwenMessage(userText) {
   } else {
     renderChatMessage('ai', '❌ Не удалось получить ответ. Проверь загрузку модели.');
   }
+}
+
+/* ============================================================
+   AI CLASSIFIER — разбор страницы через Qwen
+   ============================================================ */
+async function aiClassifyChunk(chunk) {
+  if (!qwenSession) return null;
+
+  const prompt = `Ты разбираешь текст из учебника математики.
+Определи тип каждого фрагмента и верни СТРОГО JSON без пояснений:
+{"type":"task|example|property|theory|noise","topic":"тема 2-3 слова","content":"текст"}
+
+Правила:
+- task — задача для решения (есть вопрос, "найдите", "вычислите", номер)
+- example — готовый пример решения (есть "Решение:", "Ответ:", готовые вычисления)
+- property — теорема, свойство, формула, определение
+- theory — объяснение, правило, теория
+- noise — колонтитул, номера страниц, мусор
+
+Текст:
+${chunk}`;
+
+  const resp = await askQwen(prompt, { temperature: 0.05, maxTokens: 200 });
+  if (!resp) return null;
+
+  try {
+    const jsonMatch = resp.match(/\{[\s\S]*?\}/);
+    if (!jsonMatch) return null;
+    const parsed = JSON.parse(jsonMatch[0]);
+    if (!parsed.type) return null;
+    const validTypes = ['task', 'example', 'property', 'theory', 'noise'];
+    if (!validTypes.includes(parsed.type)) parsed.type = 'noise';
+    return {
+      type: parsed.type,
+      topic: parsed.topic || 'общее',
+      content: parsed.content || chunk.substring(0, 300)
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+function splitPageIntoChunks(pageText, maxLen = 400) {
+  const cleaned = cleanPdfText(pageText);
+  const paragraphs = cleaned.split(/\n{2,}/).map(p => p.trim()).filter(p => p.length > 20);
+  const chunks = [];
+  for (const p of paragraphs) {
+    if (p.length <= maxLen) {
+      chunks.push(p);
+    } else {
+      const sentences = p.split(/(?<=[.!?])\s+/);
+      let buf = '';
+      for (const s of sentences) {
+        if ((buf + ' ' + s).length > maxLen) {
+          if (buf) chunks.push(buf.trim());
+          buf = s;
+        } else {
+          buf += ' ' + s;
+        }
+      }
+      if (buf) chunks.push(buf.trim());
+    }
+  }
+  return chunks;
+}
+
+async function aiClassifyPage(pageText, pageId, bookId) {
+  if (!qwenSession) {
+    toast('Сначала загрузи Qwen во вкладке «Qwen Чат»');
+    return null;
+  }
+  const chunks = splitPageIntoChunks(pageText);
+  if (chunks.length === 0) {
+    toast('Страница пуста или нечитаема');
+    return [];
+  }
+
+  logMsg('🤖 Классификация: ' + chunks.length + ' блоков');
+
+  const results = [];
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i];
+    if (isBrokenPdfText(chunk)) {
+      results.push({
+        id: uid(),
+        pageId, bookId,
+        type: 'noise',
+        topic: 'мусор',
+        content: chunk.substring(0, 300),
+        date: new Date().toISOString()
+      });
+    } else {
+      const classified = await aiClassifyChunk(chunk);
+      if (classified) {
+        results.push({
+          id: uid(),
+          pageId, bookId,
+          type: classified.type,
+          topic: classified.topic,
+          content: classified.content,
+          rawChunk: chunk,
+          date: new Date().toISOString()
+        });
+      } else {
+        results.push({
+          id: uid(),
+          pageId, bookId,
+          type: 'noise',
+          topic: 'без классификации',
+          content: chunk.substring(0, 300),
+          date: new Date().toISOString()
+        });
+      }
+    }
+    const pct = Math.round((i + 1) / chunks.length * 100);
+    $('#pdfAiFill').style.width = pct + '%';
+    $('#pdfAiStatus').textContent = `Блок ${i+1}/${chunks.length} — ${pct}%`;
+    if (i % 2 === 0) await new Promise(r => setTimeout(r, 20));
+  }
+
+  return results;
+}
+
+async function saveBlocksToDB(blocks) {
+  for (const b of blocks) {
+    await idbPut('pageBlocks', b);
+  }
+}
+
+async function buildTemplatesFromBlocks(blocks) {
+  const examples = blocks.filter(b => b.type === 'example');
+  for (const ex of examples) {
+    const template = {
+      id: uid(),
+      bookId: ex.bookId,
+      pageId: ex.pageId,
+      topic: ex.topic,
+      name: 'Пример: ' + ex.topic,
+      sample: ex.content,
+      pattern: buildTemplatePattern(ex.content),
+      date: new Date().toISOString()
+    };
+    await idbPut('solutionTemplates', template);
+  }
+  return examples.length;
+}
+
+function buildTemplatePattern(text) {
+  let p = text.toLowerCase();
+  p = p.replace(/\d+(?:[.,]\d+)?/g, '?');
+  p = p.replace(/\s+/g, ' ').trim();
+  return p.substring(0, 200);
+}
+
+async function findSimilarTemplate(taskText) {
+  const templates = await idbGetAll('solutionTemplates');
+  if (templates.length === 0) return null;
+
+  const taskWords = new Set(
+    taskText.toLowerCase().replace(/\d+/g, '').split(/\s+/).filter(w => w.length > 3)
+  );
+
+  let best = null, bestScore = 0;
+  for (const t of templates) {
+    const sampleWords = new Set(
+      (t.sample || '').toLowerCase().replace(/\d+/g, '').split(/\s+/).filter(w => w.length > 3)
+    );
+    let intersection = 0;
+    for (const w of taskWords) if (sampleWords.has(w)) intersection++;
+    const score = intersection / Math.max(taskWords.size, 1);
+    if (score > bestScore) { bestScore = score; best = t; }
+  }
+
+  if (bestScore < 0.35) return null;
+  return { template: best, score: bestScore };
+}
+
+async function solveByExample(taskText) {
+  if (!qwenSession) return null;
+  const found = await findSimilarTemplate(taskText);
+  if (!found) return null;
+
+  const prompt = `Учитель дал пример из учебника:
+
+ПРИМЕР:
+${found.template.sample}
+
+Теперь реши похожую задачу, используя ТОЧНО ТАКОЙ ЖЕ метод и шаги, как в примере:
+
+ЗАДАЧА:
+${taskText}
+
+Ответь СТРОГО в формате JSON:
+{"steps":[{"text":"пояснение","latex":"формула"}],"answerLatex":"ответ","answer":"ответ текстом"}`;
+
+  const resp = await askQwen(prompt, { temperature: 0.1, maxTokens: 350 });
+  if (!resp) return null;
+
+  try {
+    const jsonMatch = resp.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      return {
+        ruleName: 'По примеру из учебника (топик: ' + found.template.topic + ')',
+        ruleKey: 'example',
+        steps: parsed.steps || [],
+        answerLatex: parsed.answerLatex || parsed.answer || '',
+        answer: parsed.answer || '',
+        source: found.template
+      };
+    }
+  } catch (e) {}
+  return null;
 }
 
 /* ============================================================
@@ -2671,6 +3141,17 @@ async function ocrFromCamera() {
   const text = await runOCR(file, 'camera');
   if (text !== null) {
     $('#ocrText').value = text || '(ничего не распознано)';
+    const geo = extractGeometryFromText(text || '');
+    const geoBlock = $('#ocrGeoResult');
+    geoBlock.innerHTML = '';
+    if (geo.figureType || geo.vertices.length > 0) {
+      const div = document.createElement('div');
+      div.className = 'geo-result';
+      div.innerHTML = '<div class="geo-title">📐 Распознана геометрия</div>' +
+        '<div class="geo-line">' + escapeHtml(summarizeGeometry(geo)) + '</div>' +
+        '<div class="small" style="margin-top:6px;color:var(--fg2)">Нажми «Нарисовать по условию», чтобы построить чертёж.</div>';
+      geoBlock.appendChild(div);
+    }
     toast('OCR готов. Проверь текст.');
   } else {
     $('#ocrText').value = '';
@@ -2684,6 +3165,17 @@ async function ocrFromPhoto() {
   const text = await runOCR(currentPhotoFile, 'photo');
   if (text !== null) {
     $('#photoOcrText').value = text || '(ничего не распознано)';
+    const geo = extractGeometryFromText(text || '');
+    const geoBlock = $('#photoGeoResult');
+    geoBlock.innerHTML = '';
+    if (geo.figureType || geo.vertices.length > 0) {
+      const div = document.createElement('div');
+      div.className = 'geo-result';
+      div.innerHTML = '<div class="geo-title">📐 Распознана геометрия</div>' +
+        '<div class="geo-line">' + escapeHtml(summarizeGeometry(geo)) + '</div>' +
+        '<div class="small" style="margin-top:6px;color:var(--fg2)">Нажми «Нарисовать по условию», чтобы построить чертёж.</div>';
+      geoBlock.appendChild(div);
+    }
     toast('OCR готов. Проверь текст.');
   } else {
     $('#photoOcrText').value = '';
@@ -2787,6 +3279,48 @@ function solveTextWithRules(text, solutionEl) {
   saveToDataset(text, buildAnswerText(result), { verified: true, source: 'ocr-rules' });
 }
 
+async function solveTextWithExample(text, solutionEl) {
+  if (!text.trim()) { toast('Пустой текст'); return; }
+  if (!qwenSession) {
+    solutionEl.innerHTML = '<div class="solution-error">🤖 Qwen не загружен.</div>';
+    return;
+  }
+  solutionEl.innerHTML = '<div class="solution-step"><span class="num">⏳</span> Ищу похожий пример...</div>';
+
+  const result = await solveByExample(text);
+  solutionEl.innerHTML = '';
+
+  if (!result) {
+    solutionEl.innerHTML = '<div class="solution-error">Похожий пример не найден. Сначала разбери учебник через Qwen.</div>';
+    return;
+  }
+
+  result.steps.forEach((s, i) => {
+    const d = document.createElement('div');
+    d.className = 'solution-step';
+    const num = document.createElement('span');
+    num.className = 'num';
+    num.textContent = i + 1;
+    d.appendChild(num);
+    const t = document.createElement('span');
+    t.textContent = s.text;
+    d.appendChild(t);
+    if (s.latex) {
+      const f = document.createElement('div');
+      f.className = 'formula';
+      renderKatex(f, s.latex, true);
+      d.appendChild(f);
+    }
+    solutionEl.appendChild(d);
+  });
+  const ansDiv = document.createElement('div');
+  ansDiv.className = 'solution-answer';
+  ansDiv.innerHTML = '<div>✅ Ответ:</div><div class="ansf"></div>';
+  solutionEl.appendChild(ansDiv);
+  if (result.answerLatex) renderKatex(ansDiv.querySelector('.ansf'), result.answerLatex, true);
+  else ansDiv.querySelector('.ansf').textContent = result.answer;
+}
+
 /* ============================================================
    УЧЕБНИКИ
    ============================================================ */
@@ -2804,9 +3338,11 @@ async function createBook(name) {
 async function deleteBook(bookId) {
   if (!confirm('Удалить учебник?')) return;
   const pages = await idbGetAll('pages');
-  const templates = await idbGetAll('templates');
+  const blocks = await idbGetAll('pageBlocks');
+  const templates = await idbGetAll('solutionTemplates');
   for (const p of pages) if (p.bookId === bookId) await idbDelete('pages', p.id);
-  for (const t of templates) if (t.bookId === bookId) await idbDelete('templates', t.id);
+  for (const b of blocks) if (b.bookId === bookId) await idbDelete('pageBlocks', b.id);
+  for (const t of templates) if (t.bookId === bookId) await idbDelete('solutionTemplates', t.id);
   await idbDelete('books', bookId);
   if (currentBookId === bookId) currentBookId = null;
   await refreshBooksList();
@@ -2862,7 +3398,11 @@ async function selectBook(bookId) {
 async function updateBookStats() {
   if (!currentBookId) return;
   const pages = (await idbGetAll('pages')).filter(p => p.bookId === currentBookId);
+  const blocks = (await idbGetAll('pageBlocks')).filter(b => b.bookId === currentBookId);
+  const templates = (await idbGetAll('solutionTemplates')).filter(t => t.bookId === currentBookId);
   $('#bookPages').textContent = pages.length;
+  $('#bookBlocks').textContent = blocks.length;
+  $('#bookTemplates').textContent = templates.length;
 }
 
 async function viewBookPages() {
@@ -2870,11 +3410,47 @@ async function viewBookPages() {
   const pages = (await idbGetAll('pages')).filter(p => p.bookId === currentBookId);
   const el = $('#bookContent');
   el.innerHTML = `<h3 class="small">Страницы (${pages.length})</h3>`;
-  for (const p of pages.reverse()) {
+  for (const p of pages.slice().reverse()) {
     const div = document.createElement('div');
     div.className = 'page-item';
     div.innerHTML = `<div class="date">${new Date(p.date).toLocaleString()} · ${p.source}</div>` +
       `<div>${escapeHtml((p.text || '').substring(0, 200))}</div>`;
+    el.appendChild(div);
+  }
+}
+
+async function viewBookBlocks() {
+  if (!currentBookId) return;
+  const blocks = (await idbGetAll('pageBlocks')).filter(b => b.bookId === currentBookId);
+  const el = $('#bookContent');
+  el.innerHTML = `<h3 class="small">Блоки (${blocks.length})</h3>`;
+  const counts = { task: 0, example: 0, property: 0, theory: 0, noise: 0 };
+  for (const b of blocks) counts[b.type] = (counts[b.type] || 0) + 1;
+  el.innerHTML += `<div class="small" style="color:var(--fg2);margin-bottom:8px">` +
+    `📝 задач: ${counts.task} · ✅ примеров: ${counts.example} · ` +
+    `📐 свойств: ${counts.property} · 📖 теории: ${counts.theory} · 🗑 мусора: ${counts.noise}</div>`;
+  for (const b of blocks.slice(0, 200)) {
+    const div = document.createElement('div');
+    div.className = 'block-item ' + b.type;
+    div.innerHTML = `<div class="block-header">` +
+      `<span class="block-type ${b.type}">${b.type}</span>` +
+      `<span class="block-topic">${escapeHtml(b.topic)}</span>` +
+      `</div>` +
+      `<div class="block-content">${escapeHtml(b.content.substring(0, 200))}</div>`;
+    el.appendChild(div);
+  }
+}
+
+async function viewBookTemplates() {
+  if (!currentBookId) return;
+  const templates = (await idbGetAll('solutionTemplates')).filter(t => t.bookId === currentBookId);
+  const el = $('#bookContent');
+  el.innerHTML = `<h3 class="small">Шаблоны решений (${templates.length})</h3>`;
+  for (const t of templates) {
+    const div = document.createElement('div');
+    div.className = 'template-item';
+    div.innerHTML = `<div class="tmpl-title">${escapeHtml(t.topic)}</div>` +
+      `<div class="tmpl-body">${escapeHtml(t.sample.substring(0, 200))}</div>`;
     el.appendChild(div);
   }
 }
@@ -2889,46 +3465,48 @@ async function autoProcessBook() {
   $('#bookProcessProgress').classList.add('show');
   $('#bookProcessFill').style.width = '0%';
 
-  let tasksFound = 0, solvedByRules = 0, sentToQwen = 0, savedToDataset = 0;
+  let totalBlocks = 0, totalExamples = 0, totalTasks = 0, totalTemplates = 0;
 
   for (let i = 0; i < pages.length; i++) {
     const page = pages[i];
-    const tasks = extractTasksFromPage(page.text);
+    const blocks = await aiClassifyPage(page.text, page.id, page.bookId);
+    if (blocks && blocks.length > 0) {
+      const existing = await idbGetByIndex('pageBlocks', 'pageId', page.id);
+      for (const old of existing) await idbDelete('pageBlocks', old.id);
+      await saveBlocksToDB(blocks);
+      totalBlocks += blocks.length;
 
-    for (const task of tasks) {
-      tasksFound++;
+      const examples = blocks.filter(b => b.type === 'example');
+      totalExamples += examples.length;
+      const tasks = blocks.filter(b => b.type === 'task');
+      totalTasks += tasks.length;
 
-      const ruleResult = detectAndSolve(task);
-      if (ruleResult) {
-        await saveToDataset(task, buildAnswerText(ruleResult), { verified: true, source: 'rules' });
-        solvedByRules++;
-        savedToDataset++;
-      } else {
-        sentToQwen++;
-        try {
-          const prompt = `Реши задачу пошагово. Ответь СТРОГО в формате JSON:
-{"steps":[{"text":"пояснение","latex":"формула"}],"answerLatex":"ответ","answer":"ответ текстом"}
-Задача: ${task}`;
-          const qwenResp = await askQwen(prompt, { temperature: 0.1, maxTokens: 300 });
-          if (qwenResp) {
-            await saveToDataset(task, qwenResp, { verified: false, source: 'qwen' });
-            savedToDataset++;
-          }
-        } catch (e) {
-          logMsg('Ошибка Qwen: ' + e.message);
-        }
+      for (const ex of examples) {
+        const tpl = {
+          id: uid(),
+          bookId: ex.bookId,
+          pageId: ex.pageId,
+          topic: ex.topic,
+          name: 'Пример: ' + ex.topic,
+          sample: ex.content,
+          pattern: buildTemplatePattern(ex.content),
+          date: new Date().toISOString()
+        };
+        await idbPut('solutionTemplates', tpl);
+        totalTemplates++;
       }
     }
-
     $('#bookProcessFill').style.width = ((i + 1) / pages.length * 100) + '%';
-    $('#bookProcessStatus').textContent = `${i+1}/${pages.length} стр, задач: ${tasksFound}, правила: ${solvedByRules}, Qwen: ${sentToQwen}`;
-
-    if (i % 3 === 0) await new Promise(r => setTimeout(r, 30));
+    $('#bookProcessStatus').textContent = `${i+1}/${pages.length} стр · блоков: ${totalBlocks} · задач: ${totalTasks} · примеров: ${totalExamples}`;
+    if (i % 2 === 0) await new Promise(r => setTimeout(r, 30));
   }
 
   $('#bookProcessProgress').classList.remove('show');
-  await updateDatasetStats();
-  toast(`Готово. Задач: ${tasksFound}, правилами: ${solvedByRules}, Qwen: ${sentToQwen}`);
+  await updateBookStats();
+  await updateStats();
+  await refreshTemplatesList();
+  toast(`Готово. Блоков: ${totalBlocks}, примеров: ${totalExamples}, задач: ${totalTasks}`);
+  logMsg(`✅ Обработка учебника: блоков=${totalBlocks}, примеров=${totalExamples}, задач=${totalTasks}`);
 }
 
 function buildAnswerText(result) {
@@ -3389,6 +3967,111 @@ async function renderPdfPage(num) {
   $('#pdfPageText').style.display = 'block';
   $('#pdfCurrentPage').textContent = num;
   pdfCurrentPage = num;
+  $('#pageBlocksContainer').innerHTML = '';
+}
+
+async function renderPageBlocks(pageId) {
+  const container = $('#pageBlocksContainer');
+  container.innerHTML = '';
+  const blocks = await idbGetByIndex('pageBlocks', 'pageId', pageId);
+  if (blocks.length === 0) {
+    container.innerHTML = '<div class="small" style="color:var(--fg2)">Блоков нет. Нажми «Разобрать страницу через ИИ».</div>';
+    return;
+  }
+
+  const counts = { task: 0, example: 0, property: 0, theory: 0, noise: 0 };
+  for (const b of blocks) counts[b.type] = (counts[b.type] || 0) + 1;
+
+  const summary = document.createElement('div');
+  summary.className = 'small';
+  summary.style.color = 'var(--fg2)';
+  summary.style.marginBottom = '8px';
+  summary.textContent = `Всего: ${blocks.length} · 📝${counts.task} задач · ✅${counts.example} примеров · 📐${counts.property} свойств · 📖${counts.theory} теории · 🗑${counts.noise} мусора`;
+  container.appendChild(summary);
+
+  for (const b of blocks) {
+    const div = document.createElement('div');
+    div.className = 'block-item ' + b.type;
+    const header = document.createElement('div');
+    header.className = 'block-header';
+    const typeSpan = document.createElement('span');
+    typeSpan.className = 'block-type ' + b.type;
+    typeSpan.textContent = b.type;
+    header.appendChild(typeSpan);
+    const topicSpan = document.createElement('span');
+    topicSpan.className = 'block-topic';
+    topicSpan.textContent = b.topic || '';
+    header.appendChild(topicSpan);
+    div.appendChild(header);
+
+    const content = document.createElement('div');
+    content.className = 'block-content';
+    content.textContent = b.content;
+    div.appendChild(content);
+
+    const actions = document.createElement('div');
+    actions.className = 'block-actions';
+
+    const picker = document.createElement('div');
+    picker.className = 'type-picker';
+    for (const t of ['task', 'example', 'property', 'theory', 'noise']) {
+      const btn = document.createElement('button');
+      btn.textContent = t;
+      if (t === b.type) btn.classList.add('active');
+      btn.onclick = async () => {
+        b.type = t;
+        await idbPut('pageBlocks', b);
+        renderPageBlocks(pageId);
+      };
+      picker.appendChild(btn);
+    }
+    actions.appendChild(picker);
+
+    const solveBtn = document.createElement('button');
+    solveBtn.className = 'btn small';
+    solveBtn.textContent = '📐 Решить';
+    solveBtn.onclick = () => {
+      $('#taskInput').value = b.content;
+      $$('.tab-btn').forEach(x => x.classList.remove('active'));
+      $$('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelector('[data-tab="solve"]').classList.add('active');
+      $('#panel-solve').classList.add('active');
+      solveAndShow();
+    };
+    actions.appendChild(solveBtn);
+
+    const saveTplBtn = document.createElement('button');
+    saveTplBtn.className = 'btn small';
+    saveTplBtn.textContent = '💾 Сохранить как шаблон';
+    saveTplBtn.onclick = async () => {
+      const tpl = {
+        id: uid(),
+        bookId: b.bookId,
+        pageId: b.pageId,
+        topic: b.topic || 'общее',
+        name: 'Пример: ' + (b.topic || 'общее'),
+        sample: b.content,
+        pattern: buildTemplatePattern(b.content),
+        date: new Date().toISOString()
+      };
+      await idbPut('solutionTemplates', tpl);
+      toast('Шаблон сохранён');
+      await refreshTemplatesList();
+    };
+    actions.appendChild(saveTplBtn);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn small danger';
+    delBtn.textContent = '🗑';
+    delBtn.onclick = async () => {
+      await idbDelete('pageBlocks', b.id);
+      renderPageBlocks(pageId);
+    };
+    actions.appendChild(delBtn);
+
+    div.appendChild(actions);
+    container.appendChild(div);
+  }
 }
 
 /* ============================================================
@@ -3585,6 +4268,7 @@ async function solveAndShow() {
   $('#solutionAnswer').innerHTML = '';
   $('#figureContainer').innerHTML = '';
   $('#neuralPrediction').style.display = 'none';
+  $('#exampleSource').style.display = 'none';
 
   const pred = predictType(text);
   if (pred && pred.confidence > 0.3) {
@@ -3594,8 +4278,30 @@ async function solveAndShow() {
 
   let result = null;
 
+  if (currentSolveMode === 'example') {
+    if (!qwenSession) {
+      $('#detectedType').textContent = 'Тип: нужен Qwen';
+      $('#solutionAnswer').innerHTML = '<div class="solution-error">🤖 Qwen не загружен.</div>';
+      return;
+    }
+    $('#detectedType').textContent = 'Тип: поиск примера...';
+    const loading = document.createElement('div');
+    loading.className = 'solution-step';
+    loading.innerHTML = '<span class="num">⏳</span> Ищу похожий пример из учебника...';
+    $('#solutionSteps').appendChild(loading);
+    result = await solveByExample(raw);
+    loading.remove();
+    if (!result) {
+      $('#detectedType').textContent = 'Тип: пример не найден';
+      $('#solutionAnswer').innerHTML = '<div class="solution-error">Похожий пример не найден. Сначала разбери учебник через Qwen во вкладке «Учебники».</div>';
+      return;
+    }
+    $('#exampleSource').textContent = '📚 Источник: ' + (result.source ? result.source.topic : 'учебник');
+    $('#exampleSource').style.display = 'block';
+  }
+
   if (currentSolveMode === 'auto' || currentSolveMode === 'rules') {
-    result = detectAndSolve(text);
+    if (!result) result = detectAndSolve(text);
   }
 
   if (!result && (currentSolveMode === 'auto' || currentSolveMode === 'ai')) {
@@ -3692,13 +4398,18 @@ async function solveAndShow() {
     $('#answerFormula').textContent = '(см. шаги)';
   }
 
-  drawTaskFigure(raw, $('#figureContainer'));
+  const geo = extractGeometryFromText(raw);
+  if (geo.figureType && geo.vertices.length >= 3) {
+    drawGeometryFromOCR(geo, $('#figureContainer'));
+  } else {
+    drawTaskFigure(raw, $('#figureContainer'));
+  }
 
   const cur = +$('#statSolved').textContent || 0;
   $('#statSolved').textContent = cur + 1;
   lastSolution = { text: raw, result };
 
-  if (result.ruleKey !== 'qwen') {
+  if (result.ruleKey !== 'qwen' && result.ruleKey !== 'example') {
     await saveToDataset(raw, buildAnswerText(result), { verified: true, source: 'rules-solve' });
   }
 }
@@ -3911,11 +4622,13 @@ function takeSnapshot() {
 async function updateStats() {
   const books = await idbGetAll('books');
   const pages = await idbGetAll('pages');
-  const templates = await idbGetAll('templates');
+  const blocks = await idbGetAll('pageBlocks');
+  const templates = await idbGetAll('solutionTemplates');
   const examples = await idbGetAll('examples');
   const dataset = await idbGetAll('dataset');
   $('#statBooks').textContent = books.length;
   $('#statPages').textContent = pages.length;
+  $('#statBlocks').textContent = blocks.length;
   $('#statTemplates').textContent = templates.length;
   $('#statExamples').textContent = examples.length;
   $('#statDataset').textContent = dataset.length;
@@ -3925,13 +4638,15 @@ async function updateStats() {
 async function updateExportStats() {
   const books = await idbGetAll('books');
   const pages = await idbGetAll('pages');
-  const templates = await idbGetAll('templates');
+  const blocks = await idbGetAll('pageBlocks');
+  const templates = await idbGetAll('solutionTemplates');
   const examples = await idbGetAll('examples');
   $('#exportBooks').textContent = books.length;
   $('#exportPages').textContent = pages.length;
+  $('#exportBlocks').textContent = blocks.length;
   $('#exportTemplates').textContent = templates.length;
   $('#exportExamples').textContent = examples.length;
-  const data = JSON.stringify({ books, pages, templates, examples });
+  const data = JSON.stringify({ books, pages, blocks, templates, examples });
   $('#exportSize').textContent = (new Blob([data]).size / 1024).toFixed(1) + ' КБ';
 }
 
@@ -3955,18 +4670,24 @@ function initTabs() {
 }
 
 async function refreshTemplatesList() {
-  const templates = await idbGetAll('templates');
+  const templates = await idbGetAll('solutionTemplates');
   const el = $('#templatesList');
   if (templates.length === 0) {
-    el.textContent = 'Нет шаблонов.';
+    el.textContent = 'Нет шаблонов. Разбери учебник через Qwen.';
     return;
   }
   el.innerHTML = '';
-  for (const t of templates.slice(-50)) {
+  const byTopic = {};
+  for (const t of templates) {
+    const key = t.topic || 'общее';
+    if (!byTopic[key]) byTopic[key] = [];
+    byTopic[key].push(t);
+  }
+  for (const [topic, list] of Object.entries(byTopic)) {
     const div = document.createElement('div');
     div.className = 'template-item';
-    div.innerHTML = `<div class="tmpl-title">${escapeHtml(t.name || 'шаблон')}</div>` +
-      `<div class="tmpl-body">${escapeHtml((t.sample||'').substring(0, 150))}</div>`;
+    div.innerHTML = `<div class="tmpl-title">📚 ${escapeHtml(topic)} (${list.length})</div>` +
+      `<div class="tmpl-body">${escapeHtml((list[0].sample || '').substring(0, 150))}</div>`;
     el.appendChild(div);
   }
 }
@@ -4028,7 +4749,12 @@ function initButtons() {
   };
   $('#btnRedrawFigure').onclick = () => {
     if (!lastSolution) return;
-    drawTaskFigure(lastSolution.text, $('#figureContainer'));
+    const geo = extractGeometryFromText(lastSolution.text);
+    if (geo.figureType && geo.vertices.length >= 3) {
+      drawGeometryFromOCR(geo, $('#figureContainer'));
+    } else {
+      drawTaskFigure(lastSolution.text, $('#figureContainer'));
+    }
     toast('Перерисовано');
   };
 
@@ -4043,6 +4769,8 @@ function initButtons() {
     $('#snapshotActions').style.display = 'none';
     $('#ocrBlock').style.display = 'none';
     $('#cameraSolution').innerHTML = '';
+    $('#ocrGeoResult').innerHTML = '';
+    $('#ocrFigureContainer').innerHTML = '';
   };
   $('#btnDeleteSnapshot').onclick = () => {
     currentSnapshot = null;
@@ -4050,11 +4778,20 @@ function initButtons() {
     $('#snapshotActions').style.display = 'none';
     $('#ocrBlock').style.display = 'none';
     $('#cameraSolution').innerHTML = '';
+    $('#ocrGeoResult').innerHTML = '';
+    $('#ocrFigureContainer').innerHTML = '';
     toast('Удалено');
   };
   $('#btnOCRFromCamera').onclick = ocrFromCamera;
   $('#btnSolveFromOCR').onclick = () => solveTextWithQwen($('#ocrText').value, $('#cameraSolution'));
   $('#btnSolveFromOCRrules').onclick = () => solveTextWithRules($('#ocrText').value, $('#cameraSolution'));
+  $('#btnSolveFromOCRexample').onclick = () => solveTextWithExample($('#ocrText').value, $('#cameraSolution'));
+  $('#btnDrawFromOCR').onclick = () => {
+    const text = $('#ocrText').value;
+    const geo = extractGeometryFromText(text);
+    drawGeometryFromOCR(geo, $('#ocrFigureContainer'));
+    toast('Чертёж построен');
+  };
   $('#btnCopyOCR').onclick = async () => {
     try {
       await navigator.clipboard.writeText($('#ocrText').value);
@@ -4074,6 +4811,8 @@ function initButtons() {
       $('#photoActions').style.display = 'flex';
       $('#photoOcrBlock').style.display = 'none';
       $('#photoSolution').innerHTML = '';
+      $('#photoGeoResult').innerHTML = '';
+      $('#photoFigureContainer').innerHTML = '';
     }
   };
   $('#photoDropZone2').ondragover = e => { e.preventDefault(); $('#photoDropZone2').classList.add('dragover'); };
@@ -4090,17 +4829,28 @@ function initButtons() {
       $('#photoActions').style.display = 'flex';
       $('#photoOcrBlock').style.display = 'none';
       $('#photoSolution').innerHTML = '';
+      $('#photoGeoResult').innerHTML = '';
+      $('#photoFigureContainer').innerHTML = '';
     }
   };
   $('#btnOCRFromPhoto').onclick = ocrFromPhoto;
   $('#btnSolveFromPhotoOCR').onclick = () => solveTextWithQwen($('#photoOcrText').value, $('#photoSolution'));
   $('#btnSolveFromPhotoOCRrules').onclick = () => solveTextWithRules($('#photoOcrText').value, $('#photoSolution'));
+  $('#btnSolveFromPhotoOCRexample').onclick = () => solveTextWithExample($('#photoOcrText').value, $('#photoSolution'));
+  $('#btnDrawFromPhoto').onclick = () => {
+    const text = $('#photoOcrText').value;
+    const geo = extractGeometryFromText(text);
+    drawGeometryFromOCR(geo, $('#photoFigureContainer'));
+    toast('Чертёж построен');
+  };
   $('#btnDeletePhoto').onclick = () => {
     currentPhotoFile = null;
     $('#photoPreview').style.display = 'none';
     $('#photoActions').style.display = 'none';
     $('#photoOcrBlock').style.display = 'none';
     $('#photoSolution').innerHTML = '';
+    $('#photoGeoResult').innerHTML = '';
+    $('#photoFigureContainer').innerHTML = '';
   };
 
   // Qwen
@@ -4235,12 +4985,36 @@ function initButtons() {
     toast('Сброшено');
   };
   $('#btnRefreshTemplates').onclick = refreshTemplatesList;
+  $('#btnRebuildTemplates').onclick = async () => {
+    const blocks = await idbGetAll('pageBlocks');
+    const examples = blocks.filter(b => b.type === 'example');
+    if (examples.length === 0) { toast('Нет блоков-примеров'); return; }
+    await idbClear('solutionTemplates');
+    let count = 0;
+    for (const ex of examples) {
+      const tpl = {
+        id: uid(),
+        bookId: ex.bookId,
+        pageId: ex.pageId,
+        topic: ex.topic,
+        name: 'Пример: ' + ex.topic,
+        sample: ex.content,
+        pattern: buildTemplatePattern(ex.content),
+        date: new Date().toISOString()
+      };
+      await idbPut('solutionTemplates', tpl);
+      count++;
+    }
+    await refreshTemplatesList();
+    await updateStats();
+    toast('Пересобрано: ' + count);
+  };
   $('#btnCleanTemplates').onclick = async () => {
-    const templates = await idbGetAll('templates');
+    const templates = await idbGetAll('solutionTemplates');
     let removed = 0;
     for (const t of templates) {
       if (isBrokenPdfText(t.sample || '')) {
-        await idbDelete('templates', t.id);
+        await idbDelete('solutionTemplates', t.id);
         removed++;
       }
     }
@@ -4249,7 +5023,7 @@ function initButtons() {
   };
   $('#btnClearTemplates').onclick = async () => {
     if (!confirm('Очистить шаблоны?')) return;
-    await idbClear('templates');
+    await idbClear('solutionTemplates');
     await refreshTemplatesList();
   };
 
@@ -4262,7 +5036,8 @@ function initButtons() {
     selectBook(book.id);
   };
   $('#btnViewBookPages').onclick = viewBookPages;
-  $('#btnViewBookTemplates').onclick = refreshTemplatesList;
+  $('#btnViewBookBlocks').onclick = viewBookBlocks;
+  $('#btnViewBookTemplates').onclick = viewBookTemplates;
   $('#btnAutoProcessBook').onclick = autoProcessBook;
   $('#btnDeleteBook').onclick = async () => {
     if (!currentBookId) return;
@@ -4347,6 +5122,41 @@ function initButtons() {
     await refreshBooksList();
     toast('Сохранено');
   };
+  $('#btnAiClassifyPage').onclick = async () => {
+    const text = $('#pdfPageText').textContent;
+    if (!text || text === '—') { toast('Нет текста страницы'); return; }
+    if (!qwenSession) { toast('Загрузи Qwen во вкладке «Qwen Чат»'); return; }
+    const bookId = $('#pdfBookSelect').value || currentBookId;
+    if (!bookId) { toast('Выбери учебник'); return; }
+    const pages = await idbGetAll('pages');
+    let pageRecord = pages.find(p => p.bookId === bookId && p.source && p.source.includes('page' + pdfCurrentPage));
+    if (!pageRecord) {
+      pageRecord = await addPageToBook(bookId, text, null, 'pdf:page' + pdfCurrentPage);
+    }
+    $('#pdfAiProgress').classList.add('show');
+    $('#pdfAiFill').style.width = '0%';
+    $('#pdfAiStatus').style.display = 'block';
+    $('#pdfAiStatus').textContent = 'Классификация...';
+    const blocks = await aiClassifyPage(text, pageRecord.id, bookId);
+    $('#pdfAiProgress').classList.remove('show');
+    if (!blocks) { toast('Ошибка классификации'); return; }
+    const existing = await idbGetByIndex('pageBlocks', 'pageId', pageRecord.id);
+    for (const old of existing) await idbDelete('pageBlocks', old.id);
+    await saveBlocksToDB(blocks);
+    await updateStats();
+    await updateBookStats();
+    $('#pdfAiStatus').textContent = 'Готово: ' + blocks.length + ' блоков';
+    renderPageBlocks(pageRecord.id);
+    toast('Разобрано: ' + blocks.length + ' блоков');
+  };
+  $('#btnShowPageBlocks').onclick = async () => {
+    const bookId = $('#pdfBookSelect').value || currentBookId;
+    if (!bookId) { toast('Выбери учебник'); return; }
+    const pages = await idbGetAll('pages');
+    let pageRecord = pages.find(p => p.bookId === bookId && p.source && p.source.includes('page' + pdfCurrentPage));
+    if (!pageRecord) { toast('Страница не сохранена'); return; }
+    renderPageBlocks(pageRecord.id);
+  };
 
   // Датасет
   $('#btnExportDataset').onclick = () => exportDataset(false);
@@ -4368,10 +5178,11 @@ function initButtons() {
   $('#btnExportAll').onclick = async () => {
     const books = await idbGetAll('books');
     const pages = await idbGetAll('pages');
-    const templates = await idbGetAll('templates');
+    const blocks = await idbGetAll('pageBlocks');
+    const templates = await idbGetAll('solutionTemplates');
     const examples = await idbGetAll('examples');
     const dataset = await idbGetAll('dataset');
-    const data = { version: 4, books, pages, templates, examples, dataset, date: new Date().toISOString() };
+    const data = { version: 5, books, pages, blocks, templates, examples, dataset, date: new Date().toISOString() };
     downloadBlob(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), 'mathsolver-full-' + Date.now() + '.json');
     toast('Экспортировано');
   };
@@ -4384,11 +5195,13 @@ function initButtons() {
       const data = JSON.parse(text);
       if (data.books) for (const b of data.books) await idbPut('books', b);
       if (data.pages) for (const p of data.pages) await idbPut('pages', p);
-      if (data.templates) for (const t of data.templates) await idbPut('templates', t);
+      if (data.blocks) for (const b of data.blocks) await idbPut('pageBlocks', b);
+      if (data.templates) for (const t of data.templates) await idbPut('solutionTemplates', t);
       if (data.examples) for (const ex of data.examples) await idbPut('examples', ex);
       if (data.dataset) for (const d of data.dataset) await idbPut('dataset', d);
       await refreshBooksList();
       await refreshExamplesList();
+      await refreshTemplatesList();
       await updateStats();
       await updateDatasetStats();
       toast('Импортировано');
@@ -4399,12 +5212,14 @@ function initButtons() {
     if (!confirm('Удалить всё?')) return;
     await idbClear('books');
     await idbClear('pages');
-    await idbClear('templates');
+    await idbClear('pageBlocks');
+    await idbClear('solutionTemplates');
     await idbClear('examples');
     await idbClear('dataset');
     await idbClear('classifier');
     await refreshBooksList();
     await refreshExamplesList();
+    await refreshTemplatesList();
     await updateStats();
     await updateDatasetStats();
     toast('Очищено');
@@ -4471,6 +5286,7 @@ async function init() {
   await updateStats();
   await refreshBooksList();
   await refreshExamplesList();
+  await refreshTemplatesList();
   await updateDatasetStats();
 
   try { await loadClassifier(); } catch (e) {}
@@ -4496,7 +5312,7 @@ async function init() {
 
   $('#statusBadge').textContent = 'готово';
   $('#statusBadge').className = 'status-badge ok';
-  toast('Готово. Qwen — во вкладке «Qwen Чат», OCR — во вкладке «Камера».');
+  toast('Готово. Разбор учебника — во вкладке «Учебники» → PDF.');
 }
 
 window.addEventListener('pdfjs-ready', () => logMsg('✅ PDF.js загружен'));
