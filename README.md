@@ -1,14 +1,16 @@
-# 🤖 Local AI — мультимодальный ИИ-ассистент в браузере
-
 <div align="center">
 
-**60+ языковых и мультимодальных моделей прямо в браузере. Без серверов. Без API-ключей. Без регистрации.**
+# 🤖 Local AI
 
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
-![WebGPU](https://img.shields.io/badge/WebGPU-supported-green)
-![Transformers.js](https://img.shields.io/badge/🤗_Transformers.js-ready-orange)
-![WebLLM](https://img.shields.io/badge/⚡_WebLLM-powered-blue)
-![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen)
+**Мультимодальный ИИ-ассистент, работающий полностью в браузере.**
+
+60+ языковых и мультимодальных моделей. Без серверов. Без API-ключей. Без регистрации.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![WebGPU](https://img.shields.io/badge/WebGPU-supported-green)](https://caniuse.com/webgpu)
+[![Transformers.js](https://img.shields.io/badge/🤗_Transformers.js-ready-orange)](https://huggingface.co/docs/transformers.js)
+[![WebLLM](https://img.shields.io/badge/⚡_WebLLM-powered-blue)](https://webllm.mlc.ai/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/SawerSwet/AI-local-/pulls)
 
 </div>
 
@@ -16,7 +18,7 @@
 
 ## 📖 О проекте
 
-**Local AI** — полноценный мультимодальный ИИ-ассистент, работающий **полностью в вашем браузере**. Никаких серверов, никаких API-ключей, никакой отправки данных в облако. Всё считается локально на вашем устройстве через **WebGPU** и **WebAssembly**.
+**Local AI** — полноценный мультимодальный ИИ-ассистент, работающий **полностью в вашем браузере**. Никаких серверов, никаких API-ключей, никакой отправки данных в облако. Всё вычисляется локально на вашем устройстве через **WebGPU** и **WebAssembly**.
 
 Один HTML-файл — и у вас в руках:
 
@@ -108,8 +110,8 @@
 ### Способ 1: Локально
 
 ```bash
-git clone https://github.com/your-username/local-ai.git
-cd local-ai
+git clone https://github.com/SawerSwet/AI-local-.git
+cd AI-local-
 python -m http.server 8000
 # Открой http://localhost:8000
 ```
@@ -124,9 +126,16 @@ npx serve
 
 ### Способ 3: GitHub Pages
 
-1. Форк репозитория
-2. **Settings → Pages → Source: main / root**
-3. Открой `https://your-username.github.io/local-ai/`
+Открой готовую версию прямо сейчас:
+
+**https://sawerswet.github.io/AI-local-/**
+
+Если Pages ещё не включены:
+
+1. **Settings → Pages**
+2. **Source:** `Deploy from a branch`
+3. **Branch:** `main` / `root`
+4. Сохрани — через минуту сайт будет доступен
 
 ---
 
@@ -184,6 +193,7 @@ npx serve
 ### 🧪 Transformers.js
 
 **Текст:**
+
 - Qwen2.5 0.5B / 1.5B
 - Llama 3.2 1B
 - SmolLM2 360M
@@ -193,10 +203,12 @@ npx serve
 - mT5 Small
 
 **Перевод:**
+
 - Opus MT RU→EN
 - Opus MT EN→RU
 
 **Vision / OCR:**
+
 - TrOCR Small Printed
 - TrOCR Base Handwritten
 - Donut CORD-v2
@@ -214,11 +226,13 @@ npx serve
 - Whisper Tiny / Base / Small
 
 **Embedding:**
+
 - Nomic Embed v1.5
 - All-MiniLM-L6-v2
 - BGE Small EN v1.5
 
 **Классификация:**
+
 - DistilBERT SST-2
 
 ---
@@ -243,7 +257,7 @@ npx serve
 ## 📁 Структура
 
 ```
-local-ai/
+AI-local-/
 ├── index.html          # Всё приложение в одном файле
 ├── README.md           # Этот файл
 ├── LICENSE             # MIT
@@ -255,10 +269,10 @@ local-ai/
 
 Весь код в одном HTML — осознанное решение:
 
-- ✅ Простота: скопировал — работает
-- ✅ Портативность: можно отправить в мессенджере
-- ✅ Хостинг: GitHub Pages, Netlify, Vercel
-- ✅ Аудит: никаких сборок и минификаций
+- ✅ **Простота**: скопировал — работает
+- ✅ **Портативность**: можно отправить в мессенджере
+- ✅ **Хостинг**: GitHub Pages, Netlify, Vercel
+- ✅ **Аудит**: никаких сборок и минификаций
 
 ---
 
@@ -334,8 +348,8 @@ Llama 3.2 1B, WebGPU:
 - [x] WebGPU через WebLLM
 - [x] Transformers.js
 - [x] OCR (Tesseract.js)
-- [x] PDF/DOCX/ZIP
-- [x] Экспорт PDF/ZIP/CSV
+- [x] PDF / DOCX / ZIP
+- [x] Экспорт PDF / ZIP / CSV
 - [x] 10 режимов рассуждения
 - [x] Мобильный UI
 - [ ] Многосессионный чат
@@ -403,9 +417,9 @@ Llama 3.2 1B, WebGPU:
 
 ## 📊 Статистика
 
-![Stars](https://img.shields.io/github/stars/your-username/local-ai?style=social)
-![Forks](https://img.shields.io/github/forks/your-username/local-ai?style=social)
-![Issues](https://img.shields.io/github/issues/your-username/local-ai)
+![Stars](https://img.shields.io/github/stars/SawerSwet/AI-local-?style=social)
+![Forks](https://img.shields.io/github/forks/SawerSwet/AI-local-?style=social)
+![Issues](https://img.shields.io/github/issues/SawerSwet/AI-local-)
 
 ---
 
@@ -421,8 +435,9 @@ Llama 3.2 1B, WebGPU:
 
 ## 📞 Контакты
 
-- **Issues**: [github.com/your-username/local-ai/issues](https://github.com/your-username/local-ai/issues)
-- **Discussions**: [github.com/your-username/local-ai/discussions](https://github.com/your-username/local-ai/discussions)
+- **Issues**: [github.com/SawerSwet/AI-local-/issues](https://github.com/SawerSwet/AI-local-/issues)
+- **Discussions**: [github.com/SawerSwet/AI-local-/discussions](https://github.com/SawerSwet/AI-local-/discussions)
+- **Live demo**: [sawerswet.github.io/AI-local-/](https://sawerswet.github.io/AI-local-/)
 
 ---
 
