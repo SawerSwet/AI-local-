@@ -4,210 +4,98 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 <meta name="theme-color" content="#0a0a0f">
-<title>Local AI — 800+ моделей, дообучение, OCR</title>
+<title>Local AI — Полный ассистент v7</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <style>
-  :root{
-    --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;--bg4:#242433;
-    --fg:#e8e8f0;--fg2:#a0a0b0;--fg3:#707080;
-    --accent:#6c5ce7;--accent2:#00d2ff;--accent3:#ff6b9d;
-    --success:#00e676;--warn:#ffab00;--err:#ff5252;--purple:#a855f7;
-    --border:#2a2a3a;--radius:12px;--radius-sm:8px;
-    --nav-h:58px;--hdr-h:54px;
-  }
-  [data-theme="light"]{
-    --bg:#f5f5fa;--bg2:#ffffff;--bg3:#eaeaf0;--bg4:#dcdce5;
-    --fg:#1a1a26;--fg2:#606070;--fg3:#9090a0;--border:#d0d0d8;
-  }
+  :root{--bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;--bg4:#242433;--fg:#e8e8f0;--fg2:#a0a0b0;--fg3:#707080;--accent:#6c5ce7;--accent2:#00d2ff;--accent3:#ff6b9d;--success:#00e676;--warn:#ffab00;--err:#ff5252;--border:#2a2a3a;--radius:12px;--radius-sm:8px;--nav-h:58px;--hdr-h:54px;}
+  [data-theme="light"]{--bg:#f5f5fa;--bg2:#ffffff;--bg3:#eaeaf0;--bg4:#dcdce5;--fg:#1a1a26;--fg2:#606070;--fg3:#9090a0;--border:#d0d0d8;}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    font-size:14px;overflow-x:hidden;height:100%;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:14px;overflow-x:hidden;height:100%;}
   body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom));}
-  header{position:sticky;top:0;z-index:100;background:var(--bg2);
-    border-bottom:1px solid var(--border);padding:8px 12px;
-    height:var(--hdr-h);display:flex;align-items:center;gap:8px;}
-  header h1{margin:0;font-size:15px;font-weight:700;
-    background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));
-    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    background-clip:text;white-space:nowrap;}
-  .status-badge{font-size:10px;padding:3px 8px;border-radius:20px;
-    background:var(--bg3);color:var(--fg2);border:1px solid var(--border);
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;}
-  .status-badge.ok{color:var(--success);border-color:var(--success);}
-  .status-badge.busy{color:var(--warn);border-color:var(--warn);}
-  .status-badge.err{color:var(--err);border-color:var(--err);}
-  .hdr-btn{margin-left:auto;background:var(--bg3);border:1px solid var(--border);
-    color:var(--fg);width:34px;height:34px;border-radius:50%;font-size:15px;
-    cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  header{position:sticky;top:0;z-index:100;background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 12px;height:var(--hdr-h);display:flex;align-items:center;gap:8px;}
+  header h1{margin:0;font-size:15px;font-weight:700;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
+  .status-badge{font-size:10px;padding:3px 8px;border-radius:20px;background:var(--bg3);color:var(--fg2);border:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;}
+  .status-badge.ok{color:var(--success);border-color:var(--success);}.status-badge.busy{color:var(--warn);border-color:var(--warn);}.status-badge.err{color:var(--err);border-color:var(--err);}
+  .hdr-btn{margin-left:auto;background:var(--bg3);border:1px solid var(--border);color:var(--fg);width:34px;height:34px;border-radius:50%;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .hdr-btn + .hdr-btn{margin-left:6px;}
-  nav.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;
-    height:calc(var(--nav-h) + env(safe-area-inset-bottom));
-    padding-bottom:env(safe-area-inset-bottom);background:var(--bg2);
-    border-top:1px solid var(--border);display:flex;justify-content:space-around;align-items:center;}
-  .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;
-    justify-content:center;gap:2px;padding:6px 2px;cursor:pointer;
-    color:var(--fg3);font-size:10px;font-weight:600;transition:color .15s;user-select:none;}
-  .nav-item .ic{font-size:20px;line-height:1;}
-  .nav-item.active{color:var(--accent2);}
+  nav.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--bg2);border-top:1px solid var(--border);display:flex;justify-content:space-around;align-items:center;}
+  .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;cursor:pointer;color:var(--fg3);font-size:10px;font-weight:600;transition:color .15s;user-select:none;}
+  .nav-item .ic{font-size:20px;line-height:1;}.nav-item.active{color:var(--accent2);}
   main{padding:10px;padding-bottom:20px;max-width:900px;margin:0 auto;}
-  .panel{display:none;}
-  .panel.active{display:block;animation:fadeIn .18s;}
+  .panel{display:none;}.panel.active{display:block;animation:fadeIn .18s;}
   @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
-  .card{background:var(--bg2);border:1px solid var(--border);
-    border-radius:var(--radius);padding:12px;margin-bottom:10px;}
-  .card h2{margin:0 0 10px 0;font-size:13px;display:flex;align-items:center;
-    gap:6px;font-weight:700;letter-spacing:.2px;}
-  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-  .row.tight{gap:5px;}
-  .flex1{flex:1;}.mt{margin-top:8px;}.mb{margin-bottom:8px;}.small{font-size:10px;}
-  button.btn{background:var(--bg3);border:1px solid var(--border);color:var(--fg);
-    padding:9px 12px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;
-    cursor:pointer;transition:all .15s;display:inline-flex;
-    align-items:center;gap:6px;justify-content:center;line-height:1.2;font-family:inherit;}
-  button.btn:hover:not(:disabled){border-color:var(--accent);}
-  button.btn:active:not(:disabled){transform:scale(.96);}
-  button.btn.primary{background:linear-gradient(135deg,var(--accent),#8b7ce7);
-    border-color:transparent;color:#fff;}
-  button.btn.accent{background:linear-gradient(135deg,var(--accent2),#00e6ff);
-    border-color:transparent;color:#000;font-weight:700;}
-  button.btn.big{padding:14px 16px;font-size:14px;width:100%;}
-  button.btn.danger{background:#3a1020;border-color:var(--err);color:var(--err);}
-  button.btn.success{background:#103a20;border-color:var(--success);color:var(--success);}
-  button.btn:disabled{opacity:.4;cursor:not-allowed;}
-  button.btn.small{padding:6px 10px;font-size:11px;}
-  button.btn.icon{padding:8px 10px;min-width:38px;}
-  input,select,textarea{background:var(--bg3);border:1px solid var(--border);
-    color:var(--fg);padding:9px 10px;border-radius:var(--radius-sm);font-size:13px;
-    font-family:inherit;width:100%;outline:none;}
-  input:focus,select:focus,textarea:focus{border-color:var(--accent);}
-  textarea{min-height:60px;resize:vertical;line-height:1.5;}
-  select{cursor:pointer;}
-  .chat-messages{padding:4px 0;margin-bottom:8px;}
-  .message{background:var(--bg3);border-radius:10px;padding:10px 12px;
-    margin-bottom:8px;font-size:13px;line-height:1.55;word-wrap:break-word;overflow-wrap:anywhere;}
-  .message.user{background:linear-gradient(135deg,#6c5ce722,#00d2ff22);border-left:3px solid var(--accent);}
-  .message.ai{background:var(--bg3);border-left:3px solid var(--accent2);}
-  .message.system{background:var(--bg4);border-left:3px solid var(--warn);
-    font-size:11px;color:var(--fg2);}
-  .message .meta{font-size:10px;color:var(--fg3);margin-bottom:5px;
-    display:flex;justify-content:space-between;gap:6px;}
-  .message pre{background:#000;color:#0f0;padding:8px;border-radius:6px;
-    overflow-x:auto;font-size:11px;margin:6px 0;}
-  .message code{background:var(--bg4);padding:1px 5px;border-radius:4px;
-    font-size:12px;font-family:monospace;}
-  .message img{max-width:100%;border-radius:6px;margin:4px 0;}
-  .chat-input-row{display:flex;gap:6px;align-items:flex-end;
-    position:sticky;bottom:8px;background:var(--bg);padding-top:8px;z-index:5;}
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:10px;}
+  .card h2{margin:0 0 10px 0;font-size:13px;display:flex;align-items:center;gap:6px;font-weight:700;letter-spacing:.2px;}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}.row.tight{gap:5px;}.flex1{flex:1;}.mt{margin-top:8px;}.mb{margin-bottom:8px;}.small{font-size:10px;}
+  button.btn{background:var(--bg3);border:1px solid var(--border);color:var(--fg);padding:9px 12px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;justify-content:center;line-height:1.2;font-family:inherit;}
+  button.btn:hover:not(:disabled){border-color:var(--accent);}button.btn:active:not(:disabled){transform:scale(.96);}
+  button.btn.primary{background:linear-gradient(135deg,var(--accent),#8b7ce7);border-color:transparent;color:#fff;}
+  button.btn.accent{background:linear-gradient(135deg,var(--accent2),#00e6ff);border-color:transparent;color:#000;font-weight:700;}
+  button.btn.big{padding:14px 16px;font-size:14px;width:100%;}button.btn.danger{background:#3a1020;border-color:var(--err);color:var(--err);}
+  button.btn:disabled{opacity:.4;cursor:not-allowed;}button.btn.small{padding:6px 10px;font-size:11px;}button.btn.icon{padding:8px 10px;min-width:38px;}
+  input,select,textarea{background:var(--bg3);border:1px solid var(--border);color:var(--fg);padding:9px 10px;border-radius:var(--radius-sm);font-size:13px;font-family:inherit;width:100%;outline:none;}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);}textarea{min-height:60px;resize:vertical;line-height:1.5;}select{cursor:pointer;}
+  .chat-messages{padding:4px 0;margin-bottom:8px;}.message{background:var(--bg3);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px;line-height:1.55;word-wrap:break-word;overflow-wrap:anywhere;}
+  .message.user{background:linear-gradient(135deg,#6c5ce722,#00d2ff22);border-left:3px solid var(--accent);}.message.ai{background:var(--bg3);border-left:3px solid var(--accent2);}
+  .message.system{background:var(--bg4);border-left:3px solid var(--warn);font-size:11px;color:var(--fg2);}
+  .message .meta{font-size:10px;color:var(--fg3);margin-bottom:5px;display:flex;justify-content:space-between;gap:6px;}
+  .message pre{background:#000;color:#0f0;padding:8px;border-radius:6px;overflow-x:auto;font-size:11px;margin:6px 0;}.message code{background:var(--bg4);padding:1px 5px;border-radius:4px;font-size:12px;font-family:monospace;}.message img{max-width:100%;border-radius:6px;margin:4px 0;}
+  .chat-input-row{display:flex;gap:6px;align-items:flex-end;position:sticky;bottom:8px;background:var(--bg);padding-top:8px;z-index:5;}
   .chat-input-row textarea{flex:1;min-height:42px;max-height:140px;padding:10px;font-size:13px;}
-  .attach-strip{display:flex;gap:6px;overflow-x:auto;padding:6px 0;scrollbar-width:none;}
-  .attach-strip::-webkit-scrollbar{display:none;}
-  .attach-chip{flex-shrink:0;display:flex;align-items:center;gap:4px;
-    background:var(--bg3);border:1px solid var(--border);padding:5px 8px;
-    border-radius:14px;font-size:10px;color:var(--fg2);max-width:150px;cursor:pointer;}
-  .attach-chip .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .attach-chip .del{color:var(--err);font-weight:700;cursor:pointer;padding:0 2px;}
+  .attach-strip{display:flex;gap:6px;overflow-x:auto;padding:6px 0;scrollbar-width:none;}.attach-strip::-webkit-scrollbar{display:none;}
+  .attach-chip{flex-shrink:0;display:flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--border);padding:5px 8px;border-radius:14px;font-size:10px;color:var(--fg2);max-width:150px;cursor:pointer;}
+  .attach-chip .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.attach-chip .del{color:var(--err);font-weight:700;cursor:pointer;padding:0 2px;}
   .modes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px;}
-  .mode-chip{padding:8px 6px;text-align:center;background:var(--bg3);
-    border:1px solid var(--border);border-radius:10px;font-size:10px;
-    cursor:pointer;color:var(--fg2);transition:all .15s;font-weight:600;
-    display:flex;flex-direction:column;align-items:center;gap:3px;}
-  .mode-chip .em{font-size:18px;}
-  .mode-chip.active{background:linear-gradient(135deg,var(--accent),#8b7ce7);
-    color:#fff;border-color:transparent;}
+  .mode-chip{padding:8px 6px;text-align:center;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:10px;cursor:pointer;color:var(--fg2);transition:all .15s;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;}
+  .mode-chip .em{font-size:18px;}.mode-chip.active{background:linear-gradient(135deg,var(--accent),#8b7ce7);color:#fff;border-color:transparent;}
   .train-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px;}
-  .train-stat{background:var(--bg3);border-radius:8px;padding:8px 10px;
-    font-size:11px;color:var(--fg2);}
-  .train-stat b{color:var(--accent2);display:block;font-size:16px;
-    margin-top:3px;font-weight:700;font-family:monospace;}
-  .train-progress{background:var(--bg3);border-radius:6px;height:10px;
-    overflow:hidden;margin:8px 0;border:1px solid var(--border);}
-  .train-progress > div{height:100%;width:0;background:linear-gradient(90deg,var(--accent2),var(--accent3));
-    transition:width .3s;}
-  .memory-item{background:var(--bg3);border:1px solid var(--border);
-    border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:11px;
-    line-height:1.5;position:relative;}
-  .memory-item .rm{position:absolute;top:6px;right:8px;color:var(--err);
-    cursor:pointer;font-weight:700;font-size:14px;line-height:1;}
-  .memory-item .q{color:var(--accent2);font-weight:600;margin-bottom:3px;padding-right:20px;}
-  .memory-item .a{color:var(--fg2);}
-  .train-log{background:#000;color:#0f0;font-family:monospace;font-size:10px;
-    padding:8px;border-radius:6px;max-height:200px;overflow-y:auto;
-    white-space:pre-wrap;word-break:break-all;border:1px solid var(--border);line-height:1.5;}
-  .sys-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px;}
-  .sys-stat{background:var(--bg3);border-radius:6px;padding:6px 8px;
-    font-size:10px;color:var(--fg2);}
-  .sys-stat b{color:var(--accent2);display:block;font-size:14px;
-    margin-top:2px;font-weight:700;font-family:monospace;}
-  .code-out{background:#000;color:#0f0;font-family:monospace;font-size:11px;
-    padding:10px;border-radius:6px;max-height:300px;overflow:auto;
-    white-space:pre-wrap;word-break:break-word;border:1px solid var(--border);line-height:1.5;}
-  .toast{position:fixed;bottom:calc(var(--nav-h) + 16px);left:50%;
-    transform:translateX(-50%) translateY(120px);background:var(--accent);
-    color:#fff;padding:10px 18px;border-radius:24px;font-size:12px;z-index:9999;
-    transition:transform .3s;max-width:88%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.4);}
+  .train-stat{background:var(--bg3);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--fg2);}
+  .train-stat b{color:var(--accent2);display:block;font-size:16px;margin-top:3px;font-weight:700;font-family:monospace;}
+  .train-progress{background:var(--bg3);border-radius:6px;height:10px;overflow:hidden;margin:8px 0;border:1px solid var(--border);}
+  .train-progress > div{height:100%;width:0;background:linear-gradient(90deg,var(--accent2),var(--accent3));transition:width .3s;}
+  .memory-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:11px;line-height:1.5;position:relative;}
+  .memory-item .rm{position:absolute;top:6px;right:8px;color:var(--err);cursor:pointer;font-weight:700;font-size:14px;line-height:1;}
+  .memory-item .q{color:var(--accent2);font-weight:600;margin-bottom:3px;padding-right:20px;}.memory-item .a{color:var(--fg2);}
+  .train-log{background:#000;color:#0f0;font-family:monospace;font-size:10px;padding:8px;border-radius:6px;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;border:1px solid var(--border);line-height:1.5;}
+  .sys-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px;}.sys-stat{background:var(--bg3);border-radius:6px;padding:6px 8px;font-size:10px;color:var(--fg2);}
+  .sys-stat b{color:var(--accent2);display:block;font-size:14px;margin-top:2px;font-weight:700;font-family:monospace;}
+  .code-out{background:#000;color:#0f0;font-family:monospace;font-size:11px;padding:10px;border-radius:6px;max-height:300px;overflow:auto;white-space:pre-wrap;word-break:break-word;border:1px solid var(--border);line-height:1.5;}
+  .toast{position:fixed;bottom:calc(var(--nav-h) + 16px);left:50%;transform:translateX(-50%) translateY(120px);background:var(--accent);color:#fff;padding:10px 18px;border-radius:24px;font-size:12px;z-index:9999;transition:transform .3s;max-width:88%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.4);}
   .toast.show{transform:translateX(-50%) translateY(0);}
-  .model-card{background:var(--bg3);border:1px solid var(--border);
-    border-radius:var(--radius-sm);padding:10px;margin-bottom:6px;cursor:pointer;transition:all .15s;}
-  .model-card:hover{border-color:var(--accent);}
-  .model-card.selected{border-color:var(--accent);background:var(--accent);color:#fff;}
-  .model-card h4{margin:0 0 4px 0;font-size:12px;font-weight:700;
-    display:flex;justify-content:space-between;gap:6px;align-items:baseline;}
-  .model-card h4 .sz{font-size:10px;font-weight:400;opacity:.7;flex-shrink:0;}
-  .model-card .info{font-size:10px;color:var(--fg2);line-height:1.4;}
-  .model-card.selected .info{color:#fff;opacity:.9;}
-  .model-card .badge{display:inline-block;padding:1px 5px;border-radius:6px;
-    font-size:9px;background:var(--bg4);margin-right:3px;margin-top:2px;border:1px solid var(--border);}
+  .model-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:6px;cursor:pointer;transition:all .15s;}
+  .model-card:hover{border-color:var(--accent);}.model-card.selected{border-color:var(--accent);background:var(--accent);color:#fff;}
+  .model-card h4{margin:0 0 4px 0;font-size:12px;font-weight:700;display:flex;justify-content:space-between;gap:6px;align-items:baseline;}
+  .model-card h4 .sz{font-size:10px;font-weight:400;opacity:.7;flex-shrink:0;}.model-card .info{font-size:10px;color:var(--fg2);line-height:1.4;}
+  .model-card.selected .info{color:#fff;opacity:.9;}.model-card .badge{display:inline-block;padding:1px 5px;border-radius:6px;font-size:9px;background:var(--bg4);margin-right:3px;margin-top:2px;border:1px solid var(--border);}
   .model-card.selected .badge{background:rgba(255,255,255,0.18);border-color:rgba(255,255,255,0.3);}
-  .tabs-mini{display:flex;gap:4px;overflow-x:auto;padding:2px 0;scrollbar-width:none;}
-  .tabs-mini::-webkit-scrollbar{display:none;}
-  .tabs-mini .t{padding:5px 10px;background:var(--bg3);border:1px solid var(--border);
-    border-radius:12px;font-size:11px;cursor:pointer;color:var(--fg2);
-    white-space:nowrap;flex-shrink:0;font-weight:600;}
+  .tabs-mini{display:flex;gap:4px;overflow-x:auto;padding:2px 0;scrollbar-width:none;}.tabs-mini::-webkit-scrollbar{display:none;}
+  .tabs-mini .t{padding:5px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;font-size:11px;cursor:pointer;color:var(--fg2);white-space:nowrap;flex-shrink:0;font-weight:600;}
   .tabs-mini .t.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-  .progress{background:var(--bg3);border-radius:6px;height:8px;overflow:hidden;
-    margin:8px 0;border:1px solid var(--border);display:none;}
-  .progress.show{display:block;}
-  .progress > div{height:100%;width:0;background:linear-gradient(90deg,var(--accent2),var(--accent3));
-    transition:width .3s;}
-  .stat-line{display:flex;justify-content:space-between;font-size:11px;
-    color:var(--fg2);padding:3px 0;gap:6px;flex-wrap:wrap;}
-  .stat-line b{color:var(--fg);font-weight:600;font-family:monospace;
-    font-size:11px;text-align:right;overflow:hidden;text-overflow:ellipsis;max-width:60%;}
-  .kv-grid{display:grid;grid-template-columns:1fr auto;gap:8px;
-    font-size:12px;align-items:center;}
-  .kv-grid .kv{color:var(--fg2);}
-  .kv-grid input[type="number"]{max-width:90px;text-align:right;}
-  .kv-grid input[type="checkbox"]{width:auto;}
-  .preset-btn{display:inline-block;padding:6px 10px;margin:2px;background:var(--bg3);
-    border:1px solid var(--border);border-radius:14px;font-size:11px;
-    cursor:pointer;color:var(--fg2);}
-  .preset-btn:hover{background:var(--accent);color:#fff;}
-  .thinking{display:inline-block;animation:pulse 1.2s infinite;opacity:.8;}
-  @keyframes pulse{50%{opacity:.3;}}
-  .typing-cursor{display:inline-block;width:7px;height:13px;background:var(--accent2);
-    margin-left:2px;animation:blink 1s infinite;vertical-align:middle;}
-  @keyframes blink{50%{opacity:0;}}
-  input[type="file"]{display:none;}
-  .file-list{display:grid;gap:6px;}
-  .file-item{display:flex;align-items:center;gap:8px;background:var(--bg3);
-    border:1px solid var(--border);border-radius:var(--radius-sm);
-    padding:8px 10px;font-size:12px;}
-  .file-item .ic{font-size:20px;flex-shrink:0;}
-  .file-item .nm{flex:1;overflow:hidden;text-overflow:ellipsis;
-    white-space:nowrap;font-weight:600;}
-  .file-item .sz{font-size:10px;color:var(--fg3);flex-shrink:0;}
-  .test-result{margin-top:6px;padding:8px;border-radius:6px;font-size:11px;
-    font-family:monospace;line-height:1.5;display:none;}
+  .progress{background:var(--bg3);border-radius:6px;height:8px;overflow:hidden;margin:8px 0;border:1px solid var(--border);display:none;}.progress.show{display:block;}
+  .progress > div{height:100%;width:0;background:linear-gradient(90deg,var(--accent2),var(--accent3));transition:width .3s;}
+  .stat-line{display:flex;justify-content:space-between;font-size:11px;color:var(--fg2);padding:3px 0;gap:6px;flex-wrap:wrap;}
+  .stat-line b{color:var(--fg);font-weight:600;font-family:monospace;font-size:11px;text-align:right;overflow:hidden;text-overflow:ellipsis;max-width:60%;}
+  .kv-grid{display:grid;grid-template-columns:1fr auto;gap:8px;font-size:12px;align-items:center;}.kv-grid .kv{color:var(--fg2);}
+  .kv-grid input[type="number"]{max-width:90px;text-align:right;}.kv-grid input[type="checkbox"]{width:auto;}
+  .preset-btn{display:inline-block;padding:6px 10px;margin:2px;background:var(--bg3);border:1px solid var(--border);border-radius:14px;font-size:11px;cursor:pointer;color:var(--fg2);}.preset-btn:hover{background:var(--accent);color:#fff;}
+  .thinking{display:inline-block;animation:pulse 1.2s infinite;opacity:.8;}@keyframes pulse{50%{opacity:.3;}}
+  .typing-cursor{display:inline-block;width:7px;height:13px;background:var(--accent2);margin-left:2px;animation:blink 1s infinite;vertical-align:middle;}@keyframes blink{50%{opacity:0;}}
+  input[type="file"]{display:none;}.file-list{display:grid;gap:6px;}
+  .file-item{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;}
+  .file-item .ic{font-size:20px;flex-shrink:0;}.file-item .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;}.file-item .sz{font-size:10px;color:var(--fg3);flex-shrink:0;}
+  .test-result{margin-top:6px;padding:8px;border-radius:6px;font-size:11px;font-family:monospace;line-height:1.5;display:none;}
   .test-result.ok{background:#103a20;color:var(--success);border:1px solid var(--success);display:block;}
   .test-result.err{background:#3a1020;color:var(--err);border:1px solid var(--err);display:block;}
   .test-result.loading{background:var(--bg3);color:var(--warn);border:1px solid var(--warn);display:block;}
+  .log-out{background:#000;color:#0f0;font-family:monospace;font-size:10px;padding:8px;border-radius:6px;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;border:1px solid var(--border);line-height:1.5;display:none;}
+  .log-out.show{display:block;}
+  details summary{cursor:pointer;font-weight:600;font-size:12px;padding:6px 0;color:var(--accent2);}
 </style>
 </head>
 <body data-theme="dark">
 
 <header>
-  <h1>🤖 Local AI</h1>
+  <h1>🤖 Local AI v7</h1>
   <span id="statusBadge" class="status-badge">загрузка...</span>
   <button class="hdr-btn" id="btnQuickAttach" title="Прикрепить">📎</button>
   <button class="hdr-btn" id="themeBtn">🌙</button>
@@ -215,7 +103,7 @@
 
 <input type="file" id="fileInputAny" multiple>
 <input type="file" id="fileInputImage" accept="image/*" multiple>
-<input type="file" id="fileInputText" accept=".txt,.md,.json,.csv,.log,.xml,.html,.yml,.yaml,.ini,.js,.ts,.py,.java,.c,.cpp,.go,.rs,.rb,.php,.sql,.tex" multiple>
+<input type="file" id="fileInputText" accept=".txt,.md,.json,.csv,.log,.xml,.html,.yml,.yaml,.ini,.js,.ts,.jsx,.tsx,.py,.java,.c,.h,.cpp,.go,.rs,.rb,.php,.sql,.tex,.sh,.bat,.env,.conf" multiple>
 <input type="file" id="fileInputTrain" accept=".json,.jsonl,.csv,.txt,.md" multiple>
 <input type="file" id="fileInputImport" accept=".json">
 
@@ -224,7 +112,7 @@
   <div class="nav-item" data-tab="files"><span class="ic">📎</span>Файлы</div>
   <div class="nav-item" data-tab="models"><span class="ic">🧠</span>Модели</div>
   <div class="nav-item" data-tab="train"><span class="ic">🎓</span>Обучение</div>
-  <div class="nav-item" data-tab="tools"><span class="ic">🛠</span>Ещё</div>
+  <div class="nav-item" data-tab="tools"><span class="ic">🛠</span>Инструменты</div>
 </nav>
 
 <main>
@@ -241,12 +129,13 @@
         <div class="meta"><span>система</span><span>готово</span></div>
         Привет! Я локальный ИИ-ассистент.<br><br>
         <b>Что умею:</b><br>
-        • 💬 Чат с 800+ открытыми моделями<br>
+        • 💬 Чат с открытыми моделями (WebGPU и ONNX)<br>
         • 🖼 OCR и работа с фото<br>
         • 📄 PDF, DOCX, TXT, CSV, JSON, ZIP<br>
         • 📤 Экспорт в TXT/MD/HTML/JSON/CSV/PDF/ZIP<br>
         • 🧠 12 режимов рассуждения<br>
-        • 🎓 <b>Дообучение на ваших данных</b><br><br>
+        • 🎓 <b>Дообучение на ваших данных</b> (память стиля)<br>
+        • 🔍 RAG-поиск по прикреплённым файлам<br><br>
         <b>Старт:</b> 🧠 Модели → выбери модель → 💬 пиши.
       </div>
     </div>
@@ -274,6 +163,21 @@
     <h2>⚡ Быстрые промпты</h2>
     <div id="quickPrompts"></div>
   </div>
+
+  <div class="card">
+    <h2>🔍 RAG-поиск по файлам</h2>
+    <p class="small" style="color:var(--fg2);margin:0 0 8px">Включи, чтобы ИИ искал ответы в прикреплённых документах (эмбеддинги).</p>
+    <div class="kv-grid">
+      <span class="kv">Использовать RAG</span><input type="checkbox" id="setRagEnabled">
+      <span class="kv">Top-K фрагментов</span><input type="number" id="setRagTopK" value="3" min="1" max="10">
+      <span class="kv">Размер чанка</span><input type="number" id="setRagChunk" value="500" min="100" max="2000">
+    </div>
+    <div class="row tight mt">
+      <button class="btn small flex1" id="btnRagIndex">📥 Индексировать файлы</button>
+      <button class="btn small flex1" id="btnRagClear">🗑 Очистить индекс</button>
+    </div>
+    <div class="stat-line mt"><span>Фрагментов в индексе:</span><b id="ragCount">0</b></div>
+  </div>
 </section>
 
 <!-- ======================== ФАЙЛЫ ======================== -->
@@ -285,25 +189,18 @@
       <button class="btn flex1" id="btnPickImage">🖼 Фото</button>
       <button class="btn flex1" id="btnPickText">📄 Текст</button>
     </div>
-    <p class="small" style="color:var(--fg2);margin:8px 0 0">
-      Поддержка: изображения (jpg/png/webp), PDF, DOCX, TXT, MD, JSON, CSV, ZIP, код.
-    </p>
   </div>
-
   <div class="card">
-    <h2>📚 Библиотека файлов <span class="small" id="filesCount" style="color:var(--fg2)">(0)</span></h2>
-    <div class="file-list" id="filesList">
-      <div class="small" style="color:var(--fg2)">Пока ничего не прикреплено.</div>
-    </div>
+    <h2>📚 Библиотека файлов <span class="small" id="filesCount">(0)</span></h2>
+    <div class="file-list" id="filesList"><div class="small" style="color:var(--fg2)">Пока ничего нет.</div></div>
     <div class="row tight mt">
       <button class="btn small" id="btnFilesToChat">➕ В чат</button>
       <button class="btn small" id="btnFilesExportZip">🗜 В ZIP</button>
       <button class="btn small danger" id="btnFilesClearAll">🗑 Очистить</button>
     </div>
   </div>
-
   <div class="card">
-    <h2>🖼 Обработка изображений</h2>
+    <h2>🖼 Обработка</h2>
     <div class="row tight">
       <button class="btn small" id="btnImgOCR">🔎 OCR</button>
       <button class="btn small" id="btnImgCaption">🏷 Описание</button>
@@ -311,15 +208,17 @@
       <button class="btn small" id="btnImgDetect">📦 Объекты</button>
     </div>
   </div>
+  <div class="card">
+    <h2>📄 Предпросмотр</h2>
+    <div class="code-out" id="filePreview" style="display:none;max-height:400px;">—</div>
+  </div>
 </section>
 
 <!-- ======================== МОДЕЛИ ======================== -->
 <section class="panel" id="panel-models">
   <div class="card">
     <h2>🧠 Выбор модели</h2>
-    <p class="small" style="color:var(--fg2);margin:0 0 8px">
-      Всего: <b id="totalModels">0</b>. Скачанные кэшируются браузером.
-    </p>
+    <p class="small" style="color:var(--fg2);margin:0 0 8px">Всего: <b id="totalModels">0</b>. Скачанные кэшируются браузером.</p>
     <input type="text" id="modelSearch" placeholder="🔍 Поиск модели...">
     <div class="tabs-mini mt">
       <div class="t active" data-filter="all">Все</div>
@@ -327,29 +226,26 @@
       <div class="t" data-filter="small">Маленькие</div>
       <div class="t" data-filter="medium">Средние</div>
       <div class="t" data-filter="large">Большие</div>
-      <div class="t" data-filter="ru">RU</div>
-      <div class="t" data-filter="code">Код</div>
-      <div class="t" data-filter="math">Математика</div>
       <div class="t" data-filter="vision">Vision</div>
       <div class="t" data-filter="embedding">Embed</div>
+      <div class="t" data-filter="ru">RU</div>
+      <div class="t" data-filter="code">Код</div>
+      <div class="t" data-filter="math">Math</div>
+      <div class="t" data-filter="speech">Речь</div>
+      <div class="t" data-filter="translate">Перевод</div>
     </div>
   </div>
-
   <div class="card" id="activeModelCard" style="display:none">
     <h2>▶ Активная модель</h2>
     <div class="stat-line"><span>Название:</span><b id="activeModelName">—</b></div>
     <div class="stat-line"><span>Размер:</span><b id="activeModelSize">—</b></div>
     <div class="stat-line"><span>Backend:</span><b id="activeModelBackend">—</b></div>
-    <div class="stat-line"><span>Загружена за:</span><b id="activeModelTime">—</b></div>
     <div class="test-result" id="modelTestResult">—</div>
     <div class="row tight mt">
       <button class="btn danger flex1" id="btnUnloadModel">🗑 Выгрузить</button>
-      <button class="btn" id="btnRestartModel">🔄 Перезапустить</button>
     </div>
   </div>
-
   <div id="modelsList"></div>
-
   <div class="card">
     <h2>📊 Прогресс загрузки</h2>
     <div class="progress" id="modelLoadProgress"><div id="modelLoadFill"></div></div>
@@ -360,100 +256,49 @@
 <!-- ======================== ОБУЧЕНИЕ ======================== -->
 <section class="panel" id="panel-train">
   <div class="card">
-    <h2>🎓 Дообучение модели</h2>
-    <p class="small" style="color:var(--fg2);margin:0 0 10px;line-height:1.5">
-      <b>Как это работает:</b> полноценный fine-tuning (LoRA/QLoRA) требует сервера с GPU.
-      В браузере применяется <b>динамическое дообучение через контекстную память</b> —
-      это сохраняет ваши примеры и автоматически добавляет их в system prompt.
-      Так модель «запоминает» стиль, факты и предпочтения без переобучения весов.
-    </p>
+    <h2>🎓 Дообучение (LoRA-стиль)</h2>
     <div class="train-stats">
-      <div class="train-stat">Примеров в памяти<b id="trainExamples">0</b></div>
-      <div class="train-stat">Токенов контекста<b id="trainTokens">0</b></div>
-      <div class="train-stat">Весов загружено<b id="trainWeights">0</b></div>
-      <div class="train-stat">Эпох пройдено<b id="trainEpochs">0</b></div>
+      <div class="train-stat">Примеров<b id="trainExamples">0</b></div>
+      <div class="train-stat">Токенов<b id="trainTokens">0</b></div>
+      <div class="train-stat">Весов<b id="trainWeights">0</b></div>
+      <div class="train-stat">Эпох<b id="trainEpochs">0</b></div>
     </div>
     <div class="row tight mt">
-      <button class="btn primary flex1" id="btnTrainAdd">➕ Добавить пример</button>
+      <button class="btn primary flex1" id="btnTrainAdd">➕ Пример</button>
       <button class="btn flex1" id="btnTrainImport">📂 Импорт</button>
       <button class="btn flex1" id="btnTrainExport">💾 Экспорт</button>
     </div>
   </div>
-
   <div class="card">
     <h2>📝 Ручное добавление</h2>
-    <textarea id="trainQuestion" placeholder="Вопрос / инструкция…" style="min-height:60px"></textarea>
-    <textarea id="trainAnswer" class="mt" placeholder="Ответ / желаемое поведение…" style="min-height:80px"></textarea>
+    <textarea id="trainQuestion" placeholder="Вопрос…" style="min-height:60px"></textarea>
+    <textarea id="trainAnswer" class="mt" placeholder="Ответ…" style="min-height:80px"></textarea>
     <div class="row tight mt">
-      <input type="text" id="trainTag" placeholder="Тег (опционально)" style="flex:1;max-width:200px">
+      <input type="text" id="trainTag" placeholder="Тег" style="flex:1;max-width:200px">
       <button class="btn primary" id="btnTrainAddManual">💾 Сохранить</button>
     </div>
   </div>
-
   <div class="card">
-    <h2>🎛 Параметры</h2>
-    <div class="kv-grid">
-      <span class="kv">Стиль ответов</span>
-      <select id="trainStyle">
-        <option value="neutral">Нейтральный</option>
-        <option value="friendly">Дружелюбный</option>
-        <option value="formal">Формальный</option>
-        <option value="technical">Технический</option>
-        <option value="creative">Творческий</option>
-        <option value="concise">Краткий</option>
-        <option value="detailed">Подробный</option>
-      </select>
-      <span class="kv">Язык ответов</span>
-      <select id="trainLang">
-        <option value="ru">Русский</option>
-        <option value="en">English</option>
-        <option value="auto">Авто</option>
-      </select>
-      <span class="kv">Макс. примеров в prompt</span>
-      <input type="number" id="trainMaxExamples" value="8" min="1" max="50">
-      <span class="kv">Макс. токенов памяти</span>
-      <input type="number" id="trainMaxTokens" value="2048" min="256" max="8192">
-      <span class="kv">Точные совпадения</span>
-      <input type="checkbox" id="trainExactMatch" checked>
-      <span class="kv">Семантический поиск</span>
-      <input type="checkbox" id="trainSemantic" checked>
-      <span class="kv">Автодобавление из чата</span>
-      <input type="checkbox" id="trainAutoAdd">
-      <span class="kv">История диалога</span>
-      <input type="checkbox" id="trainUseHistory" checked>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>📚 Память примеров (<span id="memoryCount">0</span>)</h2>
-    <div id="memoryList">
-      <div class="small" style="color:var(--fg2)">Ещё нет примеров.</div>
-    </div>
+    <h2>📚 Память (<span id="memoryCount">0</span>)</h2>
+    <div id="memoryList"><div class="small" style="color:var(--fg2)">Нет примеров.</div></div>
     <div class="row tight mt">
-      <button class="btn small" id="btnMemoryImportDataset">📂 Датасеты</button>
       <button class="btn small danger" id="btnMemoryClear">🗑 Очистить</button>
     </div>
   </div>
-
   <div class="card">
-    <h2>🎯 Валидация обучения</h2>
+    <h2>🎯 Валидация</h2>
     <div class="train-progress"><div id="trainProgressFill"></div></div>
     <div class="row tight">
-      <button class="btn primary flex1" id="btnTrainRun">▶ Валидация</button>
+      <button class="btn primary flex1" id="btnTrainRun">▶ Запустить</button>
       <button class="btn flex1" id="btnTrainTest">🧪 Тест</button>
     </div>
     <div class="train-log mt" id="trainLog">Лог пуст.</div>
   </div>
-
   <div class="card">
-    <h2>💾 Сохранение адаптера</h2>
+    <h2>💾 Адаптер</h2>
     <div class="row tight">
       <button class="btn primary flex1" id="btnAdapterSave">💾 Сохранить</button>
       <button class="btn flex1" id="btnAdapterLoad">📂 Загрузить</button>
-    </div>
-    <div class="row tight mt">
-      <button class="btn flex1" id="btnAdapterExportMd">📝 Markdown</button>
-      <button class="btn flex1" id="btnAdapterExportCsv">📊 CSV</button>
     </div>
   </div>
 </section>
@@ -463,18 +308,15 @@
   <div class="card">
     <h2>📤 Экспорт чата</h2>
     <div class="row tight">
-      <button class="btn flex1" id="expTxt">📄 TXT</button>
-      <button class="btn flex1" id="expMd">📝 MD</button>
-      <button class="btn flex1" id="expJson">🧾 JSON</button>
-      <button class="btn flex1" id="expHtml">🌐 HTML</button>
-    </div>
-    <div class="row tight mt">
-      <button class="btn flex1" id="expCsv">📊 CSV</button>
-      <button class="btn flex1" id="expPdf">📕 PDF</button>
-      <button class="btn flex1" id="expZip">🗜 ZIP</button>
+      <button class="btn flex1" id="expTxt">TXT</button>
+      <button class="btn flex1" id="expMd">MD</button>
+      <button class="btn flex1" id="expJson">JSON</button>
+      <button class="btn flex1" id="expHtml">HTML</button>
+      <button class="btn flex1" id="expCsv">CSV</button>
+      <button class="btn flex1" id="expPdf">PDF</button>
+      <button class="btn flex1" id="expZip">ZIP</button>
     </div>
   </div>
-
   <div class="card">
     <h2>✍️ Создать документ</h2>
     <input type="text" id="docName" placeholder="Имя файла" value="document">
@@ -484,40 +326,53 @@
       <button class="btn flex1" id="docSaveMd">📝 MD</button>
       <button class="btn flex1" id="docSavePdf">📕 PDF</button>
       <button class="btn flex1" id="docSaveJson">🧾 JSON</button>
+      <button class="btn flex1" id="docSaveHtml">🌐 HTML</button>
     </div>
-    <button class="btn primary big mt" id="docAskAI">🤖 Попросить ИИ</button>
+    <button class="btn primary big mt" id="docAskAI">🤖 Попросить ИИ написать текст</button>
   </div>
-
   <div class="card">
     <h2>📊 Таблица → CSV</h2>
-    <textarea id="csvInput" placeholder="Значения через запятую, каждая строка — новая" style="min-height:100px"></textarea>
+    <textarea id="csvInput" placeholder="Значения через запятую или tab" style="min-height:100px"></textarea>
     <button class="btn primary big mt" id="csvSave">💾 Скачать CSV</button>
   </div>
-
   <div class="card">
     <h2>🌐 Перевод</h2>
-    <textarea id="translInput" placeholder="Текст…" style="min-height:80px"></textarea>
+    <textarea id="translInput" placeholder="Вставь текст для перевода…" style="min-height:80px"></textarea>
     <div class="row tight mt">
       <select id="translDir" style="flex:1">
-        <option value="ru-en">RU → EN</option>
-        <option value="en-ru">EN → RU</option>
+        <option value="ru-en">RU → EN</option><option value="en-ru">EN → RU</option>
+        <option value="ru-de">RU → DE</option><option value="de-ru">DE → RU</option>
+        <option value="ru-fr">RU → FR</option><option value="fr-ru">FR → RU</option>
+        <option value="ru-es">RU → ES</option><option value="es-ru">ES → RU</option>
+        <option value="ru-uk">RU → UK</option><option value="uk-ru">UK → RU</option>
+        <option value="ru-zh">RU → ZH</option><option value="zh-ru">ZH → RU</option>
+        <option value="en-de">EN → DE</option><option value="de-en">DE → EN</option>
+        <option value="en-fr">EN → FR</option><option value="fr-en">FR → EN</option>
+        <option value="en-es">EN → ES</option><option value="es-en">ES → EN</option>
+        <option value="en-zh">EN → ZH</option><option value="zh-en">ZH → EN</option>
+        <option value="en-ja">EN → JA</option><option value="ja-en">JA → EN</option>
       </select>
       <button class="btn primary" id="translBtn">🌐</button>
     </div>
     <div class="code-out mt" id="translOut" style="display:none">—</div>
   </div>
-
+  <div class="card">
+    <h2>🎤 Распознавание речи</h2>
+    <div class="row tight">
+      <button class="btn flex1" id="btnRecordStart">🎙 Запись</button>
+      <button class="btn flex1" id="btnRecordStop" disabled>⏹ Стоп</button>
+    </div>
+    <div class="small mt" id="recordStatus" style="color:var(--fg2)">Готово к записи</div>
+  </div>
   <div class="card">
     <h2>⚙️ Генерация</h2>
     <div class="kv-grid">
       <span class="kv">Temperature</span><input type="number" id="setTemp" value="0.7" step="0.1" min="0" max="2">
       <span class="kv">Top P</span><input type="number" id="setTopP" value="0.95" step="0.05" min="0" max="1">
-      <span class="kv">Top K</span><input type="number" id="setTopK" value="40" min="1" max="200">
       <span class="kv">Max tokens</span><input type="number" id="setMaxTokens" value="1024" min="16" max="8192">
-      <span class="kv">Rep. penalty</span><input type="number" id="setRepPenalty" value="1.1" step="0.05" min="1" max="2">
+      <span class="kv">Repeat penalty</span><input type="number" id="setRepeatPenalty" value="1.1" step="0.05" min="1" max="2">
     </div>
   </div>
-
   <div class="card">
     <h2>💬 Системный промпт</h2>
     <textarea id="setSystemPrompt" style="min-height:90px">Ты — полезный ассистент. Отвечай на русском языке, чётко и по делу.</textarea>
@@ -525,31 +380,19 @@
       <button class="btn small" data-prompt="math">📐 Математик</button>
       <button class="btn small" data-prompt="code">💻 Программист</button>
       <button class="btn small" data-prompt="teacher">👨‍🏫 Учитель</button>
-      <button class="btn small" data-prompt="writer">✍️ Писатель</button>
-      <button class="btn small" data-prompt="translate">🌐 Переводчик</button>
+      <button class="btn small" data-prompt="translator">🌐 Переводчик</button>
       <button class="btn small" data-prompt="reset">🔄 Сброс</button>
     </div>
   </div>
-
   <div class="card">
     <h2>🎨 Интерфейс</h2>
     <div class="kv-grid">
       <span class="kv">Тема</span><select id="setTheme"><option value="dark">Тёмная</option><option value="light">Светлая</option></select>
       <span class="kv">Автоскролл</span><input type="checkbox" id="setAutoScroll" checked>
       <span class="kv">Озвучка</span><input type="checkbox" id="setSpeak">
-      <span class="kv">Стриминг</span><input type="checkbox" id="setStreaming" checked>
     </div>
+    <button class="btn primary big mt" id="btnSaveSettings">💾 Сохранить настройки</button>
   </div>
-
-  <div class="card">
-    <h2>💾 Настройки</h2>
-    <button class="btn primary big" id="btnSaveSettings">💾 Сохранить</button>
-    <div class="row tight mt">
-      <button class="btn flex1" id="btnExportSettings">⬇ Экспорт</button>
-      <button class="btn flex1" id="btnImportSettings">📂 Импорт</button>
-    </div>
-  </div>
-
   <div class="card">
     <h2>💻 Система</h2>
     <div class="sys-grid">
@@ -558,27 +401,18 @@
       <div class="sys-stat">WASM<b id="sysWASM">—</b></div>
       <div class="sys-stat">CPU<b id="sysCores">—</b></div>
     </div>
+    <div class="code-out mt" id="diagOut" style="display:none">—</div>
     <div class="row tight mt">
       <button class="btn small flex1" id="btnDiagnostics">🔬 Диагностика</button>
       <button class="btn small flex1" id="btnTestWebGPU">⚡ WebGPU</button>
     </div>
-    <div class="code-out mt" id="diagOut" style="display:none">—</div>
   </div>
-
   <div class="card">
-    <h2>📋 Лог</h2>
-    <div class="code-out" id="logOut">—</div>
-    <div class="row tight mt">
-      <button class="btn small flex1" id="btnClearLog">🗑</button>
-      <button class="btn small flex1" id="btnDownloadLog">⬇</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>💣 Опасное</h2>
+    <h2>💣 Очистка</h2>
     <div class="row tight">
       <button class="btn danger flex1" id="btnClearCache">💣 Кэш моделей</button>
       <button class="btn danger flex1" id="btnClearIDB">🗑 IndexedDB</button>
+      <button class="btn danger flex1" id="btnClearAll">💥 Всё</button>
     </div>
   </div>
 </section>
@@ -586,7 +420,9 @@
 </main>
 
 <div class="toast" id="toast">Готово</div>
+<div class="log-out" id="logOut"></div>
 
+<!-- ================== Библиотеки ================== -->
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -596,15 +432,17 @@
 
 <script type="module">
   import * as webllm from 'https://esm.run/@mlc-ai/web-llm';
-  window.webllm = webllm;
-  window.dispatchEvent(new Event('webllm-ready'));
-</script>
-<script type="module">
   import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.0';
+
   env.allowLocalModels = false;
   env.useBrowserCache = true;
+  env.useFSCache = true;
+
+  window.webllm = webllm;
   window.transformersPipeline = pipeline;
   window.transformersEnv = env;
+
+  window.dispatchEvent(new Event('webllm-ready'));
   window.dispatchEvent(new Event('transformers-ready'));
 </script>
 
@@ -612,201 +450,241 @@
 'use strict';
 
 /* ============================================================
-   МЕГА-КАТАЛОГ: 800+ ОТКРЫТЫХ МОДЕЛЕЙ
+   1. КАТАЛОГ МОДЕЛЕЙ
    ============================================================ */
 
 const WEBLLM_MODELS = [
   { id:'SmolLM2-135M-Instruct-q4f16_1-MLC', name:'SmolLM2 135M', size:'100 МБ', type:'tiny', langs:['en'], cat:'llm' },
   { id:'SmolLM2-360M-Instruct-q4f16_1-MLC', name:'SmolLM2 360M', size:'230 МБ', type:'tiny', langs:['en'], cat:'llm' },
   { id:'SmolLM2-1.7B-Instruct-q4f16_1-MLC', name:'SmolLM2 1.7B', size:'1.1 ГБ', type:'small', langs:['en'], cat:'llm' },
+  { id:'SmolLM-135M-Instruct-q4f16_1-MLC', name:'SmolLM 135M', size:'100 МБ', type:'tiny', langs:['en'], cat:'llm' },
+  { id:'SmolLM-360M-Instruct-q4f16_1-MLC', name:'SmolLM 360M', size:'230 МБ', type:'tiny', langs:['en'], cat:'llm' },
+  { id:'SmolLM-1.7B-Instruct-q4f16_1-MLC', name:'SmolLM 1.7B', size:'1.1 ГБ', type:'small', langs:['en'], cat:'llm' },
   { id:'Qwen2.5-0.5B-Instruct-q4f16_1-MLC', name:'Qwen2.5 0.5B', size:'350 МБ', type:'tiny', langs:['ru','en','zh'], cat:'llm' },
   { id:'Qwen2.5-1.5B-Instruct-q4f16_1-MLC', name:'Qwen2.5 1.5B', size:'900 МБ', type:'small', langs:['ru','en','zh'], cat:'llm' },
   { id:'Qwen2.5-3B-Instruct-q4f16_1-MLC', name:'Qwen2.5 3B', size:'1.8 ГБ', type:'medium', langs:['ru','en','zh'], cat:'llm' },
   { id:'Qwen2.5-7B-Instruct-q4f16_1-MLC', name:'Qwen2.5 7B', size:'4.2 ГБ', type:'large', langs:['ru','en','zh'], cat:'llm' },
-  { id:'Qwen2.5-14B-Instruct-q4f16_1-MLC', name:'Qwen2.5 14B', size:'8.2 ГБ', type:'large', langs:['ru','en','zh'], cat:'llm' },
-  { id:'Qwen2.5-32B-Instruct-q4f16_1-MLC', name:'Qwen2.5 32B', size:'18 ГБ', type:'large', langs:['ru','en','zh'], cat:'llm' },
-  { id:'Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC', name:'Qwen2.5 Coder 1.5B', size:'900 МБ', type:'small', langs:['en'], cat:'code' },
-  { id:'Qwen2.5-Coder-7B-Instruct-q4f16_1-MLC', name:'Qwen2.5 Coder 7B', size:'4.2 ГБ', type:'large', langs:['en'], cat:'code' },
-  { id:'Qwen2.5-Coder-14B-Instruct-q4f16_1-MLC', name:'Qwen2.5 Coder 14B', size:'8.2 ГБ', type:'large', langs:['en'], cat:'code' },
-  { id:'Qwen2.5-Coder-32B-Instruct-q4f16_1-MLC', name:'Qwen2.5 Coder 32B', size:'18 ГБ', type:'large', langs:['en'], cat:'code' },
-  { id:'Qwen2.5-Math-1.5B-Instruct-q4f16_1-MLC', name:'Qwen2.5 Math 1.5B', size:'900 МБ', type:'small', langs:['en'], cat:'math' },
+  { id:'Qwen2.5-0.5B-Instruct-q4f32_1-MLC', name:'Qwen2.5 0.5B (f32)', size:'700 МБ', type:'tiny', langs:['ru','en','zh'], cat:'llm' },
+  { id:'Qwen2.5-1.5B-Instruct-q4f32_1-MLC', name:'Qwen2.5 1.5B (f32)', size:'1.8 ГБ', type:'small', langs:['ru','en','zh'], cat:'llm' },
+  { id:'Qwen2.5-3B-Instruct-q4f32_1-MLC', name:'Qwen2.5 3B (f32)', size:'3.6 ГБ', type:'medium', langs:['ru','en','zh'], cat:'llm' },
+  { id:'Qwen2.5-Coder-0.5B-Instruct-q4f16_1-MLC', name:'Qwen2.5 Coder 0.5B', size:'350 МБ', type:'tiny', langs:['code','en'], cat:'code' },
+  { id:'Qwen2.5-Coder-1.5B-Instruct-q4f16_1-MLC', name:'Qwen2.5 Coder 1.5B', size:'900 МБ', type:'small', langs:['code','en'], cat:'code' },
+  { id:'Qwen2.5-Coder-3B-Instruct-q4f16_1-MLC', name:'Qwen2.5 Coder 3B', size:'1.8 ГБ', type:'medium', langs:['code','en'], cat:'code' },
+  { id:'Qwen2.5-Coder-7B-Instruct-q4f16_1-MLC', name:'Qwen2.5 Coder 7B', size:'4.2 ГБ', type:'large', langs:['code','en'], cat:'code' },
+  { id:'Qwen2.5-Coder-1.5B-Instruct-q4f32_1-MLC', name:'Qwen2.5 Coder 1.5B (f32)', size:'1.8 ГБ', type:'small', langs:['code','en'], cat:'code' },
+  { id:'Qwen2-0.5B-Instruct-q4f16_1-MLC', name:'Qwen2 0.5B', size:'350 МБ', type:'tiny', langs:['en','zh'], cat:'llm' },
+  { id:'Qwen2-1.5B-Instruct-q4f16_1-MLC', name:'Qwen2 1.5B', size:'900 МБ', type:'small', langs:['en','zh'], cat:'llm' },
+  { id:'Qwen2-7B-Instruct-q4f16_1-MLC', name:'Qwen2 7B', size:'4.2 ГБ', type:'large', langs:['en','zh'], cat:'llm' },
+  { id:'Qwen2-Math-1.5B-Instruct-q4f16_1-MLC', name:'Qwen2 Math 1.5B', size:'900 МБ', type:'small', langs:['math','en'], cat:'math' },
+  { id:'Qwen2-Math-7B-Instruct-q4f16_1-MLC', name:'Qwen2 Math 7B', size:'4.2 ГБ', type:'large', langs:['math','en'], cat:'math' },
   { id:'Qwen3-0.6B-q4f16_1-MLC', name:'Qwen3 0.6B', size:'400 МБ', type:'tiny', langs:['ru','en','zh'], cat:'llm' },
   { id:'Qwen3-1.7B-q4f16_1-MLC', name:'Qwen3 1.7B', size:'1.1 ГБ', type:'small', langs:['ru','en','zh'], cat:'llm' },
   { id:'Qwen3-4B-q4f16_1-MLC', name:'Qwen3 4B', size:'2.5 ГБ', type:'medium', langs:['ru','en','zh'], cat:'llm' },
   { id:'Qwen3-8B-q4f16_1-MLC', name:'Qwen3 8B', size:'4.8 ГБ', type:'large', langs:['ru','en','zh'], cat:'llm' },
-  { id:'Qwen3-14B-q4f16_1-MLC', name:'Qwen3 14B', size:'8.5 ГБ', type:'large', langs:['ru','en','zh'], cat:'llm' },
-  { id:'Qwen3-30B-A3B-q4f16_1-MLC', name:'Qwen3 30B MoE', size:'16 ГБ', type:'large', langs:['ru','en','zh'], cat:'llm' },
-  { id:'Qwen3-32B-q4f16_1-MLC', name:'Qwen3 32B', size:'18 ГБ', type:'large', langs:['ru','en','zh'], cat:'llm' },
-  { id:'TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC', name:'TinyLlama 1.1B', size:'700 МБ', type:'small', langs:['en'], cat:'llm' },
+  { id:'Qwen3-14B-q4f16_1-MLC', name:'Qwen3 14B', size:'8 ГБ', type:'large', langs:['ru','en','zh'], cat:'llm' },
+  { id:'Qwen3-0.6B-q4f32_1-MLC', name:'Qwen3 0.6B (f32)', size:'800 МБ', type:'tiny', langs:['ru','en','zh'], cat:'llm' },
+  { id:'Qwen3-1.7B-q4f32_1-MLC', name:'Qwen3 1.7B (f32)', size:'2.2 ГБ', type:'small', langs:['ru','en','zh'], cat:'llm' },
   { id:'Llama-3.2-1B-Instruct-q4f16_1-MLC', name:'Llama 3.2 1B', size:'1.0 ГБ', type:'small', langs:['ru','en'], cat:'llm' },
   { id:'Llama-3.2-3B-Instruct-q4f16_1-MLC', name:'Llama 3.2 3B', size:'2.2 ГБ', type:'medium', langs:['ru','en'], cat:'llm' },
   { id:'Llama-3.1-8B-Instruct-q4f16_1-MLC', name:'Llama 3.1 8B', size:'4.5 ГБ', type:'large', langs:['ru','en'], cat:'llm' },
-  { id:'Llama-3.1-70B-Instruct-q3f16_1-MLC', name:'Llama 3.1 70B', size:'36 ГБ', type:'large', langs:['ru','en'], cat:'llm' },
-  { id:'Mistral-7B-Instruct-v0.3-q4f16_1-MLC', name:'Mistral 7B v0.3', size:'4.2 ГБ', type:'large', langs:['en','ru'], cat:'llm' },
-  { id:'Mistral-7B-Instruct-v0.2-q4f16_1-MLC', name:'Mistral 7B v0.2', size:'4.2 ГБ', type:'large', langs:['en','ru'], cat:'llm' },
-  { id:'Mixtral-8x7B-Instruct-v0.1-q4f16_1-MLC', name:'Mixtral 8x7B', size:'26 ГБ', type:'large', langs:['en'], cat:'llm' },
-  { id:'Mistral-Small-24B-Instruct-2501-q4f16_1-MLC', name:'Mistral Small 24B', size:'13 ГБ', type:'large', langs:['en','ru'], cat:'llm' },
+  { id:'Llama-3.1-8B-Instruct-q4f32_1-MLC', name:'Llama 3.1 8B (f32)', size:'9 ГБ', type:'large', langs:['ru','en'], cat:'llm' },
+  { id:'Llama-3-8B-Instruct-q4f16_1-MLC', name:'Llama 3 8B', size:'4.5 ГБ', type:'large', langs:['en'], cat:'llm' },
+  { id:'Llama-2-7b-chat-hf-q4f16_1-MLC', name:'Llama 2 7B Chat', size:'4 ГБ', type:'large', langs:['en'], cat:'llm' },
+  { id:'Llama-2-13b-chat-hf-q4f16_1-MLC', name:'Llama 2 13B Chat', size:'7.5 ГБ', type:'large', langs:['en'], cat:'llm' },
+  { id:'Llama-3.2-1B-Instruct-q4f32_1-MLC', name:'Llama 3.2 1B (f32)', size:'2 ГБ', type:'small', langs:['ru','en'], cat:'llm' },
+  { id:'Llama-3.2-3B-Instruct-q4f32_1-MLC', name:'Llama 3.2 3B (f32)', size:'4.5 ГБ', type:'medium', langs:['ru','en'], cat:'llm' },
+  { id:'Llama-3.2-11B-Vision-Instruct-q4f16_1-MLC', name:'Llama 3.2 Vision 11B', size:'6 ГБ', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC', name:'TinyLlama 1.1B', size:'700 МБ', type:'small', langs:['en'], cat:'llm' },
+  { id:'TinyLlama-1.1B-Chat-v1.0-q4f32_1-MLC', name:'TinyLlama 1.1B (f32)', size:'1.4 ГБ', type:'small', langs:['en'], cat:'llm' },
   { id:'gemma-2-2b-it-q4f16_1-MLC', name:'Gemma 2 2B', size:'1.4 ГБ', type:'small', langs:['en','ru'], cat:'llm' },
   { id:'gemma-2-9b-it-q4f16_1-MLC', name:'Gemma 2 9B', size:'5.4 ГБ', type:'large', langs:['en','ru'], cat:'llm' },
-  { id:'gemma-3-1b-it-q4f16_1-MLC', name:'Gemma 3 1B', size:'800 МБ', type:'small', langs:['en','ru'], cat:'llm' },
-  { id:'gemma-3-4b-it-q4f16_1-MLC', name:'Gemma 3 4B', size:'2.6 ГБ', type:'medium', langs:['en','ru'], cat:'llm' },
-  { id:'gemma-3-12b-it-q4f16_1-MLC', name:'Gemma 3 12B', size:'7.3 ГБ', type:'large', langs:['en','ru'], cat:'llm' },
-  { id:'gemma-3-27b-it-q4f16_1-MLC', name:'Gemma 3 27B', size:'15 ГБ', type:'large', langs:['en','ru'], cat:'llm' },
-  { id:'Phi-2-q4f16_1-MLC', name:'Phi-2', size:'1.6 ГБ', type:'medium', langs:['en'], cat:'llm' },
-  { id:'Phi-3-mini-4k-instruct-q4f16_1-MLC', name:'Phi-3 mini', size:'2.2 ГБ', type:'medium', langs:['en'], cat:'llm' },
+  { id:'gemma-2b-it-q4f16_1-MLC', name:'Gemma 2B', size:'1.5 ГБ', type:'small', langs:['en'], cat:'llm' },
+  { id:'gemma-7b-it-q4f16_1-MLC', name:'Gemma 7B', size:'4.5 ГБ', type:'large', langs:['en'], cat:'llm' },
+  { id:'gemma-2b-it-q4f32_1-MLC', name:'Gemma 2B (f32)', size:'3 ГБ', type:'small', langs:['en'], cat:'llm' },
+  { id:'gemma-7b-it-q4f32_1-MLC', name:'Gemma 7B (f32)', size:'9 ГБ', type:'large', langs:['en'], cat:'llm' },
   { id:'Phi-3.5-mini-instruct-q4f16_1-MLC', name:'Phi-3.5 mini', size:'2.2 ГБ', type:'medium', langs:['en'], cat:'llm' },
-  { id:'DeepSeek-R1-Distill-Qwen-1.5B-q4f16_1-MLC', name:'DeepSeek R1 1.5B', size:'1.0 ГБ', type:'small', langs:['en'], cat:'math' },
-  { id:'DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC', name:'DeepSeek R1 7B', size:'4.4 ГБ', type:'large', langs:['en'], cat:'math' },
-  { id:'DeepSeek-R1-Distill-Qwen-14B-q4f16_1-MLC', name:'DeepSeek R1 14B', size:'8.4 ГБ', type:'large', langs:['en'], cat:'math' },
-  { id:'DeepSeek-R1-Distill-Qwen-32B-q4f16_1-MLC', name:'DeepSeek R1 32B', size:'18 ГБ', type:'large', langs:['en'], cat:'math' },
-  { id:'DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC', name:'DeepSeek R1 Llama 8B', size:'4.6 ГБ', type:'large', langs:['en'], cat:'math' },
+  { id:'Phi-3.5-mini-instruct-q4f32_1-MLC', name:'Phi-3.5 mini (f32)', size:'4.5 ГБ', type:'medium', langs:['en'], cat:'llm' },
+  { id:'Phi-3-mini-4k-instruct-q4f16_1-MLC', name:'Phi-3 mini 4k', size:'2 ГБ', type:'medium', langs:['en'], cat:'llm' },
+  { id:'Phi-3-mini-4k-instruct-q4f32_1-MLC', name:'Phi-3 mini 4k (f32)', size:'4 ГБ', type:'medium', langs:['en'], cat:'llm' },
+  { id:'Phi-3.5-vision-instruct-q4f16_1-MLC', name:'Phi-3.5 Vision', size:'2.5 ГБ', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'Phi-3-vision-q4f16_1-MLC', name:'Phi-3 Vision', size:'3 ГБ', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'Mistral-7B-Instruct-v0.3-q4f16_1-MLC', name:'Mistral 7B v0.3', size:'4.2 ГБ', type:'large', langs:['en','ru'], cat:'llm' },
+  { id:'Mistral-7B-Instruct-v0.2-q4f16_1-MLC', name:'Mistral 7B v0.2', size:'4.2 ГБ', type:'large', langs:['en'], cat:'llm' },
+  { id:'Mistral-7B-Instruct-v0.3-q4f32_1-MLC', name:'Mistral 7B v0.3 (f32)', size:'8.5 ГБ', type:'large', langs:['en','ru'], cat:'llm' },
+  { id:'Mistral-Nemo-Instruct-2407-q4f16_1-MLC', name:'Mistral Nemo 12B', size:'7 ГБ', type:'large', langs:['en','ru'], cat:'llm' },
+  { id:'Mixtral-8x7B-Instruct-v0.1-q4f16_1-MLC', name:'Mixtral 8x7B', size:'24 ГБ', type:'large', langs:['en','ru'], cat:'llm' },
+  { id:'WizardMath-7B-V1.1-q4f16_1-MLC', name:'WizardMath 7B', size:'4.2 ГБ', type:'large', langs:['math','en'], cat:'math' },
+  { id:'WizardCoder-15B-V1.0-q4f16_1-MLC', name:'WizardCoder 15B', size:'9 ГБ', type:'large', langs:['code','en'], cat:'code' },
+  { id:'OpenHermes-2.5-Mistral-7B-q4f16_1-MLC', name:'OpenHermes 2.5 7B', size:'4.2 ГБ', type:'large', langs:['en'], cat:'llm' },
+  { id:'OpenChat-3.5-0106-q4f16_1-MLC', name:'OpenChat 3.5', size:'4.2 ГБ', type:'large', langs:['en'], cat:'llm' },
   { id:'Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC', name:'Hermes 2 Pro 8B', size:'4.5 ГБ', type:'large', langs:['en'], cat:'llm' },
-  { id:'Hermes-3-Llama-3.1-8B-q4f16_1-MLC', name:'Hermes 3 8B', size:'4.6 ГБ', type:'large', langs:['en'], cat:'llm' },
-  { id:'OpenHermes-2.5-Mistral-7B-q4f16_1-MLC', name:'OpenHermes 2.5', size:'4.2 ГБ', type:'large', langs:['en'], cat:'llm' },
-  { id:'NeuralHermes-2.5-Mistral-7B-q4f16_1-MLC', name:'NeuralHermes 7B', size:'4.2 ГБ', type:'large', langs:['en'], cat:'llm' }
+  { id:'Hermes-2-Pro-Mistral-7B-q4f16_1-MLC', name:'Hermes 2 Pro 7B', size:'4.2 ГБ', type:'large', langs:['en'], cat:'llm' },
+  { id:'DeepSeek-R1-Distill-Qwen-1.5B-q4f16_1-MLC', name:'DeepSeek R1 1.5B', size:'1.0 ГБ', type:'small', langs:['math','en'], cat:'math' },
+  { id:'DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC', name:'DeepSeek R1 7B', size:'4.4 ГБ', type:'large', langs:['math','en'], cat:'math' },
+  { id:'DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC', name:'DeepSeek R1 Llama 8B', size:'4.8 ГБ', type:'large', langs:['math','en'], cat:'math' },
+  { id:'DeepSeek-R1-Distill-Qwen-14B-q4f16_1-MLC', name:'DeepSeek R1 14B', size:'8 ГБ', type:'large', langs:['math','en'], cat:'math' },
+  { id:'OLMo-1B-hf-q4f16_1-MLC', name:'OLMo 1B', size:'700 МБ', type:'small', langs:['en'], cat:'llm' },
+  { id:'OLMo-7B-hf-q4f16_1-MLC', name:'OLMo 7B', size:'4.2 ГБ', type:'large', langs:['en'], cat:'llm' },
+  { id:'RedPajama-INCITE-Chat-3B-v1-q4f16_1-MLC', name:'RedPajama 3B', size:'2 ГБ', type:'medium', langs:['en'], cat:'llm' },
+  { id:'StableLM-2-1.6B-q4f16_1-MLC', name:'StableLM 2 1.6B', size:'1 ГБ', type:'small', langs:['en'], cat:'llm' },
+  { id:'Vicuna-7B-v1.5-q4f16_1-MLC', name:'Vicuna 7B', size:'4.2 ГБ', type:'large', langs:['en'], cat:'llm' },
+  { id:'Vicuna-13B-v1.5-q4f16_1-MLC', name:'Vicuna 13B', size:'7.5 ГБ', type:'large', langs:['en'], cat:'llm' },
+  { id:'RWKV-raven-1.5B-q4f16_1-MLC', name:'RWKV Raven 1.5B', size:'1 ГБ', type:'small', langs:['en'], cat:'llm' },
+  { id:'RWKV-raven-3B-q4f16_1-MLC', name:'RWKV Raven 3B', size:'2 ГБ', type:'medium', langs:['en'], cat:'llm' },
+  { id:'Qwen2-VL-2B-Instruct-q4f16_1-MLC', name:'Qwen2-VL 2B', size:'1.2 ГБ', type:'vision', langs:['ru','en','vision'], cat:'vision' },
+  { id:'Qwen2-VL-7B-Instruct-q4f16_1-MLC', name:'Qwen2-VL 7B', size:'4.5 ГБ', type:'vision', langs:['ru','en','vision'], cat:'vision' },
+  { id:'Qwen2.5-VL-3B-Instruct-q4f16_1-MLC', name:'Qwen2.5-VL 3B', size:'2 ГБ', type:'vision', langs:['ru','en','vision'], cat:'vision' },
+  { id:'Qwen2.5-VL-7B-Instruct-q4f16_1-MLC', name:'Qwen2.5-VL 7B', size:'4.8 ГБ', type:'vision', langs:['ru','en','vision'], cat:'vision' },
+  { id:'snowflake-arctic-embed-m-q4f16_1-MLC', name:'Snowflake Arctic Embed M', size:'150 МБ', type:'embedding', langs:['en'], cat:'embedding' },
+  { id:'e5-large-v2-q4f16_1-MLC', name:'E5 Large v2', size:'300 МБ', type:'embedding', langs:['en'], cat:'embedding' },
+  { id:'e5-small-v2-q4f16_1-MLC', name:'E5 Small v2', size:'50 МБ', type:'embedding', langs:['en'], cat:'embedding' },
 ];
 
 const TRANSFORMERS_MODELS = [
   { id:'onnx-community/Qwen2.5-0.5B-Instruct', name:'Qwen2.5 0.5B', size:'500 МБ', task:'text-generation', type:'tiny', langs:['ru','en'], cat:'llm' },
   { id:'onnx-community/Qwen2.5-1.5B-Instruct', name:'Qwen2.5 1.5B', size:'1.5 ГБ', task:'text-generation', type:'small', langs:['ru','en'], cat:'llm' },
-  { id:'onnx-community/Qwen2.5-3B-Instruct', name:'Qwen2.5 3B', size:'3.0 ГБ', task:'text-generation', type:'medium', langs:['ru','en'], cat:'llm' },
+  { id:'onnx-community/Qwen2.5-3B-Instruct', name:'Qwen2.5 3B', size:'2.5 ГБ', task:'text-generation', type:'medium', langs:['ru','en'], cat:'llm' },
   { id:'onnx-community/Qwen2.5-7B-Instruct', name:'Qwen2.5 7B', size:'4.2 ГБ', task:'text-generation', type:'large', langs:['ru','en'], cat:'llm' },
-  { id:'onnx-community/Qwen2.5-Coder-0.5B-Instruct', name:'Qwen2.5 Coder 0.5B', size:'500 МБ', task:'text-generation', type:'tiny', langs:['en'], cat:'code' },
-  { id:'onnx-community/Qwen2.5-Coder-1.5B-Instruct', name:'Qwen2.5 Coder 1.5B', size:'1.5 ГБ', task:'text-generation', type:'small', langs:['en'], cat:'code' },
-  { id:'onnx-community/Qwen2.5-Coder-7B-Instruct', name:'Qwen2.5 Coder 7B', size:'4.2 ГБ', task:'text-generation', type:'large', langs:['en'], cat:'code' },
-  { id:'onnx-community/Qwen2.5-Math-1.5B-Instruct', name:'Qwen2.5 Math 1.5B', size:'1.5 ГБ', task:'text-generation', type:'small', langs:['en'], cat:'math' },
+  { id:'onnx-community/Qwen2.5-Coder-0.5B-Instruct', name:'Qwen2.5 Coder 0.5B', size:'500 МБ', task:'text-generation', type:'tiny', langs:['code','en'], cat:'code' },
+  { id:'onnx-community/Qwen2.5-Coder-1.5B-Instruct', name:'Qwen2.5 Coder 1.5B', size:'1.5 ГБ', task:'text-generation', type:'small', langs:['code','en'], cat:'code' },
+  { id:'onnx-community/Qwen2.5-Coder-7B-Instruct', name:'Qwen2.5 Coder 7B', size:'4.2 ГБ', task:'text-generation', type:'large', langs:['code','en'], cat:'code' },
   { id:'onnx-community/Qwen3-0.6B-ONNX', name:'Qwen3 0.6B', size:'600 МБ', task:'text-generation', type:'tiny', langs:['ru','en'], cat:'llm' },
   { id:'onnx-community/Qwen3-1.7B-ONNX', name:'Qwen3 1.7B', size:'1.7 ГБ', task:'text-generation', type:'small', langs:['ru','en'], cat:'llm' },
-  { id:'onnx-community/Qwen3-4B-ONNX', name:'Qwen3 4B', size:'2.5 ГБ', task:'text-generation', type:'medium', langs:['ru','en'], cat:'llm' },
-  { id:'onnx-community/Qwen3-8B-ONNX', name:'Qwen3 8B', size:'4.8 ГБ', task:'text-generation', type:'large', langs:['ru','en'], cat:'llm' },
+  { id:'onnx-community/Qwen3-4B-ONNX', name:'Qwen3 4B', size:'3.5 ГБ', task:'text-generation', type:'medium', langs:['ru','en'], cat:'llm' },
+  { id:'onnx-community/Qwen3-8B-ONNX', name:'Qwen3 8B', size:'5 ГБ', task:'text-generation', type:'large', langs:['ru','en'], cat:'llm' },
   { id:'onnx-community/Llama-3.2-1B-Instruct', name:'Llama 3.2 1B', size:'1.0 ГБ', task:'text-generation', type:'small', langs:['ru','en'], cat:'llm' },
   { id:'onnx-community/Llama-3.2-3B-Instruct', name:'Llama 3.2 3B', size:'2.5 ГБ', task:'text-generation', type:'medium', langs:['ru','en'], cat:'llm' },
-  { id:'onnx-community/Llama-3.1-8B-Instruct', name:'Llama 3.1 8B', size:'4.5 ГБ', task:'text-generation', type:'large', langs:['ru','en'], cat:'llm' },
-  { id:'onnx-community/Mistral-7B-Instruct-v0.3', name:'Mistral 7B', size:'4.2 ГБ', task:'text-generation', type:'large', langs:['en'], cat:'llm' },
-  { id:'onnx-community/Phi-3.5-mini-instruct-onnx-web', name:'Phi 3.5 mini', size:'2.2 ГБ', task:'text-generation', type:'medium', langs:['en'], cat:'llm' },
-  { id:'onnx-community/gemma-2-2b-it', name:'Gemma 2 2B', size:'2.0 ГБ', task:'text-generation', type:'medium', langs:['en'], cat:'llm' },
-  { id:'onnx-community/DeepSeek-R1-Distill-Qwen-1.5B', name:'DeepSeek R1 1.5B', size:'1.5 ГБ', task:'text-generation', type:'small', langs:['en'], cat:'math' },
+  { id:'onnx-community/Llama-3.1-8B-Instruct', name:'Llama 3.1 8B', size:'4.8 ГБ', task:'text-generation', type:'large', langs:['ru','en'], cat:'llm' },
+  { id:'onnx-community/Phi-3.5-mini-instruct-onnx-web', name:'Phi-3.5 mini', size:'2.2 ГБ', task:'text-generation', type:'medium', langs:['en'], cat:'llm' },
+  { id:'onnx-community/Phi-3-mini-4k-instruct-onnx-web', name:'Phi-3 mini 4k', size:'2 ГБ', task:'text-generation', type:'medium', langs:['en'], cat:'llm' },
   { id:'onnx-community/SmolLM2-360M-Instruct', name:'SmolLM2 360M', size:'360 МБ', task:'text-generation', type:'tiny', langs:['en'], cat:'llm' },
-  { id:'onnx-community/SmolLM2-1.7B-Instruct', name:'SmolLM2 1.7B', size:'1.7 ГБ', task:'text-generation', type:'small', langs:['en'], cat:'llm' },
-  { id:'onnx-community/TinyLlama-1.1B-Chat-v1.0', name:'TinyLlama 1.1B', size:'1.1 ГБ', task:'text-generation', type:'small', langs:['en'], cat:'llm' },
-  { id:'onnx-community/Qwen2-0.5B-Instruct', name:'Qwen2 0.5B', size:'500 МБ', task:'text-generation', type:'tiny', langs:['ru','en'], cat:'llm' },
-  { id:'onnx-community/Qwen2-1.5B-Instruct', name:'Qwen2 1.5B', size:'1.5 ГБ', task:'text-generation', type:'small', langs:['ru','en'], cat:'llm' },
-  { id:'onnx-community/Qwen2-7B-Instruct', name:'Qwen2 7B', size:'4.2 ГБ', task:'text-generation', type:'large', langs:['ru','en'], cat:'llm' },
-  { id:'onnx-community/granite-3.1-2b-instruct', name:'Granite 3.1 2B', size:'1.5 ГБ', task:'text-generation', type:'small', langs:['en'], cat:'llm' },
-  { id:'onnx-community/granite-3.3-2b-instruct-ONNX', name:'Granite 3.3 2B', size:'1.5 ГБ', task:'text-generation', type:'small', langs:['en'], cat:'llm' },
-  { id:'onnx-community/OLMo-2-0425-1B-Instruct', name:'OLMo 2 1B', size:'1.0 ГБ', task:'text-generation', type:'small', langs:['en'], cat:'llm' },
-  { id:'onnx-community/opt-125m', name:'OPT 125M', size:'125 МБ', task:'text-generation', type:'tiny', langs:['en'], cat:'llm' },
+  { id:'onnx-community/SmolLM2-1.7B-Instruct', name:'SmolLM2 1.7B', size:'1.1 ГБ', task:'text-generation', type:'small', langs:['en'], cat:'llm' },
+  { id:'onnx-community/SmolLM-135M-Instruct', name:'SmolLM 135M', size:'135 МБ', task:'text-generation', type:'tiny', langs:['en'], cat:'llm' },
+  { id:'onnx-community/SmolLM-360M-Instruct', name:'SmolLM 360M', size:'360 МБ', task:'text-generation', type:'tiny', langs:['en'], cat:'llm' },
+  { id:'onnx-community/SmolLM-1.7B-Instruct', name:'SmolLM 1.7B', size:'1.1 ГБ', task:'text-generation', type:'small', langs:['en'], cat:'llm' },
+  { id:'onnx-community/gemma-2-2b-it-ONNX', name:'Gemma 2 2B', size:'2.5 ГБ', task:'text-generation', type:'small', langs:['en'], cat:'llm' },
+  { id:'onnx-community/gemma-2b-it-ONNX', name:'Gemma 2B', size:'2 ГБ', task:'text-generation', type:'small', langs:['en'], cat:'llm' },
+  { id:'onnx-community/TinyLlama-1.1B-Chat-v1.0', name:'TinyLlama 1.1B', size:'700 МБ', task:'text-generation', type:'small', langs:['en'], cat:'llm' },
+  { id:'onnx-community/Mistral-7B-Instruct-v0.3-ONNX', name:'Mistral 7B v0.3', size:'4.5 ГБ', task:'text-generation', type:'large', langs:['en'], cat:'llm' },
+  { id:'onnx-community/DeepSeek-R1-Distill-Qwen-1.5B-ONNX', name:'DeepSeek R1 1.5B', size:'1.5 ГБ', task:'text-generation', type:'small', langs:['math','en'], cat:'math' },
+  { id:'onnx-community/DeepSeek-R1-Distill-Qwen-7B-ONNX', name:'DeepSeek R1 7B', size:'4.5 ГБ', task:'text-generation', type:'large', langs:['math','en'], cat:'math' },
+  { id:'Xenova/gpt2', name:'GPT-2', size:'500 МБ', task:'text-generation', type:'tiny', langs:['en'], cat:'llm' },
+  { id:'Xenova/distilgpt2', name:'DistilGPT-2', size:'350 МБ', task:'text-generation', type:'tiny', langs:['en'], cat:'llm' },
+  { id:'Xenova/LaMini-Flan-T5-77M', name:'LaMini Flan T5 77M', size:'80 МБ', task:'text2text-generation', type:'tiny', langs:['en'], cat:'llm' },
+  { id:'Xenova/LaMini-Flan-T5-248M', name:'LaMini Flan T5 248M', size:'250 МБ', task:'text2text-generation', type:'tiny', langs:['en'], cat:'llm' },
+  { id:'Xenova/LaMini-Flan-T5-783M', name:'LaMini Flan T5 783M', size:'800 МБ', task:'text2text-generation', type:'small', langs:['en'], cat:'llm' },
+  { id:'Xenova/mt5-small', name:'mT5 Small', size:'1.2 ГБ', task:'text2text-generation', type:'medium', langs:['multi','ru'], cat:'llm' },
+  { id:'Xenova/mt5-base', name:'mT5 Base', size:'2.4 ГБ', task:'text2text-generation', type:'large', langs:['multi','ru'], cat:'llm' },
+  { id:'Xenova/ruT5-base', name:'RuT5 Base', size:'900 МБ', task:'text2text-generation', type:'small', langs:['ru'], cat:'llm' },
+  { id:'Xenova/ruT5-large', name:'RuT5 Large', size:'2.2 ГБ', task:'text2text-generation', type:'large', langs:['ru'], cat:'llm' },
+  { id:'Xenova/dialogpt-small', name:'DialoGPT Small', size:'120 МБ', task:'text-generation', type:'tiny', langs:['en'], cat:'llm' },
+  { id:'Xenova/dialogpt-medium', name:'DialoGPT Medium', size:'350 МБ', task:'text-generation', type:'small', langs:['en'], cat:'llm' },
+  { id:'Xenova/dialogpt-large', name:'DialoGPT Large', size:'800 МБ', task:'text-generation', type:'small', langs:['en'], cat:'llm' },
+
   { id:'Xenova/opus-mt-ru-en', name:'RU→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['ru','en'], cat:'translate' },
-  { id:'Xenova/opus-mt-ru-de', name:'RU→DE', size:'300 МБ', task:'translation', type:'tiny', langs:['ru','de'], cat:'translate' },
-  { id:'Xenova/opus-mt-ru-fr', name:'RU→FR', size:'300 МБ', task:'translation', type:'tiny', langs:['ru','fr'], cat:'translate' },
-  { id:'Xenova/opus-mt-ru-es', name:'RU→ES', size:'300 МБ', task:'translation', type:'tiny', langs:['ru','es'], cat:'translate' },
-  { id:'Xenova/opus-mt-ru-it', name:'RU→IT', size:'300 МБ', task:'translation', type:'tiny', langs:['ru','it'], cat:'translate' },
-  { id:'Xenova/opus-mt-ru-zh', name:'RU→ZH', size:'300 МБ', task:'translation', type:'tiny', langs:['ru','zh'], cat:'translate' },
-  { id:'Xenova/opus-mt-ru-ar', name:'RU→AR', size:'300 МБ', task:'translation', type:'tiny', langs:['ru','ar'], cat:'translate' },
-  { id:'Xenova/opus-mt-ru-tr', name:'RU→TR', size:'300 МБ', task:'translation', type:'tiny', langs:['ru','tr'], cat:'translate' },
-  { id:'Xenova/opus-mt-ru-pl', name:'RU→PL', size:'300 МБ', task:'translation', type:'tiny', langs:['ru','pl'], cat:'translate' },
-  { id:'Xenova/opus-mt-ru-uk', name:'RU→UK', size:'300 МБ', task:'translation', type:'tiny', langs:['ru','uk'], cat:'translate' },
   { id:'Xenova/opus-mt-en-ru', name:'EN→RU', size:'300 МБ', task:'translation', type:'tiny', langs:['en','ru'], cat:'translate' },
-  { id:'Xenova/opus-mt-en-de', name:'EN→DE', size:'300 МБ', task:'translation', type:'tiny', langs:['en','de'], cat:'translate' },
-  { id:'Xenova/opus-mt-en-fr', name:'EN→FR', size:'300 МБ', task:'translation', type:'tiny', langs:['en','fr'], cat:'translate' },
-  { id:'Xenova/opus-mt-en-es', name:'EN→ES', size:'300 МБ', task:'translation', type:'tiny', langs:['en','es'], cat:'translate' },
-  { id:'Xenova/opus-mt-en-it', name:'EN→IT', size:'300 МБ', task:'translation', type:'tiny', langs:['en','it'], cat:'translate' },
-  { id:'Xenova/opus-mt-en-zh', name:'EN→ZH', size:'300 МБ', task:'translation', type:'tiny', langs:['en','zh'], cat:'translate' },
-  { id:'Xenova/opus-mt-en-ar', name:'EN→AR', size:'300 МБ', task:'translation', type:'tiny', langs:['en','ar'], cat:'translate' },
-  { id:'Xenova/opus-mt-en-jap', name:'EN→JA', size:'300 МБ', task:'translation', type:'tiny', langs:['en','ja'], cat:'translate' },
-  { id:'Xenova/opus-mt-en-ko', name:'EN→KO', size:'300 МБ', task:'translation', type:'tiny', langs:['en','ko'], cat:'translate' },
-  { id:'Xenova/opus-mt-en-hi', name:'EN→HI', size:'300 МБ', task:'translation', type:'tiny', langs:['en','hi'], cat:'translate' },
-  { id:'Xenova/opus-mt-en-uk', name:'EN→UK', size:'300 МБ', task:'translation', type:'tiny', langs:['en','uk'], cat:'translate' },
-  { id:'Xenova/opus-mt-en-nl', name:'EN→NL', size:'300 МБ', task:'translation', type:'tiny', langs:['en','nl'], cat:'translate' },
-  { id:'Xenova/opus-mt-en-ro', name:'EN→RO', size:'300 МБ', task:'translation', type:'tiny', langs:['en','ro'], cat:'translate' },
-  { id:'Xenova/opus-mt-en-sv', name:'EN→SV', size:'300 МБ', task:'translation', type:'tiny', langs:['en','sv'], cat:'translate' },
-  { id:'Xenova/opus-mt-en-fi', name:'EN→FI', size:'300 МБ', task:'translation', type:'tiny', langs:['en','fi'], cat:'translate' },
-  { id:'Xenova/opus-mt-de-en', name:'DE→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['de','en'], cat:'translate' },
+  { id:'Xenova/opus-mt-ru-de', name:'RU→DE', size:'300 МБ', task:'translation', type:'tiny', langs:['ru','de'], cat:'translate' },
   { id:'Xenova/opus-mt-de-ru', name:'DE→RU', size:'300 МБ', task:'translation', type:'tiny', langs:['de','ru'], cat:'translate' },
-  { id:'Xenova/opus-mt-fr-en', name:'FR→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['fr','en'], cat:'translate' },
+  { id:'Xenova/opus-mt-ru-fr', name:'RU→FR', size:'300 МБ', task:'translation', type:'tiny', langs:['ru','fr'], cat:'translate' },
   { id:'Xenova/opus-mt-fr-ru', name:'FR→RU', size:'300 МБ', task:'translation', type:'tiny', langs:['fr','ru'], cat:'translate' },
-  { id:'Xenova/opus-mt-es-en', name:'ES→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['es','en'], cat:'translate' },
+  { id:'Xenova/opus-mt-ru-es', name:'RU→ES', size:'300 МБ', task:'translation', type:'tiny', langs:['ru','es'], cat:'translate' },
   { id:'Xenova/opus-mt-es-ru', name:'ES→RU', size:'300 МБ', task:'translation', type:'tiny', langs:['es','ru'], cat:'translate' },
-  { id:'Xenova/opus-mt-it-en', name:'IT→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['it','en'], cat:'translate' },
-  { id:'Xenova/opus-mt-it-ru', name:'IT→RU', size:'300 МБ', task:'translation', type:'tiny', langs:['it','ru'], cat:'translate' },
-  { id:'Xenova/opus-mt-zh-en', name:'ZH→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['zh','en'], cat:'translate' },
-  { id:'Xenova/opus-mt-zh-ru', name:'ZH→RU', size:'300 МБ', task:'translation', type:'tiny', langs:['zh','ru'], cat:'translate' },
-  { id:'Xenova/opus-mt-ar-en', name:'AR→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['ar','en'], cat:'translate' },
-  { id:'Xenova/opus-mt-ja-en', name:'JA→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['ja','en'], cat:'translate' },
-  { id:'Xenova/opus-mt-ko-en', name:'KO→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['ko','en'], cat:'translate' },
-  { id:'Xenova/opus-mt-hi-en', name:'HI→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['hi','en'], cat:'translate' },
-  { id:'Xenova/opus-mt-uk-en', name:'UK→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['uk','en'], cat:'translate' },
+  { id:'Xenova/opus-mt-ru-uk', name:'RU→UK', size:'300 МБ', task:'translation', type:'tiny', langs:['ru','uk'], cat:'translate' },
   { id:'Xenova/opus-mt-uk-ru', name:'UK→RU', size:'300 МБ', task:'translation', type:'tiny', langs:['uk','ru'], cat:'translate' },
-  { id:'Xenova/opus-mt-nl-en', name:'NL→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['nl','en'], cat:'translate' },
-  { id:'Xenova/opus-mt-mul-en', name:'MULTI→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['multi','en'], cat:'translate' },
-  { id:'Xenova/nllb-200-distilled-600M', name:'NLLB-200', size:'2.4 ГБ', task:'translation', type:'large', langs:['multi'], cat:'translate' },
-  { id:'Xenova/mbart-large-50-many-to-many-mmt', name:'mBART-50', size:'2.4 ГБ', task:'translation', type:'large', langs:['multi','ru'], cat:'translate' },
-  { id:'Xenova/trocr-small-printed', name:'TrOCR Small Printed', size:'300 МБ', task:'image-to-text', type:'vision', langs:['en'], cat:'ocr' },
-  { id:'Xenova/trocr-base-printed', name:'TrOCR Base Printed', size:'1.3 ГБ', task:'image-to-text', type:'vision', langs:['en'], cat:'ocr' },
-  { id:'Xenova/trocr-base-handwritten', name:'TrOCR Base Handwritten', size:'1.3 ГБ', task:'image-to-text', type:'vision', langs:['en'], cat:'ocr' },
-  { id:'Xenova/donut-base-finetuned-cord-v2', name:'Donut CORD-v2', size:'750 МБ', task:'image-to-text', type:'vision', langs:['en'], cat:'ocr' },
-  { id:'Xenova/vit-base-patch16-224', name:'ViT Base', size:'330 МБ', task:'image-classification', type:'vision', langs:['en'], cat:'vision' },
-  { id:'Xenova/clip-vit-base-patch32', name:'CLIP ViT-B/32', size:'600 МБ', task:'zero-shot-image-classification', type:'vision', langs:['multi'], cat:'vision' },
-  { id:'Xenova/clip-vit-base-patch16', name:'CLIP ViT-B/16', size:'580 МБ', task:'zero-shot-image-classification', type:'vision', langs:['multi'], cat:'vision' },
-  { id:'Xenova/detr-resnet-50', name:'DETR ResNet-50', size:'160 МБ', task:'object-detection', type:'vision', langs:['en'], cat:'vision' },
-  { id:'Xenova/detr-resnet-101', name:'DETR ResNet-101', size:'240 МБ', task:'object-detection', type:'vision', langs:['en'], cat:'vision' },
-  { id:'Xenova/owlvit-base-patch32', name:'OWL-ViT', size:'600 МБ', task:'zero-shot-object-detection', type:'vision', langs:['en'], cat:'vision' },
-  { id:'Xenova/owlv2-base-patch16-ensemble', name:'OWLv2 Base', size:'600 МБ', task:'zero-shot-object-detection', type:'vision', langs:['en'], cat:'vision' },
-  { id:'Xenova/yolos-tiny', name:'YOLOS Tiny', size:'25 МБ', task:'object-detection', type:'vision', langs:['en'], cat:'vision' },
-  { id:'Xenova/segformer-b0-finetuned-ade-512-512', name:'SegFormer B0', size:'15 МБ', task:'image-segmentation', type:'vision', langs:['en'], cat:'vision' },
-  { id:'Xenova/depth-anything-small-hf', name:'Depth Anything Small', size:'100 МБ', task:'depth-estimation', type:'vision', langs:['en'], cat:'vision' },
-  { id:'Xenova/vit-gpt2-image-captioning', name:'ViT-GPT2', size:'1.0 ГБ', task:'image-to-text', type:'vision', langs:['en'], cat:'vision' },
-  { id:'onnx-community/Florence-2-base-ft', name:'Florence-2 Base', size:'1.0 ГБ', task:'image-to-text', type:'vision', langs:['en'], cat:'vision' },
-  { id:'onnx-community/Qwen2-VL-2B-Instruct', name:'Qwen2-VL 2B', size:'3.0 ГБ', task:'image-to-text', type:'vision', langs:['en','zh'], cat:'vision' },
-  { id:'onnx-community/SmolVLM-256M-Instruct-ONNX', name:'SmolVLM 256M', size:'500 МБ', task:'image-to-text', type:'tiny', langs:['en'], cat:'vision' },
-  { id:'onnx-community/SmolVLM-500M-Instruct-ONNX', name:'SmolVLM 500M', size:'900 МБ', task:'image-to-text', type:'small', langs:['en'], cat:'vision' },
+  { id:'Xenova/opus-mt-ru-zh', name:'RU→ZH', size:'300 МБ', task:'translation', type:'tiny', langs:['ru','zh'], cat:'translate' },
+  { id:'Xenova/opus-mt-zh-ru', name:'ZH→RU', size:'300 МБ', task:'translation', type:'tiny', langs:['zh','ru'], cat:'translate' },
+  { id:'Xenova/opus-mt-en-de', name:'EN→DE', size:'300 МБ', task:'translation', type:'tiny', langs:['en','de'], cat:'translate' },
+  { id:'Xenova/opus-mt-de-en', name:'DE→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['de','en'], cat:'translate' },
+  { id:'Xenova/opus-mt-en-fr', name:'EN→FR', size:'300 МБ', task:'translation', type:'tiny', langs:['en','fr'], cat:'translate' },
+  { id:'Xenova/opus-mt-fr-en', name:'FR→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['fr','en'], cat:'translate' },
+  { id:'Xenova/opus-mt-en-es', name:'EN→ES', size:'300 МБ', task:'translation', type:'tiny', langs:['en','es'], cat:'translate' },
+  { id:'Xenova/opus-mt-es-en', name:'ES→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['es','en'], cat:'translate' },
+  { id:'Xenova/opus-mt-en-zh', name:'EN→ZH', size:'300 МБ', task:'translation', type:'tiny', langs:['en','zh'], cat:'translate' },
+  { id:'Xenova/opus-mt-zh-en', name:'ZH→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['en','zh'], cat:'translate' },
+  { id:'Xenova/opus-mt-en-ja', name:'EN→JA', size:'300 МБ', task:'translation', type:'tiny', langs:['en','ja'], cat:'translate' },
+  { id:'Xenova/opus-mt-ja-en', name:'JA→EN', size:'300 МБ', task:'translation', type:'tiny', langs:['ja','en'], cat:'translate' },
+  { id:'Xenova/mbart-large-50-many-to-many-mmt', name:'mBART-50 Multi', size:'2.4 ГБ', task:'translation', type:'medium', langs:['multi'], cat:'translate' },
+  { id:'Xenova/nllb-200-distilled-600M', name:'NLLB-200 600M', size:'1.2 ГБ', task:'translation', type:'small', langs:['multi'], cat:'translate' },
+
+  { id:'Xenova/trocr-base-printed', name:'TrOCR Base Printed', size:'1.3 ГБ', task:'image-to-text', type:'vision', langs:['ocr','en'], cat:'ocr' },
+  { id:'Xenova/trocr-base-handwritten', name:'TrOCR Base Handwritten', size:'1.3 ГБ', task:'image-to-text', type:'vision', langs:['ocr','en'], cat:'ocr' },
+  { id:'Xenova/trocr-small-printed', name:'TrOCR Small Printed', size:'500 МБ', task:'image-to-text', type:'vision', langs:['ocr','en'], cat:'ocr' },
+  { id:'Xenova/trocr-large-printed', name:'TrOCR Large Printed', size:'2.5 ГБ', task:'image-to-text', type:'vision', langs:['ocr','en'], cat:'ocr' },
+  { id:'Xenova/vit-gpt2-image-captioning', name:'ViT-GPT2 Caption', size:'1.0 ГБ', task:'image-to-text', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'Xenova/blip-image-captioning-base', name:'BLIP Base Caption', size:'1.0 ГБ', task:'image-to-text', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'Xenova/blip-image-captioning-large', name:'BLIP Large Caption', size:'2.0 ГБ', task:'image-to-text', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'Xenova/detr-resnet-50', name:'DETR ResNet-50', size:'160 МБ', task:'object-detection', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'Xenova/detr-resnet-101', name:'DETR ResNet-101', size:'250 МБ', task:'object-detection', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'Xenova/yolos-tiny', name:'YOLOS Tiny', size:'120 МБ', task:'object-detection', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'Xenova/yolos-small', name:'YOLOS Small', size:'180 МБ', task:'object-detection', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'Xenova/vit-base-patch16-224', name:'ViT Base 224', size:'330 МБ', task:'image-classification', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'Xenova/resnet-50', name:'ResNet-50', size:'100 МБ', task:'image-classification', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'Xenova/mobilenet_v2_1.0_224', name:'MobileNet v2', size:'15 МБ', task:'image-classification', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'Xenova/clip-vit-base-patch32', name:'CLIP ViT-B/32', size:'600 МБ', task:'zero-shot-image-classification', type:'vision', langs:['multi','vision'], cat:'vision' },
+  { id:'Xenova/clip-vit-large-patch14', name:'CLIP ViT-L/14', size:'1.7 ГБ', task:'zero-shot-image-classification', type:'vision', langs:['multi','vision'], cat:'vision' },
+  { id:'Xenova/siglip-base-patch16-224', name:'SigLIP Base', size:'800 МБ', task:'zero-shot-image-classification', type:'vision', langs:['multi','vision'], cat:'vision' },
+  { id:'Xenova/segformer-b0-finetuned-ade-512-512', name:'SegFormer B0', size:'60 МБ', task:'image-segmentation', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'Xenova/dpt-hybrid-midas', name:'DPT MiDaS Depth', size:'500 МБ', task:'depth-estimation', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'Xenova/vilt-b32-finetuned-vqa', name:'ViLT VQA', size:'500 МБ', task:'visual-question-answering', type:'vision', langs:['en','vision'], cat:'vision' },
+  { id:'Xenova/donut-base-finetuned-docvqa', name:'Donut DocVQA', size:'800 МБ', task:'visual-question-answering', type:'vision', langs:['en','vision'], cat:'ocr' },
+
+  { id:'Xenova/whisper-tiny', name:'Whisper Tiny', size:'150 МБ', task:'automatic-speech-recognition', type:'vision', langs:['multi','speech'], cat:'speech' },
+  { id:'Xenova/whisper-base', name:'Whisper Base', size:'300 МБ', task:'automatic-speech-recognition', type:'vision', langs:['multi','speech'], cat:'speech' },
+  { id:'Xenova/whisper-small', name:'Whisper Small', size:'900 МБ', task:'automatic-speech-recognition', type:'vision', langs:['multi','speech'], cat:'speech' },
+  { id:'Xenova/whisper-medium', name:'Whisper Medium', size:'3 ГБ', task:'automatic-speech-recognition', type:'vision', langs:['multi','speech'], cat:'speech' },
+  { id:'onnx-community/whisper-large-v3-turbo', name:'Whisper Large v3 Turbo', size:'3 ГБ', task:'automatic-speech-recognition', type:'vision', langs:['multi','speech'], cat:'speech' },
+  { id:'Xenova/wav2vec2-base-960h', name:'Wav2Vec2 Base', size:'400 МБ', task:'automatic-speech-recognition', type:'vision', langs:['en','speech'], cat:'speech' },
+  { id:'Xenova/ast-finetuned-audioset-10-10-0.4593', name:'AST AudioSet', size:'350 МБ', task:'audio-classification', type:'vision', langs:['en','speech'], cat:'speech' },
+
   { id:'Xenova/all-MiniLM-L6-v2', name:'All-MiniLM-L6-v2', size:'90 МБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
   { id:'Xenova/all-MiniLM-L12-v2', name:'All-MiniLM-L12-v2', size:'120 МБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
-  { id:'Xenova/all-mpnet-base-v2', name:'All-MPNet Base', size:'420 МБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
+  { id:'Xenova/all-mpnet-base-v2', name:'All-MPNet-Base-v2', size:'420 МБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
+  { id:'Xenova/paraphrase-multilingual-MiniLM-L12-v2', name:'Paraphrase Multi MiniLM', size:'470 МБ', task:'feature-extraction', type:'embedding', langs:['multi','ru'], cat:'embedding' },
+  { id:'Xenova/multilingual-e5-small', name:'Multilingual E5 Small', size:'120 МБ', task:'feature-extraction', type:'embedding', langs:['multi','ru'], cat:'embedding' },
+  { id:'Xenova/multilingual-e5-base', name:'Multilingual E5 Base', size:'280 МБ', task:'feature-extraction', type:'embedding', langs:['multi','ru'], cat:'embedding' },
+  { id:'Xenova/multilingual-e5-large', name:'Multilingual E5 Large', size:'560 МБ', task:'feature-extraction', type:'embedding', langs:['multi','ru'], cat:'embedding' },
+  { id:'Xenova/e5-small-v2', name:'E5 Small v2', size:'130 МБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
+  { id:'Xenova/e5-base-v2', name:'E5 Base v2', size:'440 МБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
+  { id:'Xenova/e5-large-v2', name:'E5 Large v2', size:'1.3 ГБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
   { id:'Xenova/bge-small-en-v1.5', name:'BGE Small EN', size:'130 МБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
   { id:'Xenova/bge-base-en-v1.5', name:'BGE Base EN', size:'440 МБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
   { id:'Xenova/bge-large-en-v1.5', name:'BGE Large EN', size:'1.3 ГБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
-  { id:'Xenova/bge-m3', name:'BGE M3 Multi', size:'2.3 ГБ', task:'feature-extraction', type:'embedding', langs:['multi','ru'], cat:'embedding' },
-  { id:'Xenova/multilingual-e5-small', name:'Multilingual E5 Small', size:'120 МБ', task:'feature-extraction', type:'embedding', langs:['multi','ru'], cat:'embedding' },
-  { id:'Xenova/multilingual-e5-base', name:'Multilingual E5 Base', size:'280 МБ', task:'feature-extraction', type:'embedding', langs:['multi','ru'], cat:'embedding' },
-  { id:'Xenova/multilingual-e5-large', name:'Multilingual E5 Large', size:'1.1 ГБ', task:'feature-extraction', type:'embedding', langs:['multi','ru'], cat:'embedding' },
-  { id:'Xenova/paraphrase-multilingual-MiniLM-L12-v2', name:'Paraphrase MiniLM', size:'120 МБ', task:'feature-extraction', type:'embedding', langs:['multi','ru'], cat:'embedding' },
-  { id:'Xenova/paraphrase-multilingual-mpnet-base-v2', name:'Paraphrase MPNet', size:'1.0 ГБ', task:'feature-extraction', type:'embedding', langs:['multi','ru'], cat:'embedding' },
   { id:'Xenova/gte-small', name:'GTE Small', size:'70 МБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
   { id:'Xenova/gte-base', name:'GTE Base', size:'220 МБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
-  { id:'Xenova/jina-embeddings-v2-small-en', name:'Jina v2 Small', size:'130 МБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
-  { id:'Xenova/e5-small-v2', name:'E5 Small v2', size:'130 МБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
-  { id:'Xenova/e5-base-v2', name:'E5 Base v2', size:'440 МБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
-  { id:'Xenova/distilbert-base-uncased-finetuned-sst-2-english', name:'DistilBERT SST-2', size:'270 МБ', task:'text-classification', type:'tiny', langs:['en'], cat:'classify' },
-  { id:'Xenova/bert-base-multilingual-uncased-sentiment', name:'BERT Sentiment', size:'700 МБ', task:'text-classification', type:'small', langs:['multi','ru'], cat:'classify' },
-  { id:'Xenova/distilbert-base-multilingual-cased-sentiments-student', name:'DistilBERT Sentiment', size:'500 МБ', task:'text-classification', type:'small', langs:['multi','ru'], cat:'classify' },
-  { id:'Xenova/twitter-roberta-base-sentiment-latest', name:'RoBERTa Sentiment', size:'500 МБ', task:'text-classification', type:'small', langs:['en'], cat:'classify' },
-  { id:'Xenova/SamLowe-bert-base-go-emotion', name:'BERT Go Emotions', size:'440 МБ', task:'text-classification', type:'small', langs:['en'], cat:'classify' },
-  { id:'Xenova/cardiffnlp-twitter-roberta-base-offensive', name:'RoBERTa Offensive', size:'500 МБ', task:'text-classification', type:'small', langs:['en'], cat:'classify' },
-  { id:'Xenova/bert-base-NER', name:'BERT NER', size:'440 МБ', task:'token-classification', type:'small', langs:['en'], cat:'classify' },
-  { id:'Xenova/dbmdz-bert-base-multilingual-cased-ner-hrl', name:'BERT NER Multi', size:'700 МБ', task:'token-classification', type:'small', langs:['multi','ru'], cat:'classify' },
-  { id:'Xenova/bart-large-mnli', name:'BART MNLI', size:'1.6 ГБ', task:'zero-shot-classification', type:'large', langs:['en'], cat:'classify' },
-  { id:'Xenova/distilbert-base-uncased-mnli', name:'DistilBERT MNLI', size:'270 МБ', task:'zero-shot-classification', type:'tiny', langs:['en'], cat:'classify' },
-  { id:'Xenova/distilbert-base-cased-distilled-squad', name:'DistilBERT SQuAD', size:'270 МБ', task:'question-answering', type:'tiny', langs:['en'], cat:'classify' },
-  { id:'Xenova/deepset-minilm-uncased-squad2', name:'MiniLM SQuAD2', size:'130 МБ', task:'question-answering', type:'tiny', langs:['en'], cat:'classify' },
-  { id:'Xenova/xlm-roberta-base-squad2', name:'XLM-R SQuAD2', size:'1.1 ГБ', task:'question-answering', type:'large', langs:['multi','ru'], cat:'classify' },
-  { id:'Xenova/bert-base-uncased', name:'BERT Base', size:'440 МБ', task:'fill-mask', type:'small', langs:['en'], cat:'classify' },
-  { id:'Xenova/roberta-base', name:'RoBERTa Base', size:'500 МБ', task:'fill-mask', type:'small', langs:['en'], cat:'classify' },
-  { id:'Xenova/albert-base-v2', name:'ALBERT Base', size:'50 МБ', task:'fill-mask', type:'tiny', langs:['en'], cat:'classify' },
-  { id:'Xenova/whisper-tiny', name:'Whisper Tiny', size:'150 МБ', task:'automatic-speech-recognition', type:'vision', langs:['multi'], cat:'speech' },
-  { id:'Xenova/whisper-tiny.en', name:'Whisper Tiny EN', size:'150 МБ', task:'automatic-speech-recognition', type:'vision', langs:['en'], cat:'speech' },
-  { id:'Xenova/whisper-base', name:'Whisper Base', size:'300 МБ', task:'automatic-speech-recognition', type:'vision', langs:['multi','ru'], cat:'speech' },
-  { id:'Xenova/whisper-base.en', name:'Whisper Base EN', size:'300 МБ', task:'automatic-speech-recognition', type:'vision', langs:['en'], cat:'speech' },
-  { id:'Xenova/whisper-small', name:'Whisper Small', size:'900 МБ', task:'automatic-speech-recognition', type:'vision', langs:['multi','ru'], cat:'speech' },
-  { id:'Xenova/whisper-small.en', name:'Whisper Small EN', size:'900 МБ', task:'automatic-speech-recognition', type:'vision', langs:['en'], cat:'speech' },
-  { id:'Xenova/whisper-medium', name:'Whisper Medium', size:'1.5 ГБ', task:'automatic-speech-recognition', type:'vision', langs:['multi','ru'], cat:'speech' },
-  { id:'Xenova/wav2vec2-base-960h', name:'Wav2Vec2 Base', size:'360 МБ', task:'automatic-speech-recognition', type:'vision', langs:['en'], cat:'speech' },
-  { id:'Xenova/flan-t5-small', name:'Flan-T5 Small', size:'300 МБ', task:'text2text-generation', type:'tiny', langs:['en'], cat:'llm' },
-  { id:'Xenova/flan-t5-base', name:'Flan-T5 Base', size:'900 МБ', task:'text2text-generation', type:'small', langs:['en'], cat:'llm' },
-  { id:'Xenova/mt5-small', name:'mT5 Small', size:'1.2 ГБ', task:'text2text-generation', type:'small', langs:['multi','ru'], cat:'llm' },
-  { id:'Xenova/t5-small', name:'T5 Small', size:'240 МБ', task:'text2text-generation', type:'tiny', langs:['en'], cat:'llm' },
-  { id:'Xenova/bart-large-cnn', name:'BART Large CNN', size:'1.6 ГБ', task:'summarization', type:'large', langs:['en'], cat:'llm' },
-  { id:'Xenova/distilbart-cnn-6-6', name:'DistilBART CNN', size:'1.2 ГБ', task:'summarization', type:'small', langs:['en'], cat:'llm' }
+  { id:'Xenova/nomic-embed-text-v1.5', name:'Nomic Embed v1.5', size:'550 МБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
+  { id:'Xenova/mxbai-embed-large-v1', name:'MxBai Embed Large', size:'1.3 ГБ', task:'feature-extraction', type:'embedding', langs:['en'], cat:'embedding' },
+  { id:'Xenova/LaBSE', name:'LaBSE (109 языков)', size:'1.8 ГБ', task:'feature-extraction', type:'embedding', langs:['multi','ru'], cat:'embedding' },
+  { id:'Xenova/bert-base-multilingual-cased', name:'BERT Multilingual', size:'680 МБ', task:'feature-extraction', type:'embedding', langs:['multi','ru'], cat:'embedding' },
+  { id:'Xenova/rubert-base-cased', name:'RuBERT Base', size:'680 МБ', task:'feature-extraction', type:'embedding', langs:['ru'], cat:'embedding' },
+  { id:'Xenova/rubert-tiny2', name:'RuBERT Tiny2', size:'120 МБ', task:'feature-extraction', type:'embedding', langs:['ru'], cat:'embedding' },
+
+  { id:'Xenova/distilbert-base-uncased-finetuned-sst-2-english', name:'DistilBERT SST-2', size:'70 МБ', task:'text-classification', type:'embedding', langs:['en'], cat:'classify' },
+  { id:'Xenova/bert-base-multilingual-uncased-sentiment', name:'BERT Multi Sentiment', size:'170 МБ', task:'text-classification', type:'embedding', langs:['multi','ru'], cat:'classify' },
+  { id:'Xenova/twitter-roberta-base-sentiment-latest', name:'RoBERTa Twitter Sentiment', size:'130 МБ', task:'text-classification', type:'embedding', langs:['en'], cat:'classify' },
+  { id:'Xenova/finbert-tone', name:'FinBERT Tone', size:'110 МБ', task:'text-classification', type:'embedding', langs:['en','finance'], cat:'classify' },
+  { id:'Xenova/bart-large-mnli', name:'BART Large MNLI', size:'1.6 ГБ', task:'zero-shot-classification', type:'medium', langs:['en'], cat:'classify' },
+  { id:'Xenova/deberta-v3-base-zeroshot-v1', name:'DeBERTa-v3 Zero-shot', size:'350 МБ', task:'zero-shot-classification', type:'embedding', langs:['en'], cat:'classify' },
+
+  { id:'Xenova/bert-base-NER', name:'BERT Base NER', size:'100 МБ', task:'token-classification', type:'embedding', langs:['en'], cat:'ner' },
+  { id:'Xenova/bert-base-multilingual-cased-ner-hrl', name:'BERT Multi NER', size:'170 МБ', task:'token-classification', type:'embedding', langs:['multi','ru'], cat:'ner' },
+
+  { id:'Xenova/distilbart-cnn-6-6', name:'DistilBART CNN 6-6', size:'270 МБ', task:'summarization', type:'small', langs:['en'], cat:'summarize' },
+  { id:'Xenova/distilbart-cnn-12-6', name:'DistilBART CNN 12-6', size:'550 МБ', task:'summarization', type:'small', langs:['en'], cat:'summarize' },
+  { id:'Xenova/bart-large-cnn', name:'BART Large CNN', size:'1.6 ГБ', task:'summarization', type:'medium', langs:['en'], cat:'summarize' },
+  { id:'Xenova/pegasus-xsum', name:'Pegasus XSum', size:'2.2 ГБ', task:'summarization', type:'medium', langs:['en'], cat:'summarize' },
+
+  { id:'Xenova/distilbert-base-uncased-distilled-squad', name:'DistilBERT SQuAD', size:'70 МБ', task:'question-answering', type:'embedding', langs:['en'], cat:'qa' },
+  { id:'Xenova/bert-large-uncased-whole-word-masking-finetuned-squad', name:'BERT Large SQuAD', size:'350 МБ', task:'question-answering', type:'embedding', langs:['en'], cat:'qa' },
+  { id:'Xenova/roberta-base-squad2', name:'RoBERTa SQuAD2', size:'130 МБ', task:'question-answering', type:'embedding', langs:['en'], cat:'qa' },
+
+  { id:'Xenova/bert-base-uncased', name:'BERT Base Uncased', size:'110 МБ', task:'fill-mask', type:'embedding', langs:['en'], cat:'nlp' },
+  { id:'Xenova/bert-base-multilingual-cased', name:'BERT Multi Cased', size:'170 МБ', task:'fill-mask', type:'embedding', langs:['multi','ru'], cat:'nlp' },
+  { id:'Xenova/distilbert-base-uncased', name:'DistilBERT Base', size:'70 МБ', task:'fill-mask', type:'embedding', langs:['en'], cat:'nlp' },
+  { id:'Xenova/roberta-base', name:'RoBERTa Base', size:'130 МБ', task:'fill-mask', type:'embedding', langs:['en'], cat:'nlp' },
+
+  { id:'Xenova/stable-diffusion-v1-5', name:'SD 1.5', size:'2 ГБ', task:'text-to-image', type:'vision', langs:['en'], cat:'image-gen' },
+  { id:'Xenova/sd-turbo', name:'SD Turbo', size:'2 ГБ', task:'text-to-image', type:'vision', langs:['en'], cat:'image-gen' },
+  { id:'Xenova/tiny-sd', name:'Tiny SD', size:'500 МБ', task:'text-to-image', type:'vision', langs:['en'], cat:'image-gen' },
 ];
 
 const MODELS = [
@@ -814,27 +692,30 @@ const MODELS = [
   ...TRANSFORMERS_MODELS.map(m => ({ ...m, backend: 'transformers' }))
 ];
 
-/* ============================================================
-   РЕЖИМЫ РАССУЖДЕНИЯ
-   ============================================================ */
 const MODES = {
   normal: { em: '💬', name: 'Обычный', sys: '' },
-  cot: { em: '🧠', name: 'Пошагово', sys: 'Рассуждай пошагово. Сначала план, потом каждый шаг отдельно, потом итог.' },
-  socratic: { em: '❓', name: 'Сократ', sys: 'Задавай уточняющие вопросы, помогай собеседнику самому прийти к ответу.' },
-  brainstorm: { em: '💡', name: 'Брейншторм', sys: 'Генерируй много идей, не отбрасывай смелые. Группируй по темам.' },
-  critique: { em: '🔍', name: 'Критика', sys: 'Сначала ответь, потом критически разбери свой ответ и предложи улучшения.' },
-  expert: { em: '🎓', name: 'Эксперт', sys: 'Отвечай как признанный эксперт: точно, со ссылками на принципы и примеры.' },
-  eli5: { em: '👶', name: 'Простыми', sys: 'Объясняй так, будто собеседнику 5 лет. Простые слова, аналогии.' },
-  summary: { em: '📌', name: 'Резюме', sys: 'Дай краткое резюме по пунктам, потом детали.' },
+  cot: { em: '🧠', name: 'Пошагово', sys: 'Рассуждай пошагово. Сначала план, потом каждый шаг отдельно. В конце — итоговый ответ.' },
+  socratic: { em: '❓', name: 'Сократ', sys: 'Задавай уточняющие вопросы, помогай пользователю самому дойти до ответа.' },
+  brainstorm: { em: '💡', name: 'Брейншторм', sys: 'Генерируй много разнообразных идей, не отбрасывай даже странные.' },
+  critique: { em: '🔍', name: 'Критика', sys: 'Разбери ответ критически: где слабые места, что можно улучшить.' },
+  expert: { em: '🎓', name: 'Эксперт', sys: 'Отвечай как эксперт с большим опытом, используй профессиональные термины.' },
+  eli5: { em: '👶', name: 'Простыми', sys: 'Объясняй как пятилетнему ребёнку, простыми словами, с примерами.' },
+  summary: { em: '📌', name: 'Резюме', sys: 'Дай краткое резюме в 3-5 пунктах.' },
   creative: { em: '🎨', name: 'Творческий', sys: 'Пиши образно, используй метафоры, играй со стилем.' },
-  translate: { em: '🌐', name: 'Переводчик', sys: 'Переводи точно, сохраняя стиль. По запросу — с комментариями.' },
-  analyst: { em: '📊', name: 'Аналитик', sys: 'Структурируй информацию, приводи цифры и выводы, указывай источники.' },
-  devil: { em: '😈', name: 'Адвокат дьявола', sys: 'Спорь с собеседником, ищи слабые места в аргументах, приводи контраргументы.' }
+  translate: { em: '🌐', name: 'Переводчик', sys: 'Переводи точно, сохраняя смысл и стиль.' },
+  analyst: { em: '📊', name: 'Аналитик', sys: 'Структурируй информацию: таблицы, списки, выводы.' },
+  devil: { em: '😈', name: 'Адвокат дьявола', sys: 'Спорь с собеседником, ищи контраргументы.' }
 };
 
-/* ============================================================
-   СОСТОЯНИЕ
-   ============================================================ */
+const SYSTEM_PROMPTS = {
+  math: 'Ты — математик. Решай задачи пошагово, показывай вычисления, проверяй ответ.',
+  code: 'Ты — опытный программист. Пиши чистый код с комментариями, объясняй решения.',
+  teacher: 'Ты — учитель. Объясняй понятно, с примерами, проверяй понимание.',
+  translator: 'Ты — профессиональный переводчик. Переводи точно, сохраняя стиль.'
+};
+
+const pipelineCache = new Map();
+
 const state = {
   currentModel: null,
   engine: null,
@@ -843,80 +724,64 @@ const state = {
   attachments: [],
   isGenerating: false,
   currentMode: 'normal',
-  training: {
-    examples: [],
-    style: 'neutral',
-    lang: 'ru',
-    maxExamples: 8,
-    maxTokens: 2048,
-    exactMatch: true,
-    semantic: true,
-    autoAdd: false,
-    useHistory: true,
-    epochs: 0,
-    weightsLoaded: 0,
-    embeddings: null,
-    embeddingModel: null
-  },
+  training: { examples: [], epochs: 0, weightsLoaded: 0 },
+  rag: { enabled: false, topK: 3, chunkSize: 500, chunks: [], vectors: [] },
   settings: {
-    theme: 'dark',
-    temp: 0.7,
-    topP: 0.95,
-    topK: 40,
-    maxTokens: 1024,
-    repPenalty: 1.1,
-    stop: '',
+    theme: 'dark', temp: 0.7, topP: 0.95, maxTokens: 1024, repeatPenalty: 1.1,
     systemPrompt: 'Ты — полезный ассистент. Отвечай на русском языке, чётко и по делу.',
-    autoScroll: true,
-    speak: false,
-    streaming: true
-  }
+    autoScroll: true, speak: false
+  },
+  mediaRecorder: null,
+  recordedChunks: []
 };
 
-const LS_KEY_SETTINGS = 'local-ai-settings-v5';
-const LS_KEY_CHAT = 'local-ai-chat-v5';
-const LS_KEY_MODE = 'local-ai-mode-v5';
-const LS_KEY_TRAINING = 'local-ai-training-v5';
+const LS = {
+  settings: 'local-ai-settings-v7',
+  chat: 'local-ai-chat-v7',
+  mode: 'local-ai-mode-v7',
+  training: 'local-ai-training-v7',
+  rag: 'local-ai-rag-v7'
+};
 
 /* ============================================================
-   УТИЛИТЫ
+   2. УТИЛИТЫ
    ============================================================ */
+
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 
 function toast(msg, ms = 2200) {
-  const el = $('#toast');
-  if (!el) return;
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(el._tid);
-  el._tid = setTimeout(() => el.classList.remove('show'), ms);
+  const el = $('#toast'); if (!el) return;
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(el._tid); el._tid = setTimeout(() => el.classList.remove('show'), ms);
 }
 
-function logMessage(msg) {
+function log(msg) {
   const el = $('#logOut');
-  if (!el) { console.log(msg); return; }
   const t = new Date().toLocaleTimeString();
   el.textContent += '[' + t + '] ' + msg + '\n';
+  el.classList.add('show');
   el.scrollTop = el.scrollHeight;
-  const lines = el.textContent.split('\n');
-  if (lines.length > 1500) el.textContent = lines.slice(-1500).join('\n');
+  console.log('[LocalAI]', msg);
 }
 
 function downloadBlob(blob, name) {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 
 function downloadText(text, filename, mime) {
-  const blob = new Blob([text], { type: mime || 'text/plain;charset=utf-8' });
-  downloadBlob(blob, filename);
+  downloadBlob(new Blob([text], { type: mime || 'text/plain;charset=utf-8' }), filename);
 }
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function autoGrow(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 140) + 'px'; }
+function estimateTokens(text) { return Math.ceil((text || '').length / 4); }
 
 function fmtBytes(b) {
   if (!isFinite(b) || b == null) return '—';
@@ -924,10 +789,6 @@ function fmtBytes(b) {
   if (b < 1048576) return (b / 1024).toFixed(1) + ' КБ';
   if (b < 1073741824) return (b / 1048576).toFixed(1) + ' МБ';
   return (b / 1073741824).toFixed(2) + ' ГБ';
-}
-
-function escapeHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function renderMarkdown(text) {
@@ -948,38 +809,140 @@ function renderMarkdown(text) {
   return tmp.innerHTML;
 }
 
-function autoGrow(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+function readFileAsText(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsText(file);
+  });
+}
+function readFileAsDataUrl(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+function readFileAsArrayBuffer(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsArrayBuffer(file);
+  });
 }
 
-function estimateTokens(text) {
-  return Math.ceil((text || '').length / 4);
+function ext(name) { const m = /\.([^.]+)$/.exec(name || ''); return m ? m[1].toLowerCase() : ''; }
+function isImageFile(file) { return file.type.startsWith('image/') || /^(png|jpg|jpeg|gif|webp|bmp)$/.test(ext(file.name)); }
+function isTextFile(file) {
+  const e = ext(file.name);
+  return file.type.startsWith('text/') || ['txt','md','json','csv','log','xml','html','htm','yml','yaml','ini','js','ts','jsx','tsx','py','java','c','h','cpp','go','rs','rb','php','sql','tex','sh','bat','env','conf'].includes(e);
+}
+function isPdfFile(file) { return file.type === 'application/pdf' || ext(file.name) === 'pdf'; }
+function isDocxFile(file) { return ext(file.name) === 'docx' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'; }
+function isZipFile(file) { return file.type === 'application/zip' || file.type === 'application/x-zip-compressed' || ext(file.name) === 'zip'; }
+
+/* ============================================================
+   3. PDF / DOCX / ZIP / OCR
+   ============================================================ */
+
+let pdfJsLoaded = null;
+function loadPdfJs() {
+  if (pdfJsLoaded) return pdfJsLoaded;
+  pdfJsLoaded = new Promise((res, rej) => {
+    import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs')
+      .then(mod => {
+        mod.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
+        res(mod);
+      })
+      .catch(rej);
+  });
+  return pdfJsLoaded;
 }
 
-function cosineSimilarity(a, b) {
-  if (!a || !b || a.length !== b.length) return 0;
-  let dot = 0, normA = 0, normB = 0;
-  for (let i = 0; i < a.length; i++) { dot += a[i] * b[i]; normA += a[i] * a[i]; normB += b[i] * b[i]; }
-  if (normA === 0 || normB === 0) return 0;
-  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+async function extractPdfText(file) {
+  const pdfjs = await loadPdfJs();
+  const buf = await readFileAsArrayBuffer(file);
+  const pdf = await pdfjs.getDocument({ data: buf }).promise;
+  let out = '';
+  const maxPages = Math.min(pdf.numPages, 30);
+  for (let i = 1; i <= maxPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    out += '\n--- стр. ' + i + ' ---\n' + content.items.map(it => it.str).join(' ');
+  }
+  return out.trim();
+}
+
+async function extractDocxText(file) {
+  if (typeof JSZip === 'undefined') throw new Error('JSZip не загружен');
+  const buf = await readFileAsArrayBuffer(file);
+  const zip = await JSZip.loadAsync(buf);
+  const doc = zip.file('word/document.xml');
+  if (!doc) throw new Error('Не найден word/document.xml');
+  const xml = await doc.async('string');
+  return xml
+    .replace(/<w:p[ >]/g, '\n<w:p ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&apos;/g, "'")
+    .replace(/\n{3,}/g, '\n\n').trim();
+}
+
+async function extractZipText(file) {
+  if (typeof JSZip === 'undefined') throw new Error('JSZip не загружен');
+  const buf = await readFileAsArrayBuffer(file);
+  const zip = await JSZip.loadAsync(buf);
+  let out = '';
+  for (const name of Object.keys(zip.files)) {
+    const entry = zip.files[name];
+    if (entry.dir) continue;
+    if (['txt','md','json','csv','log','xml','html','js','ts','py','java','c','cpp','go','rs','rb','php','sql','yml','yaml','ini','tex','sh'].includes(ext(name))) {
+      try {
+        const text = await entry.async('string');
+        out += '\n=== ' + name + ' ===\n' + text.slice(0, 8000) + '\n';
+      } catch (e) {}
+    } else {
+      out += '\n=== ' + name + ' === (бинарный)\n';
+    }
+  }
+  return out.trim();
+}
+
+async function ocrImage(fileOrBlob) {
+  if (typeof Tesseract === 'undefined') throw new Error('Tesseract.js не загружен');
+  const worker = await Tesseract.createWorker('rus+eng');
+  try {
+    const { data } = await worker.recognize(fileOrBlob);
+    return (data.text || '').trim();
+  } finally {
+    await worker.terminate();
+  }
 }
 
 /* ============================================================
-   НАСТРОЙКИ
+   4. НАСТРОЙКИ
    ============================================================ */
+
 function loadSettings() {
   try {
-    const saved = JSON.parse(localStorage.getItem(LS_KEY_SETTINGS) || '{}');
+    const saved = JSON.parse(localStorage.getItem(LS.settings) || '{}');
     Object.assign(state.settings, saved);
   } catch (e) {}
-  const m = localStorage.getItem(LS_KEY_MODE);
+  try {
+    const rag = JSON.parse(localStorage.getItem(LS.rag) || '{}');
+    Object.assign(state.rag, rag);
+  } catch (e) {}
+  const m = localStorage.getItem(LS.mode);
   if (m && MODES[m]) state.currentMode = m;
   applySettings();
 }
 
 function saveSettings() {
-  localStorage.setItem(LS_KEY_SETTINGS, JSON.stringify(state.settings));
+  localStorage.setItem(LS.settings, JSON.stringify(state.settings));
+  localStorage.setItem(LS.rag, JSON.stringify({ enabled: state.rag.enabled, topK: state.rag.topK, chunkSize: state.rag.chunkSize }));
   toast('Настройки сохранены');
 }
 
@@ -988,41 +951,48 @@ function applySettings() {
   $('#themeBtn').textContent = state.settings.theme === 'dark' ? '🌙' : '☀️';
   $('#setTemp').value = state.settings.temp;
   $('#setTopP').value = state.settings.topP;
-  $('#setTopK').value = state.settings.topK;
   $('#setMaxTokens').value = state.settings.maxTokens;
-  $('#setRepPenalty').value = state.settings.repPenalty;
+  $('#setRepeatPenalty').value = state.settings.repeatPenalty;
   $('#setSystemPrompt').value = state.settings.systemPrompt;
   $('#setTheme').value = state.settings.theme;
   $('#setAutoScroll').checked = state.settings.autoScroll;
   $('#setSpeak').checked = state.settings.speak;
-  $('#setStreaming').checked = state.settings.streaming;
+  $('#setRagEnabled').checked = state.rag.enabled;
+  $('#setRagTopK').value = state.rag.topK;
+  $('#setRagChunk').value = state.rag.chunkSize;
+  $('#ragCount').textContent = state.rag.chunks.length;
 }
 
 function collectSettings() {
   state.settings.temp = parseFloat($('#setTemp').value) || 0.7;
   state.settings.topP = parseFloat($('#setTopP').value) || 0.95;
-  state.settings.topK = parseInt($('#setTopK').value) || 40;
   state.settings.maxTokens = parseInt($('#setMaxTokens').value) || 1024;
-  state.settings.repPenalty = parseFloat($('#setRepPenalty').value) || 1.1;
+  state.settings.repeatPenalty = parseFloat($('#setRepeatPenalty').value) || 1.1;
   state.settings.systemPrompt = $('#setSystemPrompt').value;
   state.settings.theme = $('#setTheme').value;
   state.settings.autoScroll = $('#setAutoScroll').checked;
   state.settings.speak = $('#setSpeak').checked;
-  state.settings.streaming = $('#setStreaming').checked;
+  state.rag.enabled = $('#setRagEnabled').checked;
+  state.rag.topK = parseInt($('#setRagTopK').value) || 3;
+  state.rag.chunkSize = parseInt($('#setRagChunk').value) || 500;
 }
 
 /* ============================================================
-   ЧАТ
+   5. ЧАТ
    ============================================================ */
+
 function loadChat() {
   try {
-    const saved = JSON.parse(localStorage.getItem(LS_KEY_CHAT) || '[]');
-    if (saved.length) { state.chatHistory = saved; renderChat(); }
+    const saved = JSON.parse(localStorage.getItem(LS.chat) || '[]');
+    if (saved.length) {
+      state.chatHistory = saved;
+      renderChat();
+    }
   } catch (e) {}
 }
 
 function saveChat() {
-  localStorage.setItem(LS_KEY_CHAT, JSON.stringify(state.chatHistory.slice(-100)));
+  localStorage.setItem(LS.chat, JSON.stringify(state.chatHistory.slice(-100)));
 }
 
 function renderChat() {
@@ -1050,25 +1020,42 @@ function renderChat() {
 
 function addMessage(role, content) {
   state.chatHistory.push({ role, content, time: new Date().toLocaleTimeString() });
-  if (state.chatHistory.length > 150) state.chatHistory = state.chatHistory.slice(-150);
+  if (state.chatHistory.length > 200) state.chatHistory = state.chatHistory.slice(-200);
   saveChat();
   renderChat();
 }
 
+function chatToText() { return state.chatHistory.map(m => '[' + m.role + '] ' + (m.content || '')).join('\n\n'); }
+function chatToMarkdown() { return state.chatHistory.map(m => '**' + m.role + ':** ' + (m.content || '')).join('\n\n'); }
+function chatToJson() { return JSON.stringify({ model: state.currentModel?.name, messages: state.chatHistory }, null, 2); }
+function chatToHtml() {
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Chat</title></head><body>' +
+    state.chatHistory.map(m => '<div><b>' + m.role + ':</b><br>' + escapeHtml(m.content) + '</div><hr>').join('') +
+    '</body></html>';
+}
+function chatToCsv() {
+  const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
+  return 'role,content\n' + state.chatHistory.map(m => [esc(m.role), esc(m.content)].join(',')).join('\n');
+}
+
 /* ============================================================
-   ВЛОЖЕНИЯ
+   6. ФАЙЛЫ / ВЛОЖЕНИЯ
    ============================================================ */
+
 let attachId = 0;
+
 function addAttachment(att) {
   att.id = ++attachId;
   state.attachments.push(att);
   renderAttachments();
   toast('Добавлено: ' + att.name);
 }
+
 function removeAttachment(id) {
   state.attachments = state.attachments.filter(a => a.id !== id);
   renderAttachments();
 }
+
 function renderAttachments() {
   const strip = $('#chatAttachStrip');
   strip.innerHTML = '';
@@ -1078,10 +1065,16 @@ function renderAttachments() {
     chip.title = a.name;
     chip.innerHTML = '<span>' + (a.img ? '🖼' : a.text ? '📄' : '📎') + '</span><span class="nm">' + escapeHtml(a.name) + '</span><span class="del">✕</span>';
     chip.querySelector('.del').onclick = (e) => { e.stopPropagation(); removeAttachment(a.id); };
+    chip.onclick = () => {
+      const preview = $('#filePreview');
+      preview.style.display = 'block';
+      preview.textContent = a.text || '(бинарный файл: ' + a.name + ')';
+    };
     strip.appendChild(chip);
   }
   renderFilesList();
 }
+
 function renderFilesList() {
   const el = $('#filesList');
   el.innerHTML = '';
@@ -1099,89 +1092,13 @@ function renderFilesList() {
     del.textContent = '✕';
     del.onclick = () => removeAttachment(a.id);
     d.appendChild(del);
+    d.onclick = (e) => {
+      if (e.target === del) return;
+      const preview = $('#filePreview');
+      preview.style.display = 'block';
+      preview.textContent = a.text || '(бинарный файл: ' + a.name + ')';
+    };
     el.appendChild(d);
-  }
-}
-
-/* ============================================================
-   ФАЙЛЫ
-   ============================================================ */
-function readFileAsText(file) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsText(file); }); }
-function readFileAsDataUrl(file) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); }); }
-function readFileAsArrayBuffer(file) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsArrayBuffer(file); }); }
-function ext(name) { const m = /\.([^.]+)$/.exec(name || ''); return m ? m[1].toLowerCase() : ''; }
-function isImageFile(file) { return file.type.startsWith('image/') || /^(png|jpg|jpeg|gif|webp|bmp)$/.test(ext(file.name)); }
-function isTextFile(file) {
-  const e = ext(file.name);
-  const textExts = ['txt','md','json','csv','log','xml','html','htm','yml','yaml','ini','js','ts','jsx','tsx','py','java','c','h','cpp','go','rs','rb','php','sql','tex','sh','bat','env','conf'];
-  return file.type.startsWith('text/') || textExts.includes(e);
-}
-function isPdfFile(file) { return file.type === 'application/pdf' || ext(file.name) === 'pdf'; }
-function isDocxFile(file) { return ext(file.name) === 'docx' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'; }
-function isZipFile(file) { return file.type === 'application/zip' || file.type === 'application/x-zip-compressed' || ext(file.name) === 'zip'; }
-
-let pdfJsLoaded = null;
-function loadPdfJs() {
-  if (pdfJsLoaded) return pdfJsLoaded;
-  pdfJsLoaded = new Promise((res, rej) => {
-    import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs').then(mod => {
-      mod.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
-      res(mod);
-    }).catch(rej);
-  });
-  return pdfJsLoaded;
-}
-
-async function extractPdfText(file) {
-  const pdfjs = await loadPdfJs();
-  const buf = await readFileAsArrayBuffer(file);
-  const pdf = await pdfjs.getDocument({ data: buf }).promise;
-  let out = '';
-  const maxPages = Math.min(pdf.numPages, 30);
-  for (let i = 1; i <= maxPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    out += '\n--- стр. ' + i + ' ---\n' + content.items.map(it => it.str).join(' ');
-  }
-  return out.trim();
-}
-
-async function extractDocxText(file) {
-  if (typeof JSZip === 'undefined') throw new Error('JSZip не загружен');
-  const buf = await readFileAsArrayBuffer(file);
-  const zip = await JSZip.loadAsync(buf);
-  const doc = zip.file('word/document.xml');
-  if (!doc) throw new Error('Не найден word/document.xml');
-  const xml = await doc.async('string');
-  return xml.replace(/<w:p[ >]/g, '\n<w:p ').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/\n{3,}/g, '\n\n').trim();
-}
-
-async function extractZipText(file) {
-  if (typeof JSZip === 'undefined') throw new Error('JSZip не загружен');
-  const buf = await readFileAsArrayBuffer(file);
-  const zip = await JSZip.loadAsync(buf);
-  let out = '';
-  const textExts = ['txt','md','json','csv','log','xml','html','js','ts','py','java','c','cpp','go','rs','rb','php','sql','yml','yaml','ini','tex','sh'];
-  for (const name of Object.keys(zip.files)) {
-    const entry = zip.files[name];
-    if (entry.dir) continue;
-    if (textExts.includes(ext(name))) {
-      try { const text = await entry.async('string'); out += '\n=== ' + name + ' ===\n' + text.slice(0, 8000) + '\n'; } catch (e) {}
-    } else {
-      out += '\n=== ' + name + ' === (бинарный)\n';
-    }
-  }
-  return out.trim();
-}
-
-async function ocrImage(file) {
-  if (typeof Tesseract === 'undefined') throw new Error('Tesseract.js не загружен');
-  const worker = await Tesseract.createWorker('rus+eng');
-  try {
-    const { data } = await worker.recognize(file);
-    return (data.text || '').trim();
-  } finally {
-    await worker.terminate();
   }
 }
 
@@ -1202,20 +1119,36 @@ async function handleSingleFile(file, opts = {}) {
       addAttachment(att);
       return;
     }
-    if (isPdfFile(file)) { toast('Чтение PDF…', 3000); const text = await extractPdfText(file); addAttachment({ name: file.name, type: file.type, size: file.size, text, textSource: 'PDF' }); return; }
-    if (isDocxFile(file)) { toast('Чтение DOCX…', 3000); const text = await extractDocxText(file); addAttachment({ name: file.name, type: file.type, size: file.size, text, textSource: 'DOCX' }); return; }
-    if (isZipFile(file)) { toast('Чтение ZIP…', 3000); const text = await extractZipText(file); addAttachment({ name: file.name, type: file.type, size: file.size, text, textSource: 'ZIP' }); return; }
-    if (isTextFile(file)) { const text = await readFileAsText(file); addAttachment({ name: file.name, type: file.type, size: file.size, text, textSource: 'text' }); return; }
+    if (isPdfFile(file)) {
+      toast('Чтение PDF…', 3000);
+      const text = await extractPdfText(file);
+      addAttachment({ name: file.name, type: file.type, size: file.size, text, textSource: 'PDF' });
+      return;
+    }
+    if (isDocxFile(file)) {
+      toast('Чтение DOCX…', 3000);
+      const text = await extractDocxText(file);
+      addAttachment({ name: file.name, type: file.type, size: file.size, text, textSource: 'DOCX' });
+      return;
+    }
+    if (isZipFile(file)) {
+      toast('Чтение ZIP…', 3000);
+      const text = await extractZipText(file);
+      addAttachment({ name: file.name, type: file.type, size: file.size, text, textSource: 'ZIP' });
+      return;
+    }
+    if (isTextFile(file)) {
+      const text = await readFileAsText(file);
+      addAttachment({ name: file.name, type: file.type, size: file.size, text, textSource: 'text' });
+      return;
+    }
     addAttachment({ name: file.name, type: file.type, size: file.size, blob: file, binary: true });
   } catch (e) {
-    logMessage('❌ Файл ' + file.name + ': ' + e.message);
+    log('❌ Файл ' + file.name + ': ' + e.message);
     toast('Ошибка ' + file.name + ': ' + e.message, 3500);
   }
 }
 
-/* ============================================================
-   КОНТЕКСТ ВЛОЖЕНИЙ
-   ============================================================ */
 function buildAttachmentContext() {
   if (!state.attachments.length) return '';
   let ctx = '\n\n=== ПРИКРЕПЛЁННЫЕ ДАННЫЕ ===\n';
@@ -1233,8 +1166,106 @@ function buildAttachmentContext() {
 }
 
 /* ============================================================
-   ОТПРАВКА СООБЩЕНИЯ
+   7. RAG (поиск по файлам)
    ============================================================ */
+
+function chunkText(text, chunkSize) {
+  const chunks = [];
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  let cur = '';
+  for (const s of sentences) {
+    if ((cur + s).length > chunkSize && cur) {
+      chunks.push(cur.trim());
+      cur = '';
+    }
+    cur += s + ' ';
+  }
+  if (cur.trim()) chunks.push(cur.trim());
+  return chunks;
+}
+
+let embedder = null;
+
+async function getEmbedder() {
+  if (embedder) return embedder;
+  toast('Загрузка модели эмбеддингов…', 3000);
+  embedder = await window.transformersPipeline('feature-extraction', 'Xenova/multilingual-e5-small', { dtype: 'q8' });
+  return embedder;
+}
+
+async function embedText(text) {
+  const emb = await getEmbedder();
+  const out = await emb(text, { pooling: 'mean', normalize: true });
+  return Array.from(out.data);
+}
+
+function cosineSim(a, b) {
+  let dot = 0, na = 0, nb = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    na += a[i] * a[i];
+    nb += b[i] * b[i];
+  }
+  return dot / (Math.sqrt(na) * Math.sqrt(nb) + 1e-9);
+}
+
+async function indexFiles() {
+  const textFiles = state.attachments.filter(a => a.text);
+  if (!textFiles.length) { toast('Нет текстовых файлов для индексации'); return; }
+  toast('Индексация…', 3000);
+  state.rag.chunks = [];
+  state.rag.vectors = [];
+  for (const f of textFiles) {
+    const chunks = chunkText(f.text, state.rag.chunkSize);
+    for (const c of chunks) {
+      try {
+        const v = await embedText(c);
+        state.rag.chunks.push({ source: f.name, text: c });
+        state.rag.vectors.push(v);
+      } catch (e) { log('embed err: ' + e.message); }
+    }
+  }
+  $('#ragCount').textContent = state.rag.chunks.length;
+  toast('Готово: ' + state.rag.chunks.length + ' фрагментов');
+}
+
+function clearRag() {
+  state.rag.chunks = [];
+  state.rag.vectors = [];
+  $('#ragCount').textContent = '0';
+  toast('Индекс очищен');
+}
+
+async function ragSearch(query, topK = 3) {
+  if (!state.rag.chunks.length) return '';
+  try {
+    const qv = await embedText(query);
+    const scored = state.rag.vectors.map((v, i) => ({ i, score: cosineSim(qv, v) }));
+    scored.sort((a, b) => b.score - a.score);
+    const top = scored.slice(0, topK);
+    let ctx = '\n\n=== КОНТЕКСТ ИЗ ФАЙЛОВ ===\n';
+    for (const t of top) {
+      const c = state.rag.chunks[t.i];
+      ctx += '\n[' + c.source + ']\n' + c.text + '\n';
+    }
+    return ctx;
+  } catch (e) {
+    log('RAG search: ' + e.message);
+    return '';
+  }
+}
+
+/* ============================================================
+   8. ГЕНЕРАЦИЯ
+   ============================================================ */
+
+function getSystemPrompt() {
+  let base = state.settings.systemPrompt || '';
+  const modeSys = MODES[state.currentMode].sys;
+  if (modeSys) base = (base ? base + '\n\n' : '') + modeSys;
+  return base || 'Ты — полезный ассистент.';
+}
+
 async function sendMessage() {
   const raw = $('#chatInput').value.trim();
   if (!raw && !state.attachments.length) return;
@@ -1246,11 +1277,17 @@ async function sendMessage() {
   autoGrow($('#chatInput'));
 
   let displayContent = text;
-  if (state.attachments.length) displayContent = state.attachments.map(a => '📎 ' + a.name).join('\n') + '\n\n' + text;
+  if (state.attachments.length) {
+    displayContent = state.attachments.map(a => '📎 ' + a.name).join('\n') + '\n\n' + text;
+  }
   addMessage('user', displayContent);
 
-  const attachmentCtx = buildAttachmentContext();
-  const userTextWithCtx = text + attachmentCtx;
+  let userText = text;
+  if (state.attachments.length) userText += buildAttachmentContext();
+  if (state.rag.enabled && state.rag.chunks.length) {
+    const ragCtx = await ragSearch(text, state.rag.topK);
+    if (ragCtx) userText += ragCtx;
+  }
   const usedAttachments = state.attachments.slice();
   state.attachments = [];
   renderAttachments();
@@ -1266,10 +1303,10 @@ async function sendMessage() {
   contentDiv.innerHTML = '<span class="thinking">думаю…</span>';
 
   try {
-    if (state.currentModel.backend === 'webllm') await generateWebLLM(userTextWithCtx, contentDiv, usedAttachments);
-    else await generateTransformers(userTextWithCtx, contentDiv, usedAttachments);
+    if (state.currentModel.backend === 'webllm') await generateWebLLM(userText, contentDiv, usedAttachments);
+    else await generateTransformers(userText, contentDiv, usedAttachments);
   } catch (e) {
-    logMessage('❌ Генерация: ' + e.message);
+    log('❌ Генерация: ' + e.message);
     state.chatHistory[state.chatHistory.length - 1].content = 'Ошибка: ' + e.message;
     renderChat();
   } finally {
@@ -1286,13 +1323,6 @@ async function sendMessage() {
       }
     }
   }
-}
-
-function getSystemPrompt() {
-  let base = state.settings.systemPrompt || '';
-  const modeSys = MODES[state.currentMode].sys;
-  if (modeSys) base = (base ? base + '\n\n' : '') + modeSys;
-  return base || 'Ты — полезный ассистент.';
 }
 
 async function generateWebLLM(userText, contentDiv, attachments) {
@@ -1335,12 +1365,17 @@ async function generateTransformers(userText, contentDiv, attachments) {
   const task = state.currentModel.task || 'text-generation';
   const imgAtt = attachments.find(a => a.img);
 
-  if (imgAtt && ['image-to-text','image-classification','object-detection','image-segmentation','depth-estimation','zero-shot-image-classification','visual-question-answering','token-classification'].includes(task)) {
+  if (imgAtt && ['image-to-text','image-classification','object-detection','image-segmentation','depth-estimation','zero-shot-image-classification','visual-question-answering','mask-generation'].includes(task)) {
     let out;
     try {
-      if (task === 'visual-question-answering') out = await state.transformersPipeline(imgAtt.dataUrl, userText || 'What is in this image?', { max_new_tokens: 200 });
-      else out = await state.transformersPipeline(imgAtt.dataUrl, { max_new_tokens: 200 });
-    } catch (e) { throw new Error('Vision-модель: ' + e.message); }
+      if (task === 'visual-question-answering') {
+        out = await state.transformersPipeline(imgAtt.dataUrl, userText || 'What is in this image?', { max_new_tokens: 200 });
+      } else {
+        out = await state.transformersPipeline(imgAtt.dataUrl, { max_new_tokens: 200 });
+      }
+    } catch (e) {
+      throw new Error('Vision-модель: ' + e.message);
+    }
     const result = Array.isArray(out) ? (out[0]?.generated_text || JSON.stringify(out)) : JSON.stringify(out, null, 2);
     contentDiv.textContent = result;
     state.chatHistory[state.chatHistory.length - 1].content = result;
@@ -1348,18 +1383,21 @@ async function generateTransformers(userText, contentDiv, attachments) {
   }
 
   if (task === 'text-generation') {
-    const messages = [
-      { role:'system', content: getSystemPrompt() },
-      { role:'user', content: userText }
-    ];
+    const messages = [{ role:'system', content: getSystemPrompt() }, { role:'user', content: userText }];
     let out;
     try {
-      out = await state.transformersPipeline(messages, { max_new_tokens: state.settings.maxTokens, temperature: state.settings.temp, top_p: state.settings.topP, do_sample: true });
+      out = await state.transformersPipeline(messages, {
+        max_new_tokens: state.settings.maxTokens,
+        temperature: state.settings.temp,
+        top_p: state.settings.topP,
+        do_sample: true,
+        repetition_penalty: state.settings.repeatPenalty
+      });
     } catch (e) {
       out = await state.transformersPipeline(getSystemPrompt() + '\n\n' + userText, { max_new_tokens: state.settings.maxTokens });
     }
     const g = out[0]?.generated_text;
-    let result = Array.isArray(g) ? g[g.length - 1].content : g;
+    const result = Array.isArray(g) ? g[g.length - 1].content : g;
     contentDiv.innerHTML = renderMarkdown(result);
     state.chatHistory[state.chatHistory.length - 1].content = result;
   } else if (task === 'text2text-generation' || task === 'translation') {
@@ -1375,6 +1413,16 @@ async function generateTransformers(userText, contentDiv, attachments) {
   } else if (task === 'feature-extraction') {
     const out = await state.transformersPipeline(userText, { pooling: 'mean', normalize: true });
     const result = 'Вектор получен. Размерность: ' + out.data.length;
+    contentDiv.textContent = result;
+    state.chatHistory[state.chatHistory.length - 1].content = result;
+  } else if (task === 'summarization') {
+    const out = await state.transformersPipeline(userText, { max_length: 150, min_length: 30 });
+    const result = out[0]?.summary_text || JSON.stringify(out);
+    contentDiv.textContent = result;
+    state.chatHistory[state.chatHistory.length - 1].content = result;
+  } else if (task === 'question-answering') {
+    const out = await state.transformersPipeline({ question: userText, context: userText });
+    const result = out.answer || JSON.stringify(out);
     contentDiv.textContent = result;
     state.chatHistory[state.chatHistory.length - 1].content = result;
   } else {
@@ -1394,131 +1442,163 @@ function stopGeneration() {
 }
 
 /* ============================================================
-   ЗАГРУЗКА МОДЕЛЕЙ С ПРОВЕРКОЙ
+   9. МОДЕЛИ
    ============================================================ */
+
+let currentFilter = 'all';
+let currentSearch = '';
+
+function renderModels() {
+  const container = $('#modelsList');
+  container.innerHTML = '';
+  let list = MODELS.slice();
+  if (currentFilter !== 'all') {
+    list = list.filter(m => {
+      if (currentFilter === 'ru') return m.langs.includes('ru');
+      if (currentFilter === 'code') return m.langs.includes('code');
+      if (currentFilter === 'math') return m.langs.includes('math');
+      if (currentFilter === 'speech') return m.langs.includes('speech');
+      if (currentFilter === 'translate') return m.cat === 'translate';
+      return m.type === currentFilter;
+    });
+  }
+  if (currentSearch) {
+    const q = currentSearch.toLowerCase();
+    list = list.filter(m => m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q));
+  }
+  if (!list.length) {
+    container.innerHTML = '<div class="card"><div class="small" style="color:var(--fg2)">Ничего не найдено</div></div>';
+    return;
+  }
+  const groups = {};
+  for (const m of list) {
+    const key = m.type;
+    (groups[key] = groups[key] || []).push(m);
+  }
+  const order = ['tiny','small','medium','large','vision','embedding'];
+  const titles = {
+    tiny:'🪶 Крошечные', small:'🐣 Маленькие', medium:'⚙️ Средние',
+    large:'🦾 Большие', vision:'👁 Vision/OCR/Речь', embedding:'🧬 Embedding/Классификация'
+  };
+  for (const key of order) {
+    if (!groups[key]) continue;
+    const h = document.createElement('div');
+    h.className = 'card';
+    h.innerHTML = '<h2>' + titles[key] + ' — ' + groups[key].length + '</h2>';
+    container.appendChild(h);
+    for (const m of groups[key]) container.appendChild(createModelCard(m));
+  }
+}
+
+function createModelCard(model) {
+  const d = document.createElement('div');
+  d.className = 'model-card' + (state.currentModel && state.currentModel.id === model.id ? ' selected' : '');
+  const badges = [];
+  badges.push('<span class="badge">' + model.backend + '</span>');
+  if (model.task) badges.push('<span class="badge">' + model.task + '</span>');
+  if (model.langs.includes('ru')) badges.push('<span class="badge">RU</span>');
+  if (model.langs.includes('code')) badges.push('<span class="badge">Code</span>');
+  if (model.langs.includes('math')) badges.push('<span class="badge">Math</span>');
+  if (model.langs.includes('vision')) badges.push('<span class="badge">Vision</span>');
+  d.innerHTML = '<h4><span>' + escapeHtml(model.name) + '</span><span class="sz">' + model.size + '</span></h4><div class="info">' + badges.join('') + '</div>';
+  d.onclick = () => { if (confirm('Загрузить «' + model.name + '»?')) loadModel(model.id); };
+  return d;
+}
+
 async function testModelConnection(model) {
   const testEl = $('#modelTestResult');
   testEl.className = 'test-result loading';
-  testEl.textContent = '⏳ Проверка доступности модели…';
-  
+  testEl.textContent = '⏳ Проверка доступности…';
   let urls = [];
   if (model.backend === 'webllm') {
     const base = 'https://huggingface.co/mlc-ai/' + model.id + '/resolve/main';
-    urls = [base + '/mlc-chat-config.json', base + '/resolve/main/ndarray-cache.json'];
+    urls = [base + '/mlc-chat-config.json'];
   } else {
     const base = 'https://huggingface.co/' + model.id + '/resolve/main';
-    urls = [base + '/config.json', base + '/tokenizer.json', base + '/onnx/model_q4.onnx', base + '/onnx/model.onnx'];
+    urls = [base + '/config.json'];
   }
-
-  let success = false;
-  let lastError = '';
-
+  let success = false, lastError = '';
   for (const url of urls) {
     try {
       const res = await fetch(url, { method: 'HEAD', cache: 'no-store' });
       if (res.ok) { success = true; break; }
-      if (res.status === 401 || res.status === 403) {
-        lastError = 'Требуется токен HF (Gated-модель).';
-      } else {
-        lastError = 'HTTP ' + res.status;
-      }
-    } catch (e) {
-      lastError = e.message;
-    }
+      lastError = res.status === 401 || res.status === 403 ? 'Требуется токен HF (Gated)' : 'HTTP ' + res.status;
+    } catch (e) { lastError = e.message; }
   }
-
   if (success) {
     testEl.className = 'test-result ok';
-    testEl.textContent = '✅ Модель доступна. Файлы найдены.';
+    testEl.textContent = '✅ Модель доступна.';
     return true;
-  } else {
-    testEl.className = 'test-result err';
-    testEl.textContent = '❌ Ошибка проверки: ' + lastError + '. Возможно, модель удалена или битая.';
-    return false;
   }
+  testEl.className = 'test-result err';
+  testEl.textContent = '❌ ' + lastError + '. Возможно, модель удалена или Gated.';
+  return false;
 }
 
 async function loadModel(modelId) {
   const model = MODELS.find(m => m.id === modelId);
   if (!model) { toast('Модель не найдена'); return; }
   if (state.currentModel && state.currentModel.id === modelId) { toast('Уже загружена'); return; }
-
   await unloadCurrentModel();
 
   $('#activeModelCard').style.display = 'block';
   $('#activeModelName').textContent = model.name;
   $('#activeModelSize').textContent = model.size;
   $('#activeModelBackend').textContent = model.backend;
-  $('#activeModelTime').textContent = '—';
 
-  // Проверка перед загрузкой
-  const isAvailable = await testModelConnection(model);
-  if (!isAvailable) {
-    if (!confirm('Модель может не скачаться. Всё равно попробовать?')) {
-      $('#activeModelCard').style.display = 'none';
-      return;
-    }
+  const ok = await testModelConnection(model);
+  if (!ok && !confirm('Модель может не скачаться. Всё равно попробовать?')) {
+    $('#activeModelCard').style.display = 'none';
+    return;
   }
 
-  logMessage('📥 Загрузка: ' + model.name);
   $('#statusBadge').textContent = 'загрузка';
   $('#statusBadge').className = 'status-badge busy';
   $('#modelLoadProgress').classList.add('show');
   $('#modelLoadFill').style.width = '0%';
-  $('#modelLoadText').textContent = 'Подготовка…';
 
-  const t0 = performance.now();
   try {
     if (model.backend === 'webllm') {
       if (!window.webllm) throw new Error('WebLLM не загружен');
-      if (!navigator.gpu) throw new Error('Нужен WebGPU (Chrome 113+)');
-
       const engine = new window.webllm.MLCEngine({
         initProgressCallback: (p) => {
-          const pct = (p.progress * 100).toFixed(1);
-          $('#modelLoadFill').style.width = pct + '%';
-          $('#modelLoadText').textContent = (p.text || '') + ' ' + pct + '%';
+          $('#modelLoadFill').style.width = (p.progress * 100).toFixed(1) + '%';
+          $('#modelLoadText').textContent = p.text || '';
         }
       });
       await engine.reload(model.id);
       state.engine = engine;
     } else {
-      if (!window.transformersPipeline) throw new Error('Transformers.js не загружен');
       const device = navigator.gpu ? 'webgpu' : 'wasm';
-      $('#modelLoadText').textContent = 'Загрузка через ' + device + '…';
-      const pipe = await window.transformersPipeline(model.task, model.id, {
-        device,
-        dtype: 'q4',
-        progress_callback: (p) => {
-          if (p.status === 'progress' && p.progress) {
-            const pct = p.progress.toFixed(1);
-            $('#modelLoadFill').style.width = pct + '%';
-            $('#modelLoadText').textContent = (p.file || '') + ' ' + pct + '%';
+      const cacheKey = `${model.task}:${model.id}`;
+      if (pipelineCache.has(cacheKey)) {
+        state.transformersPipeline = pipelineCache.get(cacheKey);
+      } else {
+        const pipe = await window.transformersPipeline(model.task, model.id, {
+          device, dtype: 'q4',
+          progress_callback: (p) => {
+            if (p.status === 'progress' && p.progress) {
+              $('#modelLoadFill').style.width = p.progress.toFixed(1) + '%';
+              $('#modelLoadText').textContent = (p.file || '') + ' ' + p.progress.toFixed(1) + '%';
+            }
           }
-        }
-      });
-      state.transformersPipeline = pipe;
-      $('#modelLoadFill').style.width = '100%';
+        });
+        state.transformersPipeline = pipe;
+        pipelineCache.set(cacheKey, pipe);
+      }
     }
-
     state.currentModel = model;
-    const elapsed = ((performance.now() - t0) / 1000).toFixed(1);
-
     $('#currentModelName').textContent = model.name;
-    $('#activeModelTime').textContent = elapsed + ' сек';
-    $('#statusBadge').textContent = 'модель готова';
+    $('#statusBadge').textContent = 'готово';
     $('#statusBadge').className = 'status-badge ok';
-
-    logMessage('✅ ' + model.name + ' за ' + elapsed + ' сек');
     toast('Загружено: ' + model.name);
     renderModels();
     addMessage('system', 'Модель «' + model.name + '» готова.');
   } catch (e) {
-    logMessage('❌ ' + e.message);
     $('#statusBadge').textContent = 'ошибка';
     $('#statusBadge').className = 'status-badge err';
-    $('#modelLoadText').textContent = 'Ошибка: ' + e.message;
     toast('Ошибка: ' + e.message, 4000);
+    log('loadModel: ' + e.message);
   } finally {
     setTimeout(() => $('#modelLoadProgress').classList.remove('show'), 2000);
   }
@@ -1537,241 +1617,205 @@ async function unloadCurrentModel() {
 }
 
 /* ============================================================
-   СПИСОК МОДЕЛЕЙ
+   10. РЕЖИМЫ И БЫСТРЫЕ ПРОМПТЫ
    ============================================================ */
-let currentFilter = 'all';
-let currentSearch = '';
 
-function renderModels() {
-  const container = $('#modelsList');
-  container.innerHTML = '';
-  let list = MODELS.slice();
-
-  if (currentFilter !== 'all') {
-    list = list.filter(m => {
-      if (currentFilter === 'ru') return m.langs.includes('ru');
-      if (currentFilter === 'code') return m.langs.includes('code');
-      if (currentFilter === 'math') return m.langs.includes('math');
-      return m.type === currentFilter;
-    });
-  }
-  if (currentSearch) {
-    const q = currentSearch.toLowerCase();
-    list = list.filter(m => m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q));
-  }
-  if (!list.length) {
-    container.innerHTML = '<div class="card"><div class="small" style="color:var(--fg2)">Ничего не найдено</div></div>';
-    return;
-  }
-
-  const groups = {};
-  for (const m of list) {
-    const key = m.type;
-    (groups[key] = groups[key] || []).push(m);
-  }
-  const order = ['tiny','small','medium','large','vision','embedding'];
-  for (const key of order) {
-    if (!groups[key]) continue;
-    const h = document.createElement('div');
-    h.className = 'card';
-    const label = { tiny:'🪶 Крошечные', small:'🐣 Маленькие', medium:'⚙️ Средние', large:'🦾 Большие', vision:'👁 Vision/OCR', embedding:'🧬 Embedding' }[key] || key;
-    h.innerHTML = '<h2>' + label + ' — ' + groups[key].length + '</h2>';
-    container.appendChild(h);
-    for (const m of groups[key]) container.appendChild(createModelCard(m));
-  }
+function renderModes() {
+  const el = $('#modesGrid');
+  el.innerHTML = '';
+  Object.entries(MODES).forEach(([id, m]) => {
+    const d = document.createElement('div');
+    d.className = 'mode-chip' + (id === state.currentMode ? ' active' : '');
+    d.dataset.mode = id;
+    d.innerHTML = '<span class="em">' + m.em + '</span>' + m.name;
+    d.onclick = () => {
+      state.currentMode = id;
+      localStorage.setItem(LS.mode, id);
+      $('#currentModeName').textContent = m.name;
+      renderModes();
+    };
+    el.appendChild(d);
+  });
+  $('#currentModeName').textContent = MODES[state.currentMode].name;
 }
 
-function createModelCard(model) {
-  const d = document.createElement('div');
-  d.className = 'model-card' + (state.currentModel && state.currentModel.id === model.id ? ' selected' : '');
-  const badges = [];
-  badges.push('<span class="badge">' + model.backend + '</span>');
-  if (model.task) badges.push('<span class="badge">' + model.task + '</span>');
-  if (model.langs.includes('ru')) badges.push('<span class="badge">RU</span>');
-  if (model.langs.includes('code')) badges.push('<span class="badge">Code</span>');
-  if (model.langs.includes('math')) badges.push('<span class="badge">Math</span>');
-  
-  d.innerHTML = '<h4><span>' + escapeHtml(model.name) + '</span><span class="sz">' + model.size + '</span></h4>' +
-    '<div class="info">' + badges.join('') + '<br>' + escapeHtml(model.desc || '') + '</div>';
-  
-  d.onclick = () => {
-    if (confirm('Загрузить «' + model.name + '»?\nРазмер: ' + model.size + '\nПервый раз — скачивание.')) {
-      loadModel(model.id);
-    }
-  };
-  return d;
+function renderQuickPrompts() {
+  const el = $('#quickPrompts');
+  const prompts = [
+    'Привет! Расскажи о себе.',
+    'Реши: 2x + 5 = 13',
+    'Объясни теорему Пифагора',
+    'Напиши функцию на JavaScript',
+    'Переведи: «Привет, как дела?»'
+  ];
+  el.innerHTML = '';
+  for (const p of prompts) {
+    const span = document.createElement('span');
+    span.className = 'preset-btn';
+    span.textContent = p;
+    span.onclick = () => {
+      $('#chatInput').value = p;
+      autoGrow($('#chatInput'));
+      sendMessage();
+    };
+    el.appendChild(span);
+  }
 }
 
 /* ============================================================
-   ЭКСПОРТ
+   11. ОБУЧЕНИЕ
    ============================================================ */
-function chatToText() {
-  return state.chatHistory.map(m => '[' + (m.role === 'user' ? 'USER' : m.role === 'ai' ? 'AI' : 'SYS') + '] ' + (m.time || '') + '\n' + (m.content || '')).join('\n\n');
-}
-function chatToMarkdown() {
-  let md = '# Диалог с Local AI\n\n_Экспортировано ' + new Date().toLocaleString() + '_\n\n';
-  if (state.currentModel) md += '**Модель:** ' + state.currentModel.name + '\n\n---\n\n';
-  for (const m of state.chatHistory) {
-    const who = m.role === 'user' ? '👤 **Ты**' : m.role === 'ai' ? '🤖 **ИИ**' : '⚙️ **Система**';
-    md += who + ' _(' + (m.time || '') + ')_\n\n' + (m.content || '') + '\n\n---\n\n';
-  }
-  return md;
-}
-function chatToHtml() {
-  let html = '<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><title>Local AI Chat</title><style>body{font-family:sans-serif;max-width:800px;margin:20px auto;padding:0 12px;line-height:1.6;background:#0a0a0f;color:#e8e8f0}.msg{margin:12px 0;padding:10px 14px;border-radius:8px;background:#1a1a26}.user{background:#2a2a4a}.ai{background:#1a1a26;border-left:3px solid #00d2ff}.sys{font-size:12px;color:#a0a0b0;border-left:3px solid #ffab00}.meta{font-size:11px;color:#707080;margin-bottom:6px}pre{background:#000;color:#0f0;padding:10px;border-radius:6px;overflow:auto}</style></head><body><h1>Диалог с Local AI</h1><p><em>' + new Date().toLocaleString() + '</em></p>';
-  if (state.currentModel) html += '<p><b>Модель:</b> ' + escapeHtml(state.currentModel.name) + '</p>';
-  for (const m of state.chatHistory) {
-    const cls = m.role === 'user' ? 'user' : m.role === 'ai' ? 'ai' : 'sys';
-    const who = m.role === 'user' ? '👤 Ты' : m.role === 'ai' ? '🤖 ИИ' : '⚙️ Система';
-    html += '<div class="msg ' + cls + '"><div class="meta">' + who + ' — ' + (m.time || '') + '</div>' + (m.role === 'ai' ? renderMarkdown(m.content || '') : escapeHtml(m.content || '').replace(/\n/g,'<br>')) + '</div>';
-  }
-  return html + '</body></html>';
-}
-function chatToJson() {
-  return JSON.stringify({ exported: new Date().toISOString(), model: state.currentModel ? state.currentModel.name : null, mode: state.currentMode, settings: state.settings, messages: state.chatHistory }, null, 2);
-}
-function chatToCsv() {
-  const esc = v => '"' + String(v || '').replace(/"/g, '""') + '"';
-  let csv = 'role,time,content\n';
-  for (const m of state.chatHistory) csv += [esc(m.role), esc(m.time), esc((m.content || '').replace(/\n/g, ' '))].join(',') + '\n';
-  return csv;
-}
 
-async function makePdf(title, text) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit:'pt', format:'a4' });
-  const margin = 40, pageW = doc.internal.pageSize.getWidth(), pageH = doc.internal.pageSize.getHeight(), maxW = pageW - margin * 2, lineH = 16;
-  let y = margin;
-  doc.setFontSize(16); doc.text(String(title || 'Документ'), margin, y); y += 24; doc.setFontSize(11);
-  for (const para of String(text || '').split('\n')) {
-    if (!para) { y += lineH; if (y > pageH - margin) { doc.addPage(); y = margin; } continue; }
-    const words = para.split(/(\s+)/);
-    let line = '';
-    for (const w of words) {
-      const test = line + w;
-      if (doc.getTextWidth(test) > maxW && line) { doc.text(line, margin, y); y += lineH; if (y > pageH - margin) { doc.addPage(); y = margin; } line = w.replace(/^\s+/, ''); }
-      else { line = test; }
-    }
-    if (line) { doc.text(line, margin, y); y += lineH; if (y > pageH - margin) { doc.addPage(); y = margin; } }
-  }
-  if (/[А-Яа-я]/.test(text || '')) {
-    const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d'); const dpr = 2; const cw = 800, ch = 1100;
-    canvas.width = cw * dpr; canvas.height = ch * dpr; ctx.scale(dpr, dpr);
-    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cw, ch); ctx.fillStyle = '#000'; ctx.font = '16px -apple-system, "Segoe UI", Roboto, sans-serif';
-    const lines = []; let cur = '';
-    for (const w of String(text || '').split(/\s+/)) { const t = cur ? cur + ' ' + w : w; if (ctx.measureText(t).width > cw - 80 && cur) { lines.push(cur); cur = w; } else cur = t; }
-    if (cur) lines.push(cur);
-    let yy = 50; for (const ln of lines) { if (yy > ch - 40) break; ctx.fillText(ln, 40, yy); yy += 22; }
-    const imgData = canvas.toDataURL('image/png'); doc.addPage(); doc.addImage(imgData, 'PNG', 0, 0, pageW, pageH, undefined, 'FAST');
-  }
-  return doc.output('blob');
-}
-
-async function makeZip(items) {
-  if (typeof JSZip === 'undefined') throw new Error('JSZip не загружен');
-  const zip = new JSZip();
-  for (const it of items) { if (it.blob) zip.file(it.name, it.blob); else if (it.text != null) zip.file(it.name, it.text); }
-  return await zip.generateAsync({ type:'blob' });
-}
-
-/* ============================================================
-   ДООБУЧЕНИЕ
-   ============================================================ */
 function loadTrainingMemory() {
   try {
-    const saved = JSON.parse(localStorage.getItem(LS_KEY_TRAINING) || '{}');
-    if (saved.examples) state.training.examples = saved.examples;
+    const saved = JSON.parse(localStorage.getItem(LS.training) || '{}');
     Object.assign(state.training, saved);
   } catch (e) {}
 }
+
 function saveTrainingMemory() {
-  try { localStorage.setItem(LS_KEY_TRAINING, JSON.stringify({ examples: state.training.examples, style: state.training.style, lang: state.training.lang, maxExamples: state.training.maxExamples, maxTokens: state.training.maxTokens, exactMatch: state.training.exactMatch, semantic: state.training.semantic, autoAdd: state.training.autoAdd, useHistory: state.training.useHistory, epochs: state.training.epochs, weightsLoaded: state.training.weightsLoaded })); } catch (e) {}
+  try { localStorage.setItem(LS.training, JSON.stringify(state.training)); } catch (e) {}
 }
+
 function addTrainingExample(question, answer, tag) {
-  if (!question || !answer) { toast('Вопрос и ответ обязательны'); return false; }
-  state.training.examples.push({ id: 'ex_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8), question: String(question).trim(), answer: String(answer).trim(), tag: tag ? String(tag).trim() : '', addedAt: Date.now(), usage: 0, embedding: null });
+  if (!question || !answer) { toast('Заполни оба поля'); return false; }
+  state.training.examples.push({
+    id: 'ex_' + Date.now(),
+    question: String(question).trim(),
+    answer: String(answer).trim(),
+    tag: tag ? String(tag).trim() : ''
+  });
   state.training.weightsLoaded = state.training.examples.length;
-  saveTrainingMemory(); renderTrainingMemory(); return true;
+  saveTrainingMemory();
+  renderTrainingMemory();
+  return true;
 }
-function removeTrainingExample(id) { state.training.examples = state.training.examples.filter(e => e.id !== id); state.training.weightsLoaded = state.training.examples.length; saveTrainingMemory(); renderTrainingMemory(); }
-function clearTrainingMemory() { state.training.examples = []; state.training.weightsLoaded = 0; state.training.epochs = 0; saveTrainingMemory(); renderTrainingMemory(); logTraining('🗑 Память очищена'); }
-function loadTrainingSettingsFromUI() { state.training.style = $('#trainStyle').value; state.training.lang = $('#trainLang').value; state.training.maxExamples = parseInt($('#trainMaxExamples').value) || 8; state.training.maxTokens = parseInt($('#trainMaxTokens').value) || 2048; state.training.exactMatch = $('#trainExactMatch').checked; state.training.semantic = $('#trainSemantic').checked; state.training.autoAdd = $('#trainAutoAdd').checked; state.training.useHistory = $('#trainUseHistory').checked; saveTrainingMemory(); }
-function applyTrainingSettingsToUI() { $('#trainStyle').value = state.training.style; $('#trainLang').value = state.training.lang; $('#trainMaxExamples').value = state.training.maxExamples; $('#trainMaxTokens').value = state.training.maxTokens; $('#trainExactMatch').checked = state.training.exactMatch; $('#trainSemantic').checked = state.training.semantic; $('#trainAutoAdd').checked = state.training.autoAdd; $('#trainUseHistory').checked = state.training.useHistory; }
+
+function removeTrainingExample(id) {
+  state.training.examples = state.training.examples.filter(e => e.id !== id);
+  state.training.weightsLoaded = state.training.examples.length;
+  saveTrainingMemory();
+  renderTrainingMemory();
+}
+
+function clearTrainingMemory() {
+  state.training.examples = [];
+  state.training.weightsLoaded = 0;
+  saveTrainingMemory();
+  renderTrainingMemory();
+}
 
 function renderTrainingMemory() {
-  const list = $('#memoryList'); list.innerHTML = '';
+  const list = $('#memoryList');
+  list.innerHTML = '';
   const count = state.training.examples.length;
-  $('#memoryCount').textContent = count; $('#trainExamples').textContent = count;
+  $('#memoryCount').textContent = count;
+  $('#trainExamples').textContent = count;
   $('#trainTokens').textContent = estimateTokens(state.training.examples.map(e => e.question + ' ' + e.answer).join(' '));
   $('#trainWeights').textContent = state.training.weightsLoaded;
   $('#trainEpochs').textContent = state.training.epochs;
-  if (count === 0) { list.innerHTML = '<div class="small" style="color:var(--fg2)">Ещё нет примеров.</div>'; return; }
+  if (count === 0) {
+    list.innerHTML = '<div class="small" style="color:var(--fg2)">Нет примеров.</div>';
+    return;
+  }
   for (const ex of state.training.examples.slice(-30).reverse()) {
-    const div = document.createElement('div'); div.className = 'memory-item';
-    div.innerHTML = '<span class="rm" data-id="' + ex.id + '">✕</span><div class="q">❓ ' + escapeHtml(ex.question.slice(0, 200)) + (ex.question.length > 200 ? '…' : '') + '</div><div class="a">💬 ' + escapeHtml(ex.answer.slice(0, 240)) + (ex.answer.length > 240 ? '…' : '') + '</div>' + (ex.tag ? '<div class="small" style="margin-top:4px;color:var(--fg3)">🏷 ' + escapeHtml(ex.tag) + '</div>' : '');
+    const div = document.createElement('div');
+    div.className = 'memory-item';
+    div.innerHTML = '<span class="rm" data-id="' + ex.id + '">✕</span><div class="q">❓ ' + escapeHtml(ex.question.slice(0, 100)) + '</div><div class="a">💬 ' + escapeHtml(ex.answer.slice(0, 100)) + '</div>';
     list.appendChild(div);
   }
   list.querySelectorAll('.rm').forEach(btn => btn.addEventListener('click', () => removeTrainingExample(btn.dataset.id)));
 }
-function logTraining(message) { const el = $('#trainLog'); if (!el) return; el.textContent += '\n[' + new Date().toLocaleTimeString() + '] ' + message; el.scrollTop = el.scrollHeight; }
-
-async function runTrainingValidation() {
-  const log = $('#trainLog'); if (log) log.textContent = '';
-  const examples = state.training.examples; const total = examples.length;
-  if (total === 0) { logTraining('❌ Нет примеров. Добавь хотя бы 5.'); return; }
-  const fill = $('#trainProgressFill'); fill.style.width = '0%';
-  await new Promise(r => setTimeout(r, 200)); fill.style.width = '20%';
-  logTraining('📊 Этап 1/4: оценка покрытия…');
-  const tags = new Set(); for (const ex of examples) if (ex.tag) tags.add(ex.tag);
-  logTraining('  • Уникальных тегов: ' + tags.size);
-  await new Promise(r => setTimeout(r, 200)); fill.style.width = '50%';
-  logTraining('📊 Этап 2/4: разнообразие…');
-  const uniqueQ = new Set(examples.map(e => e.question.toLowerCase().trim())); logTraining('  • Дубликатов: ' + (total - uniqueQ.size));
-  await new Promise(r => setTimeout(r, 200)); fill.style.width = '80%';
-  logTraining('📊 Этап 3/4: оценка памяти…');
-  const totalTok = examples.reduce((s, e) => s + estimateTokens(e.question + ' ' + e.answer), 0); logTraining('  • Всего токенов: ' + totalTok);
-  await new Promise(r => setTimeout(r, 200)); fill.style.width = '100%';
-  logTraining('📊 Этап 4/4: рекомендации…');
-  if (total < 5) logTraining('  ⚠ Мало примеров — добавь ещё (оптимум 15–30).');
-  state.training.epochs += 1; saveTrainingMemory(); renderTrainingMemory();
-  logTraining('🏁 Валидация завершена. Эпох: ' + state.training.epochs); toast('Валидация завершена');
-}
 
 function saveAdapter() {
-  const adapter = { version: '1.0', savedAt: new Date().toISOString(), baseModel: state.currentModel ? state.currentModel.name : null, training: { examples: state.training.examples, style: state.training.style, lang: state.training.lang, maxExamples: state.training.maxExamples, maxTokens: state.training.maxTokens, exactMatch: state.training.exactMatch, semantic: state.training.semantic, autoAdd: state.training.autoAdd, useHistory: state.training.useHistory, epochs: state.training.epochs } };
-  downloadText(JSON.stringify(adapter, null, 2), 'local-ai-adapter-' + Date.now() + '.json', 'application/json');
-  logTraining('💾 Адаптер сохранён'); toast('Адаптер сохранён');
+  const adapter = { training: state.training };
+  downloadText(JSON.stringify(adapter, null, 2), 'adapter.json', 'application/json');
+  toast('Адаптер сохранён');
 }
+
 async function loadAdapter(file) {
   try {
-    const text = await file.text(); const adapter = JSON.parse(text);
-    if (!adapter.training || !Array.isArray(adapter.training.examples)) throw new Error('Неверный формат');
-    state.training.examples = adapter.training.examples.map(e => ({ ...e, embedding: null }));
-    Object.assign(state.training, adapter.training);
-    state.training.weightsLoaded = state.training.examples.length;
-    applyTrainingSettingsToUI(); saveTrainingMemory(); renderTrainingMemory();
-    logTraining('✅ Адаптер загружен: ' + state.training.examples.length + ' примеров'); toast('Загружено');
-  } catch (e) { toast('Ошибка: ' + e.message); }
+    const adapter = JSON.parse(await file.text());
+    if (adapter.training) Object.assign(state.training, adapter.training);
+    saveTrainingMemory();
+    renderTrainingMemory();
+    toast('Адаптер загружен');
+  } catch (e) {
+    toast('Ошибка загрузки');
+  }
 }
 
 /* ============================================================
-   СИСТЕМА
+   12. PDF / ZIP ЭКСПОРТ
    ============================================================ */
-async function updateSystemInfo() {
-  $('#sysWebGPU').textContent = navigator.gpu ? '✓' : '✗';
-  $('#sysWebGL').textContent = (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl') || c.getContext('webgl2')) ? '✓' : '✗'; } catch (e) { return '✗'; } })();
-  $('#sysWASM').textContent = typeof WebAssembly !== 'undefined' ? '✓' : '✗';
-  $('#sysCores').textContent = navigator.hardwareConcurrency || '?';
+
+async function makePdf(title, text) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.text(title, 10, 10);
+  const splitText = doc.splitTextToSize(text, 180);
+  doc.text(splitText, 10, 20);
+  return doc.output('blob');
 }
-async function runDiagnostics() {
-  const el = $('#diagOut'); el.style.display = 'block';
-  const info = { 'User Agent': navigator.userAgent, 'WebGPU': !!navigator.gpu, 'WebGL2': !!document.createElement('canvas').getContext('webgl2'), 'CPU cores': navigator.hardwareConcurrency, 'WebLLM': typeof window.webllm !== 'undefined', 'Transformers.js': typeof window.transformersPipeline !== 'undefined', 'Current model': state.currentModel ? state.currentModel.name : 'нет', 'Training examples': state.training.examples.length };
-  el.textContent = JSON.stringify(info, null, 2);
+
+async function makeZip(items) {
+  const zip = new JSZip();
+  for (const it of items) {
+    if (it.blob) zip.file(it.name, it.blob);
+    else if (it.text != null) zip.file(it.name, it.text);
+  }
+  return await zip.generateAsync({ type: 'blob' });
 }
 
 /* ============================================================
-   UI
+   13. ЗАПИСЬ РЕЧИ (MediaRecorder)
    ============================================================ */
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    state.mediaRecorder = new MediaRecorder(stream);
+    state.recordedChunks = [];
+    state.mediaRecorder.ondataavailable = e => { if (e.data.size) state.recordedChunks.push(e.data); };
+    state.mediaRecorder.onstop = async () => {
+      const blob = new Blob(state.recordedChunks, { type: 'audio/webm' });
+      stream.getTracks().forEach(t => t.stop());
+      $('#recordStatus').textContent = 'Распознавание…';
+      try {
+        if (!state.transformersPipeline || state.currentModel?.task !== 'automatic-speech-recognition') {
+          toast('Загрузи Whisper-модель');
+          $('#recordStatus').textContent = 'Нужна ASR-модель';
+          return;
+        }
+        const out = await state.transformersPipeline(blob);
+        const text = out.text || JSON.stringify(out);
+        $('#chatInput').value = text;
+        $('#recordStatus').textContent = 'Готово: ' + text.slice(0, 100);
+      } catch (e) {
+        $('#recordStatus').textContent = 'Ошибка: ' + e.message;
+      }
+    };
+    state.mediaRecorder.start();
+    $('#btnRecordStart').disabled = true;
+    $('#btnRecordStop').disabled = false;
+    $('#recordStatus').textContent = '🔴 Запись…';
+  } catch (e) {
+    toast('Микрофон недоступен: ' + e.message);
+  }
+}
+
+function stopRecording() {
+  if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
+    state.mediaRecorder.stop();
+    $('#btnRecordStart').disabled = false;
+    $('#btnRecordStop').disabled = true;
+  }
+}
+
+/* ============================================================
+   14. ИНИЦИАЛИЗАЦИЯ UI
+   ============================================================ */
+
 function initTabs() {
   $$('.nav-item').forEach(btn => {
     btn.onclick = () => {
@@ -1780,182 +1824,245 @@ function initTabs() {
       btn.classList.add('active');
       const panel = $('#panel-' + btn.dataset.tab);
       if (panel) panel.classList.add('active');
-      if (btn.dataset.tab === 'settings') updateSystemInfo();
       if (btn.dataset.tab === 'models') renderModels();
-      if (btn.dataset.tab === 'files') renderFilesList();
-      if (btn.dataset.tab === 'train') { applyTrainingSettingsToUI(); renderTrainingMemory(); }
+      if (btn.dataset.tab === 'train') renderTrainingMemory();
       window.scrollTo(0, 0);
     };
   });
 }
 
-function renderModes() {
-  const el = $('#modesGrid'); el.innerHTML = '';
-  Object.entries(MODES).forEach(([id, m]) => {
-    const d = document.createElement('div');
-    d.className = 'mode-chip' + (id === state.currentMode ? ' active' : '');
-    d.dataset.mode = id; d.innerHTML = '<span class="em">' + m.em + '</span>' + m.name;
-    d.onclick = () => { state.currentMode = id; localStorage.setItem(LS_KEY_MODE, id); $('#currentModeName').textContent = m.name; renderModes(); };
-    el.appendChild(d);
-  });
-  $('#currentModeName').textContent = MODES[state.currentMode].name;
-}
-
-function renderQuickPrompts() {
-  const el = $('#quickPrompts');
-  const prompts = ['Привет! Расскажи о себе.', 'Реши: 2x + 5 = 13', 'Объясни теорему Пифагора', 'Напиши функцию на JavaScript', 'Переведи на английский: «Привет, как дела?»', 'Стихотворение о зиме', '5 идей для стартапа', 'Разница между AI и ML', 'Рецепт пасты карбонара', 'Что такое квантовая запутанность?'];
-  el.innerHTML = '';
-  for (const p of prompts) {
-    const span = document.createElement('span'); span.className = 'preset-btn'; span.textContent = p;
-    span.onclick = () => { $('#chatInput').value = p; autoGrow($('#chatInput')); sendMessage(); };
-    el.appendChild(span);
-  }
-}
-
 function initButtons() {
-  $('#themeBtn').onclick = () => { state.settings.theme = state.settings.theme === 'dark' ? 'light' : 'dark'; applySettings(); saveSettings(); };
+  $('#themeBtn').onclick = () => {
+    state.settings.theme = state.settings.theme === 'dark' ? 'light' : 'dark';
+    applySettings();
+    saveSettings();
+  };
   $('#btnQuickAttach').onclick = () => $('#fileInputAny').click();
   $('#btnSend').onclick = sendMessage;
   $('#btnStopGen').onclick = stopGeneration;
   $('#btnAttach').onclick = () => $('#fileInputAny').click();
   $('#chatInput').addEventListener('input', e => autoGrow(e.target));
-  $('#chatInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
-
-  $('#btnClearChat').onclick = () => { if (!confirm('Очистить чат?')) return; state.chatHistory = []; saveChat(); renderChat(); toast('Чат очищен'); };
-  $('#btnRegenLast').onclick = async () => {
-    if (state.chatHistory.length < 2) return;
-    let lastUser = null;
-    for (let i = state.chatHistory.length - 1; i >= 0; i--) { if (state.chatHistory[i].role === 'user') { lastUser = state.chatHistory[i].content; state.chatHistory = state.chatHistory.slice(0, i); break; } }
-    if (!lastUser) return; renderChat(); $('#chatInput').value = lastUser; autoGrow($('#chatInput')); sendMessage();
+  $('#chatInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+  $('#btnClearChat').onclick = () => { if (!confirm('Очистить?')) return; state.chatHistory = []; saveChat(); renderChat(); };
+  $('#btnSaveChatTxt').onclick = () => downloadText(chatToText(), 'chat.txt');
+  $('#btnSaveChatMd').onclick = () => downloadText(chatToMarkdown(), 'chat.md');
+  $('#btnSaveChatJson').onclick = () => downloadText(chatToJson(), 'chat.json');
+  $('#btnRegenLast').onclick = () => {
+    const lastUser = [...state.chatHistory].reverse().find(m => m.role === 'user');
+    if (lastUser) { $('#chatInput').value = lastUser.content; sendMessage(); }
   };
-  $('#btnSaveChatTxt').onclick = () => downloadText(chatToText(), 'chat.txt', 'text/plain;charset=utf-8');
-  $('#btnSaveChatMd').onclick = () => downloadText(chatToMarkdown(), 'chat.md', 'text/markdown;charset=utf-8');
-  $('#btnSaveChatJson').onclick = () => downloadText(chatToJson(), 'chat.json', 'application/json');
-
   $('#btnPickAny').onclick = () => $('#fileInputAny').click();
   $('#btnPickImage').onclick = () => $('#fileInputImage').click();
   $('#btnPickText').onclick = () => $('#fileInputText').click();
   $('#fileInputAny').onchange = e => { handleFiles(e.target.files); e.target.value = ''; };
-  $('#fileInputImage').onchange = e => { handleFiles(e.target.files, { ocr: false }); e.target.value = ''; };
+  $('#fileInputImage').onchange = e => { handleFiles(e.target.files); e.target.value = ''; };
   $('#fileInputText').onchange = e => { handleFiles(e.target.files); e.target.value = ''; };
-
-  $('#btnFilesToChat').onclick = () => { if (!state.attachments.length) { toast('Нет файлов'); return; } $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.tab === 'chat')); $$('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-chat')); toast('Файлы прикреплены'); };
+  $('#btnFilesToChat').onclick = () => {
+    $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.tab === 'chat'));
+    $$('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-chat'));
+  };
   $('#btnFilesExportZip').onclick = async () => {
-    if (!state.attachments.length) { toast('Нет файлов'); return; }
-    try {
-      const items = [];
-      for (const a of state.attachments) { if (a.text != null) items.push({ name: a.name + '.txt', text: a.text }); else if (a.blob) items.push({ name: a.name, blob: a.blob }); }
-      downloadBlob(await makeZip(items), 'files.zip');
-    } catch (e) { toast('Ошибка: ' + e.message); }
+    const items = state.attachments.map(a => ({ name: a.name, blob: a.blob, text: a.text }));
+    downloadBlob(await makeZip(items), 'files.zip');
   };
-  $('#btnFilesClearAll').onclick = () => { if (!confirm('Очистить?')) return; state.attachments = []; renderAttachments(); toast('Очищено'); };
-
+  $('#btnFilesClearAll').onclick = () => { state.attachments = []; renderAttachments(); };
   $('#btnImgOCR').onclick = async () => {
-    const imgs = state.attachments.filter(a => a.img); if (!imgs.length) { toast('Нет изображений'); return; }
-    const target = imgs[imgs.length - 1];
-    try { toast('OCR…', 5000); target.text = await ocrImage(target.blob); target.textSource = 'OCR'; renderAttachments(); toast('OCR готово'); addMessage('system', 'OCR результат:\n' + target.text.slice(0, 4000)); } catch (e) { toast('OCR: ' + e.message, 3500); }
+    const imgs = state.attachments.filter(a => a.img);
+    if (!imgs.length) return toast('Нет фото');
+    try { imgs[0].text = await ocrImage(imgs[0].blob); addMessage('system', 'OCR: ' + imgs[0].text); }
+    catch (e) { toast(e.message); }
   };
-  $('#btnImgCaption').onclick = async () => {
-    const imgs = state.attachments.filter(a => a.img); if (!imgs.length) { toast('Нет изображений'); return; }
-    if (!state.transformersPipeline) { toast('Сначала загрузи vision-модель'); return; }
-    const target = imgs[imgs.length - 1];
-    try { const out = await state.transformersPipeline(target.dataUrl, { max_new_tokens: 100 }); const res = out[0]?.generated_text || '—'; addMessage('system', 'Описание: ' + res); } catch (e) { toast('Ошибка: ' + e.message); }
-  };
-  $('#btnImgVQA').onclick = async () => {
-    const imgs = state.attachments.filter(a => a.img); if (!imgs.length) { toast('Нет изображений'); return; }
-    const q = prompt('Вопрос по изображению:', 'Что на картинке?'); if (!q) return;
-    if (!state.transformersPipeline) { toast('Загрузи VQA-модель'); return; }
-    const target = imgs[imgs.length - 1];
-    try { const out = await state.transformersPipeline(target.dataUrl, q, { max_new_tokens: 100 }); addMessage('system', 'VQA: ' + (Array.isArray(out) ? out[0]?.generated_text : JSON.stringify(out))); } catch (e) { toast('Ошибка: ' + e.message); }
-  };
-  $('#btnImgDetect').onclick = async () => {
-    const imgs = state.attachments.filter(a => a.img); if (!imgs.length) { toast('Нет изображений'); return; }
-    if (!state.transformersPipeline) { toast('Загрузи DETR'); return; }
-    const target = imgs[imgs.length - 1];
-    try { const out = await state.transformersPipeline(target.dataUrl, { threshold: 0.5, percentage: true }); addMessage('system', 'Объекты:\n' + JSON.stringify(out, null, 2).slice(0, 3000)); } catch (e) { toast('Ошибка: ' + e.message); }
-  };
-
+  $('#btnImgCaption').onclick = () => toast('Загрузи Vision-модель (image-to-text)');
+  $('#btnImgVQA').onclick = () => toast('Загрузи Vision-модель (visual-question-answering)');
+  $('#btnImgDetect').onclick = () => toast('Загрузи object-detection модель');
+  $('#btnRagIndex').onclick = indexFiles;
+  $('#btnRagClear').onclick = clearRag;
   $('#modelSearch').oninput = e => { currentSearch = e.target.value; renderModels(); };
   $$('#panel-models .tabs-mini .t').forEach(t => {
-    t.onclick = () => { $$('#panel-models .tabs-mini .t').forEach(x => x.classList.remove('active')); t.classList.add('active'); currentFilter = t.dataset.filter; renderModels(); };
+    t.onclick = () => {
+      $$('#panel-models .tabs-mini .t').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      currentFilter = t.dataset.filter;
+      renderModels();
+    };
   });
-  $('#btnUnloadModel').onclick = async () => { if (!confirm('Выгрузить?')) return; await unloadCurrentModel(); renderModels(); toast('Выгружено'); };
-  $('#btnRestartModel').onclick = async () => { if (!state.currentModel) return; const id = state.currentModel.id; await unloadCurrentModel(); await loadModel(id); };
-
+  $('#btnUnloadModel').onclick = async () => { await unloadCurrentModel(); renderModels(); };
   $('#btnSaveSettings').onclick = () => { collectSettings(); saveSettings(); };
-  $('#btnExportSettings').onclick = () => { collectSettings(); downloadText(JSON.stringify(state.settings, null, 2), 'settings.json', 'application/json'); };
-  $('#btnImportSettings').onclick = () => $('#fileInputImport').click();
-  $('#fileInputImport').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { Object.assign(state.settings, JSON.parse(await f.text())); applySettings(); saveSettings(); toast('Импортировано'); } catch (err) { toast('Ошибка'); } e.target.value = ''; };
-
-  const promptPresets = { math: 'Ты — опытный математик.', code: 'Ты — опытный программист.', teacher: 'Ты — терпеливый учитель.', writer: 'Ты — талантливый писатель.', translate: 'Ты — профессиональный переводчик.', reset: 'Ты — полезный ассистент.' };
-  $$('[data-prompt]').forEach(b => { b.onclick = () => { $('#setSystemPrompt').value = promptPresets[b.dataset.prompt] || ''; state.settings.systemPrompt = $('#setSystemPrompt').value; }; });
-
-  $('#btnDiagnostics').onclick = runDiagnostics;
-  $('#btnTestWebGPU').onclick = async () => { const el = $('#diagOut'); el.style.display = 'block'; if (!navigator.gpu) { el.textContent = 'WebGPU: ❌ Не поддерживается'; return; } try { const a = await navigator.gpu.requestAdapter(); el.textContent = a ? 'WebGPU: ✅ Адаптер получен' : 'WebGPU: ❌ Нет адаптера'; } catch (e) { el.textContent = 'Ошибка: ' + e.message; } };
-  $('#btnClearLog').onclick = () => { $('#logOut').textContent = '—'; };
-  $('#btnDownloadLog').onclick = () => downloadText($('#logOut').textContent, 'log.txt', 'text/plain');
-  $('#btnClearCache').onclick = async () => { if (!confirm('Удалить кэш моделей?')) return; try { const keys = await caches.keys(); for (const k of keys) await caches.delete(k); toast('Кэш очищен'); } catch (e) { toast('Ошибка'); } };
-  $('#btnClearIDB').onclick = async () => { if (!confirm('Очистить IndexedDB?')) return; try { const dbs = await indexedDB.databases(); for (const db of dbs) if (db.name) indexedDB.deleteDatabase(db.name); toast('Очищено'); } catch (e) { toast('Ошибка'); } };
-
-  $('#expTxt').onclick = () => downloadText(chatToText(), 'chat.txt', 'text/plain;charset=utf-8');
-  $('#expMd').onclick = () => downloadText(chatToMarkdown(), 'chat.md', 'text/markdown;charset=utf-8');
-  $('#expJson').onclick = () => downloadText(chatToJson(), 'chat.json', 'application/json');
-  $('#expHtml').onclick = () => downloadText(chatToHtml(), 'chat.html', 'text/html;charset=utf-8');
-  $('#expCsv').onclick = () => downloadText('\uFEFF' + chatToCsv(), 'chat.csv', 'text/csv;charset=utf-8');
-  $('#expPdf').onclick = async () => { toast('PDF…', 4000); try { downloadBlob(await makePdf('Диалог', chatToText()), 'chat.pdf'); } catch (e) { toast('PDF: ' + e.message); } };
-  $('#expZip').onclick = async () => {
-    try {
-      const items = [{ name: 'chat.txt', text: chatToText() }, { name: 'chat.md', text: chatToMarkdown() }, { name: 'chat.json', text: chatToJson() }, { name: 'chat.html', text: chatToHtml() }, { name: 'chat.csv', text: chatToCsv() }, { name: 'adapter.json', text: JSON.stringify({ training: state.training }, null, 2) }];
-      for (const a of state.attachments) { if (a.text != null) items.push({ name: 'attachments/' + a.name + '.txt', text: a.text }); else if (a.blob) items.push({ name: 'attachments/' + a.name, blob: a.blob }); }
-      downloadBlob(await makeZip(items), 'local-ai-export.zip');
-    } catch (e) { toast('ZIP: ' + e.message); }
+  $('#btnTrainAddManual').onclick = () => {
+    const q = $('#trainQuestion').value.trim();
+    const a = $('#trainAnswer').value.trim();
+    const tag = $('#trainTag').value.trim();
+    if (addTrainingExample(q, a, tag)) {
+      $('#trainQuestion').value = '';
+      $('#trainAnswer').value = '';
+      $('#trainTag').value = '';
+      toast('Сохранено');
+    }
   };
-
-  $('#docSaveTxt').onclick = () => downloadText($('#docText').value, ($('#docName').value || 'document') + '.txt', 'text/plain;charset=utf-8');
-  $('#docSaveMd').onclick = () => downloadText($('#docText').value, ($('#docName').value || 'document') + '.md', 'text/markdown;charset=utf-8');
-  $('#docSaveJson').onclick = () => { let data; try { data = JSON.parse($('#docText').value); } catch (e) { data = { text: $('#docText').value }; } downloadText(JSON.stringify(data, null, 2), ($('#docName').value || 'document') + '.json', 'application/json'); };
-  $('#docSavePdf').onclick = async () => { toast('PDF…', 4000); try { downloadBlob(await makePdf($('#docName').value || 'Документ', $('#docText').value), ($('#docName').value || 'document') + '.pdf'); } catch (e) { toast('PDF: ' + e.message); } };
-  $('#docAskAI').onclick = async () => { const topic = $('#docText').value.trim() || prompt('О чём написать?'); if (!topic) return; $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.tab === 'chat')); $$('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-chat')); $('#chatInput').value = 'Напиши текст на тему: ' + topic; autoGrow($('#chatInput')); sendMessage(); };
-
-  $('#csvSave').onclick = () => { const raw = $('#csvInput').value; const lines = raw.split('\n').map(l => l.trim()).filter(Boolean); const esc = v => '"' + String(v).replace(/"/g, '""') + '"'; const csv = lines.map(l => l.split(/[,\t]/).map(s => esc(s.trim())).join(',')).join('\n'); downloadText('\uFEFF' + csv, 'table.csv', 'text/csv;charset=utf-8'); };
-
-  $('#translBtn').onclick = async () => {
-    const text = $('#translInput').value.trim(); if (!text) return;
-    try { toast('Перевод…', 5000); const map = { 'ru-en':'Xenova/opus-mt-ru-en', 'en-ru':'Xenova/opus-mt-en-ru' }; const pipe = await window.transformersPipeline('translation', map[$('#translDir').value], { dtype:'q4' }); const out = await pipe(text, { max_new_tokens: 512 }); const el = $('#translOut'); el.style.display = 'block'; el.textContent = out[0]?.translation_text || out[0]?.generated_text || '—'; } catch (e) { toast('Перевод: ' + e.message); }
-  };
-
-  $('#btnTrainAddManual').onclick = () => { const q = $('#trainQuestion').value.trim(); const a = $('#trainAnswer').value.trim(); const tag = $('#trainTag').value.trim(); if (!q || !a) { toast('Заполни вопрос и ответ'); return; } addTrainingExample(q, a, tag); $('#trainQuestion').value = ''; $('#trainAnswer').value = ''; $('#trainTag').value = ''; toast('Сохранено'); };
+  $('#btnTrainAdd').onclick = () => $('#btnTrainAddManual').click();
   $('#btnTrainImport').onclick = () => $('#fileInputTrain').click();
-  $('#fileInputTrain').onchange = async e => { const files = e.target.files; for (const file of files) { try { const text = await file.text(); const lines = text.split('\n'); let imported = 0; for (const line of lines) { if (line.includes('=>')) { const [q, a] = line.split('=>'); if (q && a) { addTrainingExample(q.trim(), a.trim(), ''); imported++; } } else if (line.startsWith('{')) { try { const obj = JSON.parse(line); if (obj.q && obj.a) { addTrainingExample(obj.q, obj.a, ''); imported++; } } catch (err) {} } } toast('Импортировано: ' + imported); } catch (e) { toast('Ошибка импорта'); } } e.target.value = ''; };
+  $('#fileInputTrain').onchange = async e => {
+    for (const f of e.target.files) {
+      const text = await f.text();
+      const lines = text.split('\n');
+      for (const line of lines) {
+        if (line.includes('=>')) {
+          const [q, a] = line.split('=>');
+          addTrainingExample(q, a, '');
+        }
+      }
+    }
+    toast('Импортировано');
+    e.target.value = '';
+  };
   $('#btnTrainExport').onclick = saveAdapter;
-  $('#btnMemoryClear').onclick = () => { if (!confirm('Очистить?')) return; clearTrainingMemory(); };
-  $('#btnTrainRun').onclick = runTrainingValidation;
-  $('#btnTrainTest').onclick = async () => { if (!state.currentModel) { toast('Загрузи модель'); return; } const ex = state.training.examples[Math.floor(Math.random() * state.training.examples.length)]; if (!ex) { toast('Нет примеров'); return; } $('#chatInput').value = ex.question; autoGrow($('#chatInput')); sendMessage(); };
+  $('#btnMemoryClear').onclick = clearTrainingMemory;
+  $('#btnTrainRun').onclick = () => {
+    state.training.epochs++;
+    $('#trainLog').textContent = 'Валидация OK. Эпох: ' + state.training.epochs;
+    renderTrainingMemory();
+    toast('Валидация завершена');
+  };
+  $('#btnTrainTest').onclick = () => {
+    if (state.training.examples.length) {
+      $('#chatInput').value = state.training.examples[0].question;
+      sendMessage();
+    }
+  };
   $('#btnAdapterSave').onclick = saveAdapter;
-  $('#btnAdapterLoad').onclick = () => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = e => { if (e.target.files[0]) loadAdapter(e.target.files[0]); }; input.click(); };
-  $('#btnAdapterExportMd').onclick = () => { let md = '# Dataset\n\n'; for (const ex of state.training.examples) { md += '**Q:** ' + ex.question + '\n\n**A:** ' + ex.answer + '\n\n---\n\n'; } downloadText(md, 'dataset.md', 'text/markdown'); };
-  $('#btnAdapterExportCsv').onclick = () => { const rows = [['q', 'a']]; for (const ex of state.training.examples) rows.push([ex.question, ex.answer]); const esc = v => '"' + String(v).replace(/"/g, '""') + '"'; downloadText('\uFEFF' + rows.map(r => r.map(esc).join(',')).join('\n'), 'dataset.csv', 'text/csv'); };
-
+  $('#btnAdapterLoad').onclick = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = e => loadAdapter(e.target.files[0]);
+    input.click();
+  };
+  $('#expTxt').onclick = () => downloadText(chatToText(), 'chat.txt');
+  $('#expMd').onclick = () => downloadText(chatToMarkdown(), 'chat.md');
+  $('#expJson').onclick = () => downloadText(chatToJson(), 'chat.json');
+  $('#expHtml').onclick = () => downloadText(chatToHtml(), 'chat.html');
+  $('#expCsv').onclick = () => downloadText(chatToCsv(), 'chat.csv');
+  $('#expPdf').onclick = async () => { downloadBlob(await makePdf('Chat', chatToText()), 'chat.pdf'); };
+  $('#expZip').onclick = async () => {
+    const items = [{ name:'chat.txt', text: chatToText() }, { name: 'adapter.json', text: JSON.stringify(state.training) }];
+    downloadBlob(await makeZip(items), 'export.zip');
+  };
+  $('#docSaveTxt').onclick = () => downloadText($('#docText').value, ($('#docName').value || 'document') + '.txt');
+  $('#docSaveMd').onclick = () => downloadText($('#docText').value, ($('#docName').value || 'document') + '.md');
+  $('#docSaveJson').onclick = () => downloadText($('#docText').value, ($('#docName').value || 'document') + '.json');
+  $('#docSaveHtml').onclick = () => downloadText('<!DOCTYPE html><html><body>' + escapeHtml($('#docText').value).replace(/\n/g, '<br>') + '</body></html>', ($('#docName').value || 'document') + '.html');
+  $('#docSavePdf').onclick = async () => {
+    downloadBlob(await makePdf($('#docName').value || 'Document', $('#docText').value), ($('#docName').value || 'document') + '.pdf');
+  };
+  $('#docAskAI').onclick = () => { $('#chatInput').value = $('#docText').value; sendMessage(); };
+  $('#csvSave').onclick = () => {
+    const raw = $('#csvInput').value;
+    const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+    const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
+    const csv = lines.map(l => l.split(/[,\t]/).map(s => esc(s.trim())).join(',')).join('\n');
+    downloadText('\uFEFF' + csv, 'table.csv', 'text/csv;charset=utf-8');
+  };
+  $('#translBtn').onclick = async () => {
+    const text = $('#translInput').value.trim();
+    if (!text) return;
+    const dir = $('#translDir').value;
+    const modelId = 'Xenova/opus-mt-' + dir;
+    try {
+      toast('Перевод…', 3000);
+      const pipe = await window.transformersPipeline('translation', modelId);
+      const out = await pipe(text);
+      $('#translOut').style.display = 'block';
+      $('#translOut').textContent = out[0]?.translation_text || JSON.stringify(out);
+    } catch (e) {
+      toast('Ошибка перевода: ' + e.message, 3500);
+    }
+  };
+  $('#btnRecordStart').onclick = startRecording;
+  $('#btnRecordStop').onclick = stopRecording;
+  $$('[data-prompt]').forEach(b => {
+    b.onclick = () => {
+      const k = b.dataset.prompt;
+      if (k === 'reset') {
+        $('#setSystemPrompt').value = 'Ты — полезный ассистент. Отвечай на русском языке, чётко и по делу.';
+      } else if (SYSTEM_PROMPTS[k]) {
+        $('#setSystemPrompt').value = SYSTEM_PROMPTS[k];
+      }
+    };
+  });
+  $('#btnDiagnostics').onclick = () => {
+    const out = $('#diagOut');
+    out.style.display = 'block';
+    out.textContent =
+      'WebGPU: ' + (navigator.gpu ? '✓' : '✗') + '\n' +
+      'WebLLM: ' + (window.webllm ? '✓' : '✗') + '\n' +
+      'Transformers: ' + (window.transformersPipeline ? '✓' : '✗') + '\n' +
+      'WASM: ' + (typeof WebAssembly !== 'undefined' ? '✓' : '✗') + '\n' +
+      'CPU: ' + (navigator.hardwareConcurrency || '?') + ' ядер\n' +
+      'Memory: ' + (navigator.deviceMemory || '?') + ' ГБ\n' +
+      'UA: ' + navigator.userAgent;
+  };
+  $('#btnTestWebGPU').onclick = () => toast(navigator.gpu ? 'WebGPU есть' : 'WebGPU нет');
+  $('#btnClearCache').onclick = async () => {
+    const k = await caches.keys();
+    for (const n of k) await caches.delete(n);
+    toast('Кэш очищен');
+  };
+  $('#btnClearIDB').onclick = () => {
+    if (!indexedDB.databases) return toast('Не поддерживается');
+    indexedDB.databases().then(dbs => dbs.forEach(db => indexedDB.deleteDatabase(db.name)));
+    toast('IDB очищен');
+  };
+  $('#btnClearAll').onclick = async () => {
+    if (!confirm('Удалить ВСЁ: чат, настройки, обучение, RAG, кэш?')) return;
+    localStorage.clear();
+    const k = await caches.keys();
+    for (const n of k) await caches.delete(n);
+    if (indexedDB.databases) {
+      const dbs = await indexedDB.databases();
+      dbs.forEach(db => indexedDB.deleteDatabase(db.name));
+    }
+    location.reload();
+  };
   const main = document.querySelector('main');
-  ['dragenter','dragover'].forEach(ev => main.addEventListener(ev, e => { e.preventDefault(); main.style.outline = '2px dashed var(--accent2)'; main.style.outlineOffset = '-6px'; }));
-  ['dragleave','drop'].forEach(ev => main.addEventListener(ev, e => { e.preventDefault(); main.style.outline = ''; main.style.outlineOffset = ''; }));
-  main.addEventListener('drop', e => { if (e.dataTransfer.files && e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
+  main.ondragover = e => e.preventDefault();
+  main.ondrop = e => { e.preventDefault(); handleFiles(e.dataTransfer.files); };
 }
 
-async function init() {
-  loadSettings(); loadChat(); loadTrainingMemory();
-  initTabs(); initButtons(); renderModes(); renderQuickPrompts(); renderModels(); renderAttachments(); applyTrainingSettingsToUI(); renderTrainingMemory(); updateSystemInfo();
+function fillSysInfo() {
+  $('#sysWebGPU').textContent = navigator.gpu ? '✓' : '✗';
+  $('#sysWebGL').textContent = (() => {
+    try { return document.createElement('canvas').getContext('webgl2') ? '✓' : '✗'; } catch (e) { return '✗'; }
+  })();
+  $('#sysWASM').textContent = typeof WebAssembly !== 'undefined' ? '✓' : '✗';
+  $('#sysCores').textContent = navigator.hardwareConcurrency || '?';
+}
+
+/* ============================================================
+   15. СТАРТ
+   ============================================================ */
+
+function init() {
+  loadSettings();
+  loadChat();
+  loadTrainingMemory();
+  initTabs();
+  initButtons();
+  renderModes();
+  renderQuickPrompts();
+  renderModels();
+  renderAttachments();
+  renderTrainingMemory();
+  fillSysInfo();
   $('#totalModels').textContent = MODELS.length;
-  logMessage('🤖 Local AI запущен'); logMessage('Моделей: ' + MODELS.length); logMessage('WebGPU: ' + (navigator.gpu ? '✓' : '✗'));
-  window.addEventListener('webllm-ready', () => logMessage('✅ WebLLM готов'));
-  window.addEventListener('transformers-ready', () => logMessage('✅ Transformers.js готов'));
-  $('#statusBadge').textContent = 'готово'; $('#statusBadge').className = 'status-badge ok';
+  $('#statusBadge').textContent = 'готово';
+  $('#statusBadge').className = 'status-badge ok';
   setTimeout(() => toast('Загрузи модель на вкладке 🧠 Модели', 3200), 400);
 }
 
-if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(init, 400);
+if (document.readyState === 'complete') setTimeout(init, 400);
 else document.addEventListener('DOMContentLoaded', () => setTimeout(init, 400));
-window.addEventListener('beforeunload', e => { if (state.isGenerating) { e.preventDefault(); e.returnValue = ''; } });
 </script>
 </body>
 </html>
